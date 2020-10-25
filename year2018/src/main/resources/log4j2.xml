@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns="http://logging.apache.org/log4j/2.0/config"
+               strict="true">
+    <Appenders>
+        <Appender type="Console" name="Solution">
+            <Layout type="PatternLayout" pattern="%d [%t] %highlight{========== %-16msg ==========%n}%throwable"/>
+            <Filter type="MarkerFilter" marker="SOLUTION" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Appender>
+
+        <Appender type="Console" name="SolutionResult">
+            <Layout type="PatternLayout" pattern="%d [%t] %msg%n%throwable"/>
+            <Filter type="MarkerFilter" marker="SOLUTION_RESULT" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Appender>
+
+        <Appender type="Console" name="Console">
+            <Layout type="PatternLayout" pattern="%d [%t] %logger{36} %highlight{%-5level: %msg%n}%throwable"/>
+            <Filter type="NoMarkerFilter" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Appender>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="dev.linl33.adventofcode" level="ALL" additivity="true">
+<!--            <Filter type="MarkerFilter" marker="SOLUTION" onMatch="ACCEPT" onMismatch="NEUTRAL"/>-->
+            <AppenderRef ref="Solution"/>
+            <AppenderRef ref="SolutionResult"/>
+        </Logger>
+        
+        <Root level="ALL">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
