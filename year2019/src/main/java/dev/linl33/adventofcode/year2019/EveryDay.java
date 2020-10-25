@@ -6,7 +6,7 @@ import java.lang.reflect.InvocationTargetException;
 
 public class EveryDay {
   public static void main(String[] args) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-    for (int i = 1; i <= 30; i++) {
+    for (int i = 1; i <= 25; i++) {
       try {
         var instance = Class
             .forName(getClassName(i))
