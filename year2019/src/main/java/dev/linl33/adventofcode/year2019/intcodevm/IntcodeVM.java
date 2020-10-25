@@ -69,15 +69,11 @@ public class IntcodeVM {
   }
 
   public IntcodeVM(long[] memory, BlockingDeque<Long> input, BlockingDeque<Long> output) {
-    this(memory, new EnumMap<>(Register.class), input, output);
+    this(memory, null, input, output);
   }
 
   public IntcodeVM(long[] memory) {
-    this(
-        memory,
-        new LinkedBlockingDeque<>(),
-        new LinkedBlockingDeque<>()
-    );
+    this(memory, null, null);
   }
 
   public IntcodeVM(BufferedReader reader) {
@@ -88,17 +84,12 @@ public class IntcodeVM {
                     EnumMap<Register, Integer> registers,
                     BlockingDeque<Long> input,
                     BlockingDeque<Long> output) {
-    Objects.requireNonNull(memory);
-    Objects.requireNonNull(registers);
-    Objects.requireNonNull(input);
-    Objects.requireNonNull(output);
-
     this.memory = memory;
-    this.registers = registers;
+    this.registers = Objects.requireNonNullElseGet(registers, () -> new EnumMap<>(Register.class));
     this.verb = null;
     this.noun = null;
-    this.input = input;
-    this.output = output;
+    this.input = Objects.requireNonNullElseGet(input, LinkedBlockingDeque::new);
+    this.output = Objects.requireNonNullElseGet(output, LinkedBlockingDeque::new);
     this.state = State.NULL;
 
     initializeRegistersIfNeeded();
