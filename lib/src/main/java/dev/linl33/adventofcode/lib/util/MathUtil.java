@@ -1,14 +1,8 @@
 package dev.linl33.adventofcode.lib.util;
 
-import dev.linl33.adventofcode.lib.point.Point;
 import dev.linl33.adventofcode.lib.point.Point2D;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.IntStream;
-
-public class MathUtil {
+public final class MathUtil {
   public static int gcd(int a, int b) {
     if (a == b) {
       return a;
@@ -118,5 +112,21 @@ public class MathUtil {
     var intercept = a.y() - slope * a.x();
 
     return new Point2D(intercept, slope);
+  }
+
+  public static int choose(int n, int r) {
+    if (n < r) {
+      return 0;
+    }
+
+    if (r == 0 || r == n) {
+      return 1;
+    }
+
+    if (r == 1) {
+      return n;
+    }
+
+    return choose(n - 1, r - 1) + choose(n - 1, r);
   }
 }

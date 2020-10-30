@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class AdventUtil {
+public final class AdventUtil {
   public static <K, V extends Comparable<V>> K argMax(Map<K, V> map) {
     return argMax(map, Comparator.naturalOrder());
   }
@@ -33,15 +33,23 @@ public class AdventUtil {
   }
 
   public static <K, V> K argMax(Collection<K> collection, Function<K, V> mapping, Comparator<? super V> comparator) {
-    return collection
-        .stream()
-        .collect(Collectors.collectingAndThen(
-            Collectors.toMap(
-                Function.identity(),
-                mapping
-            ),
-            map -> argMax(map, comparator)
-        ));
+    var collectionIt = collection.iterator();
+
+    var maxKey = collectionIt.next();
+    var maxVal = mapping.apply(maxKey);
+
+    var size = collection.size() - 1;
+    for (int i = 0; i < size; i++) {
+      var nextKey = collectionIt.next();
+      var nextVal = mapping.apply(nextKey);
+
+      if (comparator.compare(nextVal, maxVal) > 0) {
+        maxVal = nextVal;
+        maxKey = nextKey;
+      }
+    }
+
+    return maxKey;
   }
 
   public static <K, V extends Comparable<V>> K argMin(Map<K, V> map) {
@@ -72,5 +80,13 @@ public class AdventUtil {
     return iterable
         .stream()
         .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+  }
+
+  public static int alphabetToInt(char c) {
+    return c - (c < 'a' ? ('A' - 26) : 'a');
+  }
+
+  public static char intToAlphabet(int i) {
+    return (char) (i + (i > 25 ? ('A' - 26) : 'a'));
   }
 }
