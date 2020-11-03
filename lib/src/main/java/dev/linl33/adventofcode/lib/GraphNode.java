@@ -44,11 +44,11 @@ public class GraphNode<T> {
   }
 
   public int descendentCount() {
-    return outNodes
+    return outNodes.size() + outNodes
         .stream()
         .filter(x -> this != x)
         .mapToInt(GraphNode::descendentCount)
-        .sum() + outNodes.size();
+        .sum();
   }
 
   @Override

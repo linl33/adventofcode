@@ -7,4 +7,6 @@ public interface Point<T extends Point<T>> {
   T translate(T delta);
 
   int manhattanDistance(T anotherPoint);
+
+  int squaredEuclideanDistance(T anotherPoint);
 }

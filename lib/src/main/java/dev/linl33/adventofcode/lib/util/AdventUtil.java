@@ -1,6 +1,9 @@
 package dev.linl33.adventofcode.lib.util;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -88,5 +91,15 @@ public final class AdventUtil {
 
   public static char intToAlphabet(int i) {
     return (char) (i + (i > 25 ? ('A' - 26) : 'a'));
+  }
+
+  public static <K, V> Map<V, K> invertMap(Map<K, V> map) {
+    return map
+        .entrySet()
+        .stream()
+        .collect(Collectors.toMap(
+            Map.Entry::getValue,
+            Map.Entry::getKey
+        ));
   }
 }

@@ -1,7 +1,14 @@
 package dev.linl33.adventofcode.lib.grid;
 
+import dev.linl33.adventofcode.lib.point.Point2D;
+import dev.linl33.adventofcode.lib.util.PrintUtil;
+
 public interface Grid {
   int get(int x, int y);
+
+  default int get(Point2D pt) {
+    return get(pt.x(), pt.y());
+  }
 
   void set(int x, int y, int value);
 
@@ -12,6 +19,42 @@ public interface Grid {
   int[] row(int y);
 
   int[] column(int x);
+
+  default GridConfiguration configuration() {
+    return GridConfiguration.DEFAULT;
+  }
+
+  default boolean isWithinBounds(int x, int y) {
+    return x >= 0 && y >= 0 && x < width() && y < height();
+  }
+
+  default boolean isWithinBounds(Point2D pt) {
+    return isWithinBounds(pt.x(), pt.y());
+  }
+
+  default void print() {
+    visit(new GridVisitor() {
+      StringBuilder sb;
+
+      @Override
+      public GridVisitResult preVisitLine(int x, int y, int[] line) {
+        sb = new StringBuilder();
+        return GridVisitResult.CONTINUE;
+      }
+
+      @Override
+      public GridVisitResult visit(int x, int y, int value) {
+        sb.append((char) value);
+        return GridVisitResult.CONTINUE;
+      }
+
+      @Override
+      public GridVisitResult postVisitLine(int x, int y, int[] line) {
+        PrintUtil.enhancedPrint(sb.toString());
+        return GridVisitResult.CONTINUE;
+      }
+    });
+  }
 
   default Grid visit(GridVisitor visitor, GridVisitOptions... options) {
     var byRow = true;

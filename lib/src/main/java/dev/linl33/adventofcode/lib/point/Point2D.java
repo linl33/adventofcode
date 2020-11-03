@@ -18,4 +18,9 @@ public record Point2D(int x, int y) implements Point<Point2D> {
   public int manhattanDistance(Point2D anotherPoint) {
     return Math.abs(x() - anotherPoint.x()) + Math.abs(y() - anotherPoint.y());
   }
+
+  @Override
+  public int squaredEuclideanDistance(Point2D anotherPoint) {
+    return (int) Math.pow(x() - anotherPoint.x(), 2) + (int) Math.pow(y() - anotherPoint.y(), 2);
+  }
 }

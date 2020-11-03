@@ -2,7 +2,14 @@ package dev.linl33.adventofcode.lib.util;
 
 import dev.linl33.adventofcode.lib.GridEntity;
 import dev.linl33.adventofcode.lib.HasHeading;
+import dev.linl33.adventofcode.lib.grid.Grid;
+import dev.linl33.adventofcode.lib.grid.GridVisitResult;
 import dev.linl33.adventofcode.lib.point.Point2D;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 public class GridUtil {
   public enum TurningDirection {
@@ -72,5 +79,39 @@ public class GridUtil {
       case HEADING_WEST -> '<';
       default -> throw new IllegalArgumentException();
     };
+  }
+
+  public static List<Point2D> orthogonalNeighbors(Grid grid, Point2D pt) {
+    return Arrays
+        .stream(HEADINGS)
+        .mapToObj(h -> move(pt, h))
+        .filter(grid::isWithinBounds)
+        .filter(newPt -> !grid.configuration().isBlocked(grid.get(newPt)))
+        .collect(Collectors.toUnmodifiableList());
+  }
+
+  public static List<Point2D> orthogonalNeighbors(Grid grid, int x, int y) {
+    return orthogonalNeighbors(grid, new Point2D(x, y));
+  }
+
+  public static void fillEnclaves(Grid grid) {
+    var changed = new AtomicBoolean(false);
+
+    do {
+      changed.setPlain(false);
+
+      grid.visit((x, y, value) -> {
+        if (!grid.configuration().isEmptySpace(value)) {
+          return GridVisitResult.CONTINUE;
+        }
+
+        if (orthogonalNeighbors(grid, x, y).size() == 1) {
+          changed.setPlain(true);
+          return new GridVisitResult.Mutate.MutateAndContinue(grid.configuration().wall());
+        } else {
+          return GridVisitResult.CONTINUE;
+        }
+      });
+    } while (changed.getPlain());
   }
 }

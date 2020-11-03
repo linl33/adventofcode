@@ -20,4 +20,11 @@ public record Point3D(int x, int y, int z) implements Point<Point3D> {
         Math.abs(y() - anotherPoint.y()) +
         Math.abs(z() - anotherPoint.z());
   }
+
+  @Override
+  public int squaredEuclideanDistance(Point3D anotherPoint) {
+    return (int) Math.pow(x() - anotherPoint.x(), 2) +
+        (int) Math.pow(y() - anotherPoint.y(), 2) +
+        (int) Math.pow(z() - anotherPoint.z(), 2);
+  }
 }

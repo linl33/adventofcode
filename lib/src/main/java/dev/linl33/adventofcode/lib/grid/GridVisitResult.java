@@ -5,39 +5,39 @@ public sealed interface GridVisitResult {
   ITerminate TERMINATE = new Terminate();
   ISkipLine SKIP_LINE = new SkipLine();
 
-  sealed interface IContinue extends GridVisitResult permits Continue, Mutate.MutateAndContinue {}
+  sealed interface IContinue extends GridVisitResult {}
 
   final class Continue implements IContinue {
     private Continue() {}
   }
 
-  sealed interface ITerminate extends GridVisitResult permits Terminate, Mutate.MutateAndTerminate {}
+  sealed interface ITerminate extends GridVisitResult {}
 
   final class Terminate implements ITerminate {
     private Terminate() {}
   }
 
-  sealed interface ISkipLine extends GridVisitResult permits SkipLine, Mutate.MutateAndSkipLine {}
+  sealed interface ISkipLine extends GridVisitResult {}
 
   final class SkipLine implements ISkipLine {
     private SkipLine() {}
   }
 
-  sealed interface ISkipToNextLineWith extends GridVisitResult permits SkipToNextLineWith, Mutate.MutateAndSkipToNextLineWith {
+  sealed interface ISkipToNextLineWith extends GridVisitResult {
     int startWith();
   }
 
-  record SkipToNextLineWith(int startWith) implements ISkipToNextLineWith {}
+  final record SkipToNextLineWith(int startWith) implements ISkipToNextLineWith {}
 
   sealed interface Mutate extends GridVisitResult {
     int newValue();
 
-    record MutateAndContinue(int newValue) implements Mutate, IContinue {}
+    final record MutateAndContinue(int newValue) implements Mutate, IContinue {}
 
-    record MutateAndTerminate(int newValue) implements Mutate, ITerminate {}
+    final record MutateAndTerminate(int newValue) implements Mutate, ITerminate {}
 
-    record MutateAndSkipLine(int newValue) implements Mutate, ISkipLine {}
+    final record MutateAndSkipLine(int newValue) implements Mutate, ISkipLine {}
 
-    record MutateAndSkipToNextLineWith(int newValue, int startWith) implements Mutate, ISkipToNextLineWith {}
+    final record MutateAndSkipToNextLineWith(int newValue, int startWith) implements Mutate, ISkipToNextLineWith {}
   }
 }
