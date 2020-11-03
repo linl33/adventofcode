@@ -8,25 +8,40 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.function.*;
 
-final public class GraphUtil {
+public final class GraphUtil {
   private static final Logger LOGGER = LogManager.getLogger(GraphUtil.class);
 
-  public static <T> Map<T, T> aStar(T start, T end, Function<T, ? extends Iterable<T>> neighborsFunc) {
-    return aStar(start, end, neighborsFunc, GraphUtil::aStarNullHeuristic, GraphUtil::aStarNullCost);
+  public static <T> GraphPath<T> aStar(T start, T end, Function<T, ? extends Iterable<T>> neighborsFunc) {
+    return aStar(start, end, neighborsFunc, (ToIntFunction<T>) GraphUtil::aStarNullHeuristic, GraphUtil::aStarNullCost);
   }
 
-  public static <T> Map<T, T> aStar(T start,
-                                    T end,
-                                    Function<T, ? extends Iterable<T>> neighborsFunc,
-                                    ToIntFunction<T> heuristic) {
+  public static <T> GraphPath<T> aStar(T start,
+                                       T end,
+                                       Function<T, ? extends Iterable<T>> neighborsFunc,
+                                       ToIntFunction<T> heuristic) {
     return aStar(start, end, neighborsFunc, heuristic, GraphUtil::aStarNullCost);
   }
 
-  public static <T> Map<T, T> aStar(T start,
-                                    T end,
-                                    Function<T, ? extends Iterable<T>> neighborsFunc,
-                                    ToIntFunction<T> heuristic,
-                                    ToIntBiFunction<T, T> cost) {
+  public static <T> GraphPath<T> aStar(T start,
+                                       T end,
+                                       Function<T, ? extends Iterable<T>> neighborsFunc,
+                                       Function<T, ToIntFunction<T>> heuristic) {
+    return aStar(start, end, neighborsFunc, heuristic.apply(end), GraphUtil::aStarNullCost);
+  }
+
+  public static <T> GraphPath<T> aStar(T start,
+                                       T end,
+                                       Function<T, ? extends Iterable<T>> neighborsFunc,
+                                       Function<T, ToIntFunction<T>> heuristic,
+                                       ToIntBiFunction<T, T> cost) {
+    return aStar(start, end, neighborsFunc, heuristic.apply(end), cost);
+  }
+
+  public static <T> GraphPath<T> aStar(T start,
+                                       T end,
+                                       Function<T, ? extends Iterable<T>> neighborsFunc,
+                                       ToIntFunction<T> heuristic,
+                                       ToIntBiFunction<T, T> cost) {
     var cameFrom = new HashMap<T, T>();
     var neighborCache = new HashMap<T, Iterable<T>>();
 
@@ -39,7 +54,6 @@ final public class GraphUtil {
     var visitCounter = 0;
 
     while (!openSet.isEmpty()) {
-//      var current = AdventUtil.argMin(openSet, fScore::get);
       var current = openSet.remove();
       if (current.equals(end)) {
 //        LOGGER.debug("Visited {} nodes", visitCounter);
@@ -53,68 +67,11 @@ final public class GraphUtil {
           pathPointer = pathNext;
         }
 
-        return path;
+        return new GraphPath<>(path, gScore.get(end));
       }
 
       visitCounter++;
       for (var neighbor : neighborCache.computeIfAbsent(current, neighborsFunc)) {
-        var tentativeGScore = gScore.get(current) + cost.applyAsInt(current, neighbor);
-        if (tentativeGScore < gScore.getOrDefault(neighbor, Integer.MAX_VALUE)) {
-          cameFrom.put(neighbor, current);
-          gScore.put(neighbor, tentativeGScore);
-          fScore.put(neighbor, gScore.get(neighbor) + heuristic.applyAsInt(neighbor));
-
-          openSet.add(neighbor);
-        }
-      }
-    }
-
-    return null;
-  }
-
-  public static <T> GraphPath<T> aStarAsGraphPath(T start,
-                                               T end,
-                                               Function<T, ? extends Iterable<T>> neighborsFunc,
-                                               ToIntFunction<T> heuristic,
-                                               ToIntBiFunction<T, T> cost) {
-    var cameFrom = new HashMap<T, T>(100);
-//    var neighborCache = new HashMap<T, Iterable<T>>(500);
-
-    var gScore = new HashMap<T, Integer>(100);
-    gScore.put(start, 0);
-    var fScore = new HashMap<T, Integer>(100);
-    fScore.put(start, gScore.get(start) + heuristic.applyAsInt(start));
-
-    var openSet = new PriorityQueue<T>(Comparator.comparing(fScore::get));
-//    var openSet = new ArrayList<T>(100);
-    openSet.add(start);
-
-    var visitCounter = 0;
-
-    while (!openSet.isEmpty()) {
-//      var current = AdventUtil.argMin(openSet, fScore::get);
-      var current = openSet.remove();
-      if (current.equals(end)) {
-//        LOGGER.debug("Visited {} nodes", visitCounter);
-
-        var path = new HashMap<T, T>(cameFrom.size());
-        var length = 0;
-
-        var pathPointer = end;
-        while (!pathPointer.equals(start)) {
-          var pathNext = cameFrom.get(pathPointer);
-
-          path.put(pathPointer, pathNext);
-          length += cost.applyAsInt(pathPointer, pathNext);
-
-          pathPointer = pathNext;
-        }
-
-        return new GraphPath<>(path, length);
-      }
-
-      visitCounter++;
-      for (var neighbor : /*neighborCache.computeIfAbsent(current, neighborsFunc)*/ neighborsFunc.apply(current)) {
         var tentativeGScore = gScore.get(current) + cost.applyAsInt(current, neighbor);
         if (tentativeGScore < gScore.getOrDefault(neighbor, Integer.MAX_VALUE)) {
           cameFrom.put(neighbor, current);
@@ -196,10 +153,10 @@ final public class GraphUtil {
     return Integer.MIN_VALUE;
   }
 
-  public static <T> Function<T, Map<T, T>> adaptAStar(T end,
+  public static <T> Function<T, GraphPath<T>> adaptAStar(T end,
                                                       Function<T, ? extends Iterable<T>> neighborsFunc,
-                                                      ToIntFunction<T> heuristic) {
-    return start -> aStar(start, end, neighborsFunc, heuristic);
+                                                      Function<T, ToIntFunction<T>> heuristic) {
+    return start -> aStar(start, end, neighborsFunc, heuristic.apply(end));
   }
 
   private static <T> Integer aStarNullHeuristic(T point) {

@@ -7,6 +7,8 @@ import dev.linl33.adventofcode.year2019.intcodevm.IntcodeVM;
 
 import java.io.BufferedReader;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 public class Day15 extends AdventSolution2019<Integer, Integer> {
@@ -25,12 +27,14 @@ public class Day15 extends AdventSolution2019<Integer, Integer> {
   public Integer part1(BufferedReader reader) {
     var world = buildMap(reader, false);
 
-    var start = new Point2D(0, 0);
-    var end = findInMap(world, BOT_RETURN_O2);
-
     return GraphUtil
-        .aStar(start, end, pt -> findNeighbors(pt, world), GraphUtil.manhattanDistHeuristic(end))
-        .size();
+        .aStar(
+            Point.ORIGIN_2D,
+            findInMap(world, BOT_RETURN_O2),
+            pt -> findNeighbors(pt, world),
+            (Function<Point2D, ToIntFunction<Point2D>>) GraphUtil::manhattanDistHeuristic
+        )
+        .length();
   }
 
   @Override
@@ -63,7 +67,7 @@ public class Day15 extends AdventSolution2019<Integer, Integer> {
     var fixedEndAStar = GraphUtil.adaptAStar(
         end,
         pt -> findNeighbors(pt, world),
-        GraphUtil.manhattanDistHeuristic(end)
+        GraphUtil::manhattanDistHeuristic
     );
 
     var toExplore = world
@@ -79,10 +83,10 @@ public class Day15 extends AdventSolution2019<Integer, Integer> {
       var next = toExplore.iterator().next();
       var nextPath = fixedEndAStar.apply(next);
 
-      toExplore.removeAll(nextPath.keySet());
+      toExplore.removeAll(nextPath.path().keySet());
       toExplore.remove(next);
 
-      var distance = nextPath.size();
+      var distance = nextPath.length();
       if (distance > max) {
         max = distance;
       }

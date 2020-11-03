@@ -590,7 +590,7 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
               var aStarForKey = GraphUtil.adaptAStar(
                   currPt,
                   pt -> listNeighbors(pt, v),
-                  GraphUtil.manhattanDistHeuristic(currPt)
+                  GraphUtil::manhattanDistHeuristic
               );
 
               var edges = new int[nodes.size() - 1];
