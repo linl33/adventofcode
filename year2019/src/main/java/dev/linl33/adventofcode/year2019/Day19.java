@@ -21,44 +21,33 @@ public class Day19 extends AdventSolution2019<Integer, Integer> {
 
   @Override
   public Integer part2(BufferedReader reader) throws Exception {
-    var colHeight = new int[1200];
-    var result = new AtomicInteger(0);
+    var vm = new IntcodeVM(reader);
+    var xStart = 0;
 
-    readTractorBeam(new IntcodeVM(reader), 1200, new GridVisitor() {
-      int counter = 0;
+    for (int y = 1000; y < 1200; y++) {
+      for (int x = xStart; x < 1200; x++) {
+        if (readBeamAt(vm, x, y) == 1) {
+          xStart = x;
 
-      @Override
-      public GridVisitResult preVisitLine(int x, int y, int[] line) {
-        counter = 0;
-
-        return GridVisitResult.CONTINUE;
-      }
-
-      @Override
-      public GridVisitResult visit(int x, int y, int value) {
-        colHeight[x]++;
-
-        if (colHeight[x] >= 100) {
-          counter++;
+          if (readBeamAt(vm, x + 99, y - 99) == 1) {
+            return x * 10000 + (y - 99);
+          } else {
+            break;
+          }
         }
-
-        if (counter == 100) {
-          result.set((x - 99) * 10000 + (y - 99));
-
-          return GridVisitResult.TERMINATE;
-        }
-
-        return GridVisitResult.CONTINUE;
       }
-    });
-
-    int resultInt = result.intValue();
-
-    if (resultInt == 0) {
-      throw new IllegalArgumentException();
     }
 
-    return resultInt;
+    throw new IllegalArgumentException();
+  }
+
+  private static int readBeamAt(IntcodeVM tractorBeamVm, int x, int y) {
+    tractorBeamVm.getInput().add((long) x);
+    tractorBeamVm.getInput().add((long) y);
+
+    tractorBeamVm.executeNonBlocking(IntcodeVM.ExecMode.STATELESS);
+
+    return tractorBeamVm.getOutput().remove().intValue();
   }
 
   private static void readTractorBeam(IntcodeVM tractorBeamVm, int dim, GridVisitor visitor) {
@@ -124,12 +113,7 @@ public class Day19 extends AdventSolution2019<Integer, Integer> {
 
     @Override
     public int get(int x, int y) {
-      vm.getInput().add((long) x);
-      vm.getInput().add((long) y);
-
-      vm.executeNonBlocking(IntcodeVM.ExecMode.STATELESS);
-
-      return vm.getOutput().remove().intValue();
+      return readBeamAt(vm, x, y);
     }
 
     @Override
