@@ -164,7 +164,7 @@ public final class GraphUtil {
   }
 
   public static <T extends Point<T>> ToIntFunction<T> manhattanDistHeuristic(T destination) {
-    return curr -> GeomUtil.manhattanDist(curr, destination);
+    return destination::manhattanDistance;
   }
 
   private static <T> Integer aStarNullCost(T a, T b) {

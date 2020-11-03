@@ -1,7 +1,7 @@
 package dev.linl33.adventofcode.year2019;
 
+import dev.linl33.adventofcode.lib.point.Point;
 import dev.linl33.adventofcode.lib.point.Point3D;
-import dev.linl33.adventofcode.lib.util.GeomUtil;
 import dev.linl33.adventofcode.lib.util.MathUtil;
 
 import java.io.BufferedReader;
@@ -161,7 +161,7 @@ public class Day12 extends AdventSolution2019<Integer, Long> {
   }
 
   private static int computeEnergy(Point3D[] position, Point3D[] velocity) {
-    return computeEnergy(position, velocity, GeomUtil::manhattanDistToOrigin);
+    return computeEnergy(position, velocity, Point.ORIGIN_3D::manhattanDistance);
   }
 
   private static int computeEnergyX(Point3D[] position, Point3D[] velocity) {

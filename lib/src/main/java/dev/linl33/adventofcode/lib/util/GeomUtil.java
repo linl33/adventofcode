@@ -1,8 +1,6 @@
 package dev.linl33.adventofcode.lib.util;
 
-import dev.linl33.adventofcode.lib.point.Point;
 import dev.linl33.adventofcode.lib.point.Point2D;
-import dev.linl33.adventofcode.lib.point.Point3D;
 
 import java.lang.reflect.Array;
 import java.util.Map;
@@ -10,17 +8,6 @@ import java.util.Set;
 import java.util.function.Function;
 
 public class GeomUtil {
-  public static <T extends Point<T>> int manhattanDist(T pt1, T pt2) {
-    return pt1.manhattanDistance(pt2);
-  }
-
-  public static int manhattanDistToOrigin(Point2D pt) {
-    return manhattanDist(pt, Point.ORIGIN_2D);
-  }
-
-  public static int manhattanDistToOrigin(Point3D pt) {
-    return manhattanDist(pt, Point.ORIGIN_3D);
-  }
 
   public static <T, U> U[][] mappingPointsToGrid(Map<Point2D, T> points,
                                                  Function<T, U> mapping,

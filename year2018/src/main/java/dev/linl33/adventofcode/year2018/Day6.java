@@ -2,7 +2,6 @@ package dev.linl33.adventofcode.year2018;
 
 import dev.linl33.adventofcode.lib.point.Point2D;
 import dev.linl33.adventofcode.lib.util.AdventUtil;
-import dev.linl33.adventofcode.lib.util.GeomUtil;
 
 import java.io.BufferedReader;
 import java.util.Collections;
@@ -64,7 +63,7 @@ public class Day6 extends AdventSolution2018<Integer, Integer> {
 
         var totalDist = 0;
         for (Point2D knownPoint : points) {
-          totalDist += GeomUtil.manhattanDist(currPt, knownPoint);
+          totalDist += currPt.manhattanDistance(knownPoint);
         }
 
         if (totalDist < totalDistRadius) {
@@ -92,7 +91,7 @@ public class Day6 extends AdventSolution2018<Integer, Integer> {
             break;
           }
 
-          int dist = GeomUtil.manhattanDist(currPt, knownPoint);
+          int dist = currPt.manhattanDistance(knownPoint);
           if (dist < minDist) {
             minDist = dist;
             minDistPt = knownPoint;

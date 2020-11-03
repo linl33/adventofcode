@@ -2,7 +2,6 @@ package dev.linl33.adventofcode.year2019;
 
 import dev.linl33.adventofcode.lib.point.Point;
 import dev.linl33.adventofcode.lib.point.Point2D;
-import dev.linl33.adventofcode.lib.util.GeomUtil;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +20,7 @@ public class Day3 extends AdventSolution2019<Integer, Integer> {
 
     return findCollisions(wire1, wire2)
         .stream()
-        .map(GeomUtil::manhattanDistToOrigin)
+        .map(Point.ORIGIN_2D::manhattanDistance)
         .min(Comparator.naturalOrder())
         .orElseThrow(IllegalArgumentException::new);
   }
