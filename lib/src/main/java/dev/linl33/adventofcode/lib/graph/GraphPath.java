@@ -1,4 +1,4 @@
-package dev.linl33.adventofcode.lib;
+package dev.linl33.adventofcode.lib.graph;
 
 import java.util.Map;
 

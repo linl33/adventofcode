@@ -1,6 +1,5 @@
 package dev.linl33.adventofcode.lib.graph;
 
-import dev.linl33.adventofcode.lib.util.GraphUtil;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -210,7 +209,7 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
                               @NotNull TNode end,
                               @NotNull UnaryOperator<IntFunction<int[]>> neighborFunc) {
 
-    var length = GraphUtil.aStarLengthOnly(
+    return GraphUtil.aStarLengthOnly(
         start.id(),
         end.id(),
         neighborFunc.apply(this::defaultNeighborFunction),
@@ -218,12 +217,10 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
         this::defaultCostFunction,
         getIdLayout().allocationSize()
     );
-
-    return length == Integer.MIN_VALUE ? OptionalInt.empty() : OptionalInt.of(length);
   }
 
   @NotNull
-  public Optional<TNode> findNode(Predicate<TNode> predicate) {
+  public Optional<TNode> findNode(@NotNull Predicate<TNode> predicate) {
     return Arrays
         .stream(getNodes())
         .filter(predicate)
@@ -231,7 +228,7 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
   }
 
   @NotNull
-  public <K> Map<K, TNode> findNodeMulti(Map<K, Predicate<TNode>> predicates) {
+  public <K> Map<K, TNode> findNodeMulti(@NotNull Map<K, Predicate<TNode>> predicates) {
     return Arrays
         .stream(getNodes())
         .filter(predicates
@@ -261,11 +258,11 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
   }
 
   @NotNull
-  public Optional<TNode> getNode(TData nodeData) {
+  public Optional<TNode> getNode(@NotNull TData nodeData) {
     return getNode(getIdGenerator().applyAsInt(nodeData));
   }
 
-  public int getCost(TNode from, TNode to) {
+  public int getCost(@NotNull TNode from, @NotNull TNode to) {
     return adjacencyMatrix[from.id()][to.id()];
   }
 
@@ -273,7 +270,7 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
     return nodes.length;
   }
 
-  private void populateEdges(BiFunction<TNode, TNode, OptionalInt> costFunction) {
+  private void populateEdges(@NotNull BiFunction<TNode, TNode, OptionalInt> costFunction) {
     var arrSize = getIdLayout().allocationSize();
 
     var matrix = new int[arrSize][arrSize];

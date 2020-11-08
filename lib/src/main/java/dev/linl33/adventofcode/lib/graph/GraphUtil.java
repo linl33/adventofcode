@@ -1,6 +1,5 @@
-package dev.linl33.adventofcode.lib.util;
+package dev.linl33.adventofcode.lib.graph;
 
-import dev.linl33.adventofcode.lib.GraphPath;
 import dev.linl33.adventofcode.lib.point.Point;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,39 +10,37 @@ import java.util.function.*;
 public final class GraphUtil {
   private static final Logger LOGGER = LogManager.getLogger(GraphUtil.class);
 
-  public static <T> GraphPath<T> aStar(T start, T end, Function<T, ? extends Collection<T>> neighborsFunc) {
+  public static <T> Optional<GraphPath<T>> aStar(T start, T end, Function<T, ? extends Collection<T>> neighborsFunc) {
     return aStar(start, end, neighborsFunc, (ToIntFunction<T>) GraphUtil::aStarNullHeuristic, GraphUtil::aStarNullCost);
   }
 
-  public static <T> GraphPath<T> aStar(T start,
-                                       T end,
-                                       Function<T, ? extends Collection<T>> neighborsFunc,
-                                       ToIntFunction<T> heuristic) {
+  public static <T> Optional<GraphPath<T>> aStar(T start,
+                                                 T end,
+                                                 Function<T, ? extends Collection<T>> neighborsFunc,
+                                                 ToIntFunction<T> heuristic) {
     return aStar(start, end, neighborsFunc, heuristic, GraphUtil::aStarNullCost);
   }
 
-  public static <T> GraphPath<T> aStar(T start,
-                                       T end,
-                                       Function<T, ? extends Collection<T>> neighborsFunc,
-                                       Function<T, ToIntFunction<T>> heuristic) {
+  public static <T> Optional<GraphPath<T>> aStar(T start,
+                                                 T end,
+                                                 Function<T, ? extends Collection<T>> neighborsFunc,
+                                                 Function<T, ToIntFunction<T>> heuristic) {
     return aStar(start, end, neighborsFunc, heuristic.apply(end), GraphUtil::aStarNullCost);
   }
 
-  public static <T> GraphPath<T> aStar(T start,
-                                       T end,
-                                       Function<T, ? extends Collection<T>> neighborsFunc,
-                                       Function<T, ToIntFunction<T>> heuristic,
-                                       ToIntBiFunction<T, T> cost) {
+  public static <T> Optional<GraphPath<T>> aStar(T start,
+                                                 T end,
+                                                 Function<T, ? extends Collection<T>> neighborsFunc,
+                                                 Function<T, ToIntFunction<T>> heuristic,
+                                                 ToIntBiFunction<T, T> cost) {
     return aStar(start, end, neighborsFunc, heuristic.apply(end), cost);
   }
 
-  public static <T> GraphPath<T> aStar(T start,
-                                       T end,
-                                       Function<T, ? extends Collection<T>> neighborsFunc,
-                                       ToIntFunction<T> heuristic,
-                                       ToIntBiFunction<T, T> cost) {
-    // TODO: return Optional
-
+  public static <T> Optional<GraphPath<T>> aStar(T start,
+                                                 T end,
+                                                 Function<T, ? extends Collection<T>> neighborsFunc,
+                                                 ToIntFunction<T> heuristic,
+                                                 ToIntBiFunction<T, T> cost) {
     var cameFrom = new HashMap<T, T>();
     var neighborCache = new HashMap<T, Collection<T>>();
 
@@ -69,7 +66,7 @@ public final class GraphUtil {
           pathPointer = pathNext;
         }
 
-        return new GraphPath<>(path, gScore.get(end));
+        return Optional.of(new GraphPath<>(path, gScore.get(end)));
       }
 
       visitCounter++;
@@ -86,17 +83,15 @@ public final class GraphUtil {
       }
     }
 
-    return null;
+    return Optional.empty();
   }
 
-  public static int aStarLengthOnly(int start,
-                                    int end,
-                                    IntFunction<int[]> neighborsFunc,
-                                    IntUnaryOperator heuristic,
-                                    IntBinaryOperator cost,
-                                    int size) {
-    // TODO: return OptionalInt
-
+  public static OptionalInt aStarLengthOnly(int start,
+                                            int end,
+                                            IntFunction<int[]> neighborsFunc,
+                                            IntUnaryOperator heuristic,
+                                            IntBinaryOperator cost,
+                                            int size) {
     var gScore = new int[size];
     Arrays.fill(gScore, Integer.MAX_VALUE);
     gScore[start] = 0;
@@ -130,7 +125,7 @@ public final class GraphUtil {
       hasMin = false;
 
       if (minNode == end) {
-        return gScore[end];
+        return OptionalInt.of(gScore[end]);
       }
 
       visitCounter++;
@@ -155,12 +150,12 @@ public final class GraphUtil {
       }
     }
 
-    return Integer.MIN_VALUE;
+    return OptionalInt.empty();
   }
 
-  public static <T> Function<T, GraphPath<T>> adaptAStar(T end,
-                                                      Function<T, ? extends Collection<T>> neighborsFunc,
-                                                      Function<T, ToIntFunction<T>> heuristic) {
+  public static <T> Function<T, Optional<GraphPath<T>>> adaptAStar(T end,
+                                                                   Function<T, ? extends Collection<T>> neighborsFunc,
+                                                                   Function<T, ToIntFunction<T>> heuristic) {
     return start -> aStar(start, end, neighborsFunc, heuristic.apply(end));
   }
 

@@ -1,6 +1,6 @@
 package dev.linl33.adventofcode.year2019;
 
-import dev.linl33.adventofcode.lib.GraphPath;
+import dev.linl33.adventofcode.lib.graph.GraphPath;
 import dev.linl33.adventofcode.lib.graph.AbsIntGraphNode;
 import dev.linl33.adventofcode.lib.graph.DataIntGraphNode;
 import dev.linl33.adventofcode.lib.graph.IntGraph;
@@ -8,7 +8,7 @@ import dev.linl33.adventofcode.lib.grid.Grid;
 import dev.linl33.adventofcode.lib.grid.GridVisitResult;
 import dev.linl33.adventofcode.lib.grid.RowArrayGrid;
 import dev.linl33.adventofcode.lib.point.Point2D;
-import dev.linl33.adventofcode.lib.util.GraphUtil;
+import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import dev.linl33.adventofcode.lib.util.GridUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -176,7 +176,7 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
         (left, right) -> graph.getCost(graph.getNode(left).orElseThrow(), graph.getNode(right).orElseThrow())
     );
 
-    return Optional.ofNullable(path).map(GraphPath::length).orElseThrow();
+    return path.map(GraphPath::length).orElseThrow();
   }
 
   private static HashMap<Point2D, String> findPortals(Grid grid) {
@@ -248,18 +248,16 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
   }
 
   private static OptionalInt findPathOnGrid(Grid grid, Point2D start, Point2D end) {
-    var path = GraphUtil.aStar(
-        start,
-        end,
-        pos -> GridUtil
-            .orthogonalNeighbors(grid, pos)
-            .stream()
-            .filter(neighbor -> grid.configuration().isEmptySpace(grid.get(neighbor)) || neighbor.equals(end))
-            .collect(Collectors.toList())
-    );
-
-    return Optional
-        .ofNullable(path)
+    return GraphUtil
+        .aStar(
+            start,
+            end,
+            pos -> GridUtil
+                .orthogonalNeighbors(grid, pos)
+                .stream()
+                .filter(neighbor -> grid.configuration().isEmptySpace(grid.get(neighbor)) || neighbor.equals(end))
+                .collect(Collectors.toList())
+        )
         .map(GraphPath::length)
         .map(length -> OptionalInt.of(length - 2))
         .orElseGet(OptionalInt::empty);

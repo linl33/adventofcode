@@ -1,5 +1,7 @@
 package dev.linl33.adventofcode.year2019;
 
+import dev.linl33.adventofcode.lib.graph.GraphPath;
+import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import dev.linl33.adventofcode.lib.point.Point;
 import dev.linl33.adventofcode.lib.point.Point2D;
 import dev.linl33.adventofcode.lib.util.*;
@@ -34,7 +36,8 @@ public class Day15 extends AdventSolution2019<Integer, Integer> {
             pt -> findNeighbors(pt, world),
             (Function<Point2D, ToIntFunction<Point2D>>) GraphUtil::manhattanDistHeuristic
         )
-        .length();
+        .map(GraphPath::length)
+        .orElseThrow();
   }
 
   @Override
@@ -81,7 +84,7 @@ public class Day15 extends AdventSolution2019<Integer, Integer> {
     var max = 0;
     while (!toExplore.isEmpty()) {
       var next = toExplore.iterator().next();
-      var nextPath = fixedEndAStar.apply(next);
+      var nextPath = fixedEndAStar.apply(next).orElseThrow();
 
       toExplore.removeAll(nextPath.path().keySet());
       toExplore.remove(next);
