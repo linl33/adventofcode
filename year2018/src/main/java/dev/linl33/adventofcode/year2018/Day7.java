@@ -1,6 +1,6 @@
 package dev.linl33.adventofcode.year2018;
 
-import dev.linl33.adventofcode.lib.Graph;
+import dev.linl33.adventofcode.lib.graph.MutableGraph;
 
 import java.io.BufferedReader;
 import java.util.*;
@@ -17,9 +17,10 @@ public class Day7 extends AdventSolution2018<String, Integer> {
 
     var sequence = new StringBuilder();
     while (graph.getNodes().size() > 0) {
-      var node = nextNode(graph, Collections.emptySet());
-      sequence.append(node);
-      graph.removeNode(node);
+      nextNode(graph, Set.of()).ifPresent(node -> {
+        sequence.append(node);
+        graph.removeNode(node);
+      });
     }
 
     return sequence.toString();
@@ -63,8 +64,7 @@ public class Day7 extends AdventSolution2018<String, Integer> {
         }
 
         if (worker.getTask() == null) {
-          var node = nextNode(graph, queued);
-          if (node != null) {
+          nextNode(graph, queued).ifPresent(node -> {
             queued.add(node);
             worker.setTask(() -> graph.removeNode(node));
 
@@ -73,7 +73,7 @@ public class Day7 extends AdventSolution2018<String, Integer> {
               time += 60;
             }
             worker.setTime(time);
-          }
+          });
         }
       }
 
@@ -83,34 +83,35 @@ public class Day7 extends AdventSolution2018<String, Integer> {
     return t;
   }
 
-  private static Graph<String> buildGraph(Stream<String> instructions) {
-    var graph = new Graph<String>();
+  private static MutableGraph buildGraph(Stream<String> instructions) {
+    var graph = new MutableGraph();
 
     instructions
         .forEach(s -> {
           var nodeA = s.substring(5, 6);
           var nodeB = s.substring(36, 37);
 
-          graph.addNode(nodeA);
-          graph.addNode(nodeB);
-          graph.addEdge(nodeA, nodeB);
+          graph
+              .addNode(nodeA)
+              .addNode(nodeB)
+              .addEdge(nodeA, nodeB);
         });
 
     return graph;
   }
 
-  private static String nextNode(Graph<String> graph, Set<String> excluded) {
+  private static Optional<String> nextNode(MutableGraph graph, Set<String> excluded) {
     for (var s : graph.getNodes().keySet()) {
       if (excluded.contains(s)) {
         continue;
       }
 
-      if (graph.getNodes().get(s).getInNodes().size() == 0) {
-        return s;
+      if (graph.getNodes().get(s).inNodes().size() == 0) {
+        return Optional.of(s);
       }
     }
 
-    return null;
+    return Optional.empty();
   }
 
   private static class Worker {

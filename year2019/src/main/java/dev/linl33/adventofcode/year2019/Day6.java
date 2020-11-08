@@ -1,11 +1,12 @@
 package dev.linl33.adventofcode.year2019;
 
-import dev.linl33.adventofcode.lib.Graph;
-import dev.linl33.adventofcode.lib.GraphNode;
+import dev.linl33.adventofcode.lib.graph.IntGraph;
+import dev.linl33.adventofcode.lib.graph.IntGraphNode;
 
 import java.io.BufferedReader;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Day6 extends AdventSolution2019<Integer, Integer> {
   public static void main(String[] args) {
@@ -14,71 +15,59 @@ public class Day6 extends AdventSolution2019<Integer, Integer> {
 
   @Override
   public Integer part1(BufferedReader reader) {
-    var graph = new Graph<String>();
+    var graphBuilder = new IntGraph.Builder<String>();
+    var edges = new HashMap<String, Map<String, Integer>>();
 
     reader
         .lines()
         .map(line -> line.split("\\)"))
         .forEach(pair -> {
-          graph.addNode(pair[0]);
-          graph.addNode(pair[1]);
+          graphBuilder
+              .addNode(pair[0])
+              .addNode(pair[1]);
 
-          graph.addEdge(pair[1], pair[0]);
+          edges.computeIfAbsent(pair[0], __ -> new HashMap<>()).put(pair[1], 1);
         });
 
-    return graph
-        .getNodes()
-        .values()
-        .stream()
-        .mapToInt(GraphNode::descendentCount)
+    var graph = graphBuilder
+        .withDefaultAccessors(String.class)
+        .withDefaultIntAssignment()
+        .withEdges(edges)
+        .build();
+
+    return Arrays.stream(graph.getNodes())
+        .mapToInt(IntGraphNode::descendentCount)
         .sum();
   }
 
   @Override
   public Integer part2(BufferedReader reader) {
-    var graph = new Graph<String>();
+    var graphBuilder = new IntGraph.Builder<String>();
+    var edges = new HashMap<String, Map<String, Integer>>();
 
     reader
         .lines()
         .map(line -> line.split("\\)"))
         .forEach(pair -> {
-          graph.addNode(pair[0]);
-          graph.addNode(pair[1]);
+          graphBuilder
+              .addNode(pair[0])
+              .addNode(pair[1]);
 
-          graph.addEdge(pair[0], pair[1]);
+          edges.computeIfAbsent(pair[0], __ -> new HashMap<>()).put(pair[1], 1);
+          edges.computeIfAbsent(pair[1], __ -> new HashMap<>()).put(pair[0], 1);
         });
 
-    return findPathToSan(graph.getNodes().get("YOU"), new HashSet<>()) - 2;
-  }
+    var graph = graphBuilder
+        .withDefaultAccessors(String.class)
+        .withDefaultIntAssignment()
+        .withEdges(edges)
+        .build();
 
-  private static int findPathToSan(GraphNode<String> curr, Set<String> visited) {
-    if (visited.contains(curr.getId())) {
-      return -1;
-    }
-
-    var count = 0;
-    for (var outNode : curr.getOutNodes()) {
-      if (outNode.getId().equals("SAN")) {
-        return 1;
-      }
-
-      visited.add(curr.getId());
-      var outDist = findPathToSan(outNode, visited);
-
-      if (outDist > 0) {
-        count = outDist + 1;
-      }
-    }
-
-    for (var inNode : curr.getInNodes()) {
-      visited.add(curr.getId());
-      var inDist = findPathToSan(inNode, visited);
-
-      if (inDist > 0) {
-        count = inDist + 1;
-      }
-    }
-
-    return count;
+    return graph
+        .findPath(
+            graph.getNode("YOU").orElseThrow(),
+            graph.getNode("SAN").orElseThrow()
+        )
+        .orElseThrow() - 2;
   }
 }

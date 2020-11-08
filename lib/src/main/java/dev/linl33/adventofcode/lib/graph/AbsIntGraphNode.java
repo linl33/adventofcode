@@ -51,6 +51,18 @@ public abstract class AbsIntGraphNode<T extends AbsIntGraphNode<T>> implements I
     return Optional.ofNullable(lastOutNode);
   }
 
+  protected AbsIntGraphNode(int id) {
+    this.id = id;
+    this.inNodes = new ArrayList<>();
+    this.outNodes = new ArrayList<>();
+    this.inNodesUnmodifiable = List.of();
+    this.outNodesUnmodifiable = List.of();
+    this.updateInNodeUnmodifiable = false;
+    this.updateOutNodeUnmodifiable = false;
+    this.lastInNode = null;
+    this.lastOutNode = null;
+  }
+
   @Override
   public void addInNode(@NotNull T other) {
     inNodes.add(other);
@@ -63,18 +75,6 @@ public abstract class AbsIntGraphNode<T extends AbsIntGraphNode<T>> implements I
     outNodes.add(other);
     updateOutNodeUnmodifiable = true;
     lastOutNode = other;
-  }
-
-  protected AbsIntGraphNode(int id) {
-    this.id = id;
-    this.inNodes = new ArrayList<>();
-    this.outNodes = new ArrayList<>();
-    this.inNodesUnmodifiable = List.of();
-    this.outNodesUnmodifiable = List.of();
-    this.updateInNodeUnmodifiable = false;
-    this.updateOutNodeUnmodifiable = false;
-    this.lastInNode = null;
-    this.lastOutNode = null;
   }
 
   @Override

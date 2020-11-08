@@ -64,6 +64,8 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
 
     @Contract(value = "_ -> this", mutates = "this")
     public Builder<T> addNode(@NotNull T data) {
+      // TODO: support SimpleIntGraphNode
+
       nodes.add(data);
       return this;
     }
@@ -164,7 +166,7 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
   private int[][] adjacencyMatrix;
   private int[][] adjacencyList;
 
-  private TNode[] getNodes() {
+  public TNode[] getNodes() {
     return nodes;
   }
 

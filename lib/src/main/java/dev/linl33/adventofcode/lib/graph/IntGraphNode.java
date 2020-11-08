@@ -2,18 +2,10 @@ package dev.linl33.adventofcode.lib.graph;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Optional;
 
-public interface IntGraphNode<T extends IntGraphNode<T>> extends Comparable<T> {
+public interface IntGraphNode<T extends IntGraphNode<T>> extends GraphNode<T>, Comparable<T> {
   int id();
-
-  @NotNull
-  Collection<T> inNodes();
-
-  @NotNull
-  Collection<T> outNodes();
-
   @NotNull
   Optional<T> lastInNode();
 
