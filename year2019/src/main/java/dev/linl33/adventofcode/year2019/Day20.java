@@ -1,24 +1,28 @@
 package dev.linl33.adventofcode.year2019;
 
-import dev.linl33.adventofcode.lib.Graph;
-import dev.linl33.adventofcode.lib.GraphNode;
+import dev.linl33.adventofcode.lib.GraphPath;
+import dev.linl33.adventofcode.lib.graph.AbsIntGraphNode;
+import dev.linl33.adventofcode.lib.graph.DataIntGraphNode;
+import dev.linl33.adventofcode.lib.graph.IntGraph;
 import dev.linl33.adventofcode.lib.grid.Grid;
 import dev.linl33.adventofcode.lib.grid.GridVisitResult;
 import dev.linl33.adventofcode.lib.grid.RowArrayGrid;
 import dev.linl33.adventofcode.lib.point.Point2D;
-import dev.linl33.adventofcode.lib.util.AdventUtil;
 import dev.linl33.adventofcode.lib.util.GraphUtil;
 import dev.linl33.adventofcode.lib.util.GridUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Day20 extends AdventSolution2019<Integer, Integer> {
+  public static final String ENTRANCE_EXIT_NAME = "AA";
+  private static final Portal P_ENTRANCE = new Portal(null, ENTRANCE_EXIT_NAME, Portal.Edge.INTERIOR, Portal.Direction.EXIT, 0);
+  private static final Portal P_EXIT = new Portal(null, ENTRANCE_EXIT_NAME, Portal.Edge.EXTERIOR, Portal.Direction.ENTER, 0);
+
   public static void main(String[] args) {
     new Day20().runAndPrintAll();
   }
@@ -30,233 +34,149 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
 
     var ptToId = findPortals(grid);
 
-    var portalArr = ptToId.keySet().toArray(Point2D[]::new);
-    var portalCount = portalArr.length;
-    var ptIdx = IntStream
-        .range(0, portalCount)
-        .collect(
-            () -> new TreeMap<Point2D, Integer>(Comparator.comparing(ptToId::get)),
-            (map, idx) -> map.put(portalArr[idx], idx),
-            Map::putAll
-        );
+    var graphBuilder = new IntGraph.Builder<Portal>();
 
-    var adjacencyMatrix = new int[portalCount][portalCount];
-    var adjacencyList = new int[portalCount][];
-
-    for (Point2D portal : ptIdx.keySet()) {
-      Function<Point2D, List<Point2D>> neighborFunc = (Point2D gridPt) -> GridUtil
-          .orthogonalNeighbors(grid, gridPt)
-          .stream()
-          .filter(neighbor -> neighbor.equals(portal) || grid.configuration().isEmptySpace(grid.get(neighbor)))
-          .collect(Collectors.toList());
-
-      var portalId = ptToId.get(portal);
-      var portalName = portalId.substring(0, 2);
-      var portalIdx = ptIdx.get(portal);
-
-      var edgesArr = new int[portalCount - 1];
-      var edgeCounter = 0;
-
-      for (Point2D portal2 : ptIdx.keySet()) {
-        if (portal == portal2) {
-          continue;
-        }
-
-        var portal2Id = ptToId.get(portal2);
-        var portal2Name = portal2Id.substring(0, 2);
-        var portal2Idx = ptIdx.get(portal2);
-
-        if (portal2Name.equals(portalName)) {
-          edgesArr[edgeCounter++] = portal2Idx;
-          adjacencyMatrix[portalIdx][portal2Idx] = 1;
-        } else {
-          var path = GraphUtil.aStar(portal2, portal, neighborFunc);
-
-          if (path != null) {
-            edgesArr[edgeCounter++] = portal2Idx;
-            adjacencyMatrix[portalIdx][portal2Idx] = path.length() - 2;
-          }
-        }
+    for (Map.Entry<Point2D, String> entry : ptToId.entrySet()) {
+      Portal r;
+      var portalStr = entry.getValue();
+      if (portalStr.length() == 2) {
+        r = new Portal(portalStr.equals("AA") ? P_ENTRANCE : P_EXIT, entry.getKey());
+      } else {
+        r = new Portal(entry.getKey(), portalStr, Portal.Direction.EXIT);
       }
 
-      adjacencyList[portalIdx] = Arrays.copyOf(edgesArr, edgeCounter);
+      graphBuilder.addNode(r);
     }
 
-    var pathLength = GraphUtil.aStarLengthOnly(
-        ptIdx.firstEntry().getValue(),
-        ptIdx.lastEntry().getValue(),
-        i -> adjacencyList[i],
-        __ -> 0,
-        (a, b) -> adjacencyMatrix[a][b],
-        ptIdx.size()
-    );
+    var graph = graphBuilder
+        .withAccessors(List.of(Portal::name, Portal::edge))
+        .withCostFunction((n1, n2) -> {
+          if (n1.getData().name().equals(n2.getData().name()) && !n1.getData().name().equals(ENTRANCE_EXIT_NAME)) {
+            return OptionalInt.of(1);
+          }
 
-    if (pathLength < 0) {
-      throw new IllegalArgumentException();
-    }
+          return findPathOnGrid(grid, n1.getData().position(), n2.getData().position());
+        })
+        .withDefaultIntAssignment()
+        .build();
 
-    return pathLength;
+    var entrance = graph.getNode(P_ENTRANCE).orElseThrow();
+    var exit = graph.getNode(P_EXIT).orElseThrow();
+
+    return graph
+        .findPath(entrance, exit)
+        .orElseThrow();
   }
 
   @Override
-  public Integer part2(BufferedReader reader) throws Exception {
+  public Integer part2(BufferedReader reader) {
     var grid = new RowArrayGrid(reader);
     GridUtil.fillEnclaves(grid);
 
-    grid.print();
-
     var ptToId = findPortals(grid);
 
-    var portalArr = ptToId.keySet().toArray(Point2D[]::new);
-    var portalCount = portalArr.length;
-    var ptIdx = IntStream
-        .range(0, portalCount)
-        .collect(
-            () -> new TreeMap<Point2D, Integer>(Comparator.comparing(ptToId::get)),
-            (map, idx) -> map.put(portalArr[idx], idx),
-            Map::putAll
-        );
+    var graphBuilder = new IntGraph.Builder<Portal>();
 
-    var adjacencyMatrix = new int[portalCount][portalCount];
-    var adjacencyList = new int[portalCount][];
+    for (Map.Entry<Point2D, String> entry : ptToId.entrySet()) {
+      var portalStr = entry.getValue();
 
-    for (Point2D portal : ptIdx.keySet()) {
-      Function<Point2D, List<Point2D>> neighborFunc = (Point2D gridPt) -> GridUtil
-          .orthogonalNeighbors(grid, gridPt)
-          .stream()
-          .filter(neighbor -> neighbor.equals(portal) || grid.configuration().isEmptySpace(grid.get(neighbor)))
-          .collect(Collectors.toList());
-
-      var portalId = ptToId.get(portal);
-      var portalName = portalId.substring(0, 2);
-      var portalIdx = ptIdx.get(portal);
-
-      var edgesArr = new int[portalCount - 1];
-      var edgeCounter = 0;
-
-      for (Point2D portal2 : ptIdx.keySet()) {
-        if (portal == portal2) {
-          continue;
-        }
-
-        var portal2Id = ptToId.get(portal2);
-        var portal2Name = portal2Id.substring(0, 2);
-        var portal2Idx = ptIdx.get(portal2);
-
-        if (portal2Name.equals(portalName)) {
-          edgesArr[edgeCounter++] = portal2Idx;
-          adjacencyMatrix[portalIdx][portal2Idx] = 1;
-        } else {
-          var path = GraphUtil.aStar(portal2, portal, neighborFunc);
-
-          if (path != null) {
-            edgesArr[edgeCounter++] = portal2Idx;
-            adjacencyMatrix[portalIdx][portal2Idx] = path.length() - 2;
-          }
-        }
-      }
-
-      adjacencyList[portalIdx] = Arrays.copyOf(edgesArr, edgeCounter);
-    }
-
-    var idToPt = AdventUtil.invertMap(ptToId);
-    var idxToId = ptIdx
-        .entrySet()
-        .stream()
-        .collect(Collectors.toMap(
-            Map.Entry::getValue,
-            kv -> ptToId.get(kv.getKey())
-        ));
-
-    var graph = new Graph<String>();
-    for (Map.Entry<String, Point2D> portal : idToPt.entrySet()) {
-      if (portal.getKey().length() == 2) {
-        graph.addNode(portal.getKey());
-
-        for (int neighborIdx : adjacencyList[ptIdx.get(idToPt.get(portal.getKey()))]) {
-          var id = idxToId.get(neighborIdx);
-
-          if (id.length() != 2) {
-            id += "A";
-          }
-
-          graph.addNode(id);
-          graph.addEdge(portal.getKey(), id);
-        }
+      if (portalStr.length() == 2) {
+        graphBuilder
+            .addNode(new Portal(portalStr.equals("AA") ? P_ENTRANCE : P_EXIT, entry.getKey()));
       } else {
-        graph.addNode(portal.getKey() + "A");
-        graph.addNode(portal.getKey() + "B");
-
-        var receivingNodeId = portal.getKey().substring(0, 3) + (portal.getKey().endsWith("E") ? "I" : "E") + "B";
-        graph.addNode(receivingNodeId);
-        graph.addEdge(portal.getKey() + "A", receivingNodeId);
-
-        for (int neighborIdx : adjacencyList[ptIdx.get(idToPt.get(portal.getKey()))]) {
-          var id = idxToId.get(neighborIdx);
-
-          // skip the matching portal
-          if (id.substring(0, 2).equals(portal.getKey().substring(0, 2))) {
-            continue;
-          }
-
-          if (id.length() != 2) {
-            id += "A";
-          }
-
-          graph.addNode(id);
-          graph.addEdge(portal.getKey() + "B", id);
-        }
+        graphBuilder
+            .addNode(new Portal(entry.getKey(), portalStr, Portal.Direction.EXIT))
+            .addNode(new Portal(entry.getKey(), portalStr, Portal.Direction.ENTER));
       }
     }
+
+    var graph = graphBuilder
+        .withAccessors(List.of(Portal::name, Portal::edge, Portal::direction))
+        .withCostFunction((n1, n2) -> {
+          var portal1 = n1.getData();
+          var portal2 = n2.getData();
+
+          // this is the exit, it has no out edge
+          if (portal1.edge() == Portal.Edge.EXTERIOR && portal1.name().equals(ENTRANCE_EXIT_NAME)) {
+            return OptionalInt.empty();
+          }
+
+          if (portal1.direction() == portal2.direction()) {
+            return OptionalInt.empty();
+          }
+
+          // ENTER portals can only goto their matching EXIT
+          if (!portal1.name().equals(ENTRANCE_EXIT_NAME) && portal1.name().equals(portal2.name())) {
+            if (portal1.direction() == Portal.Direction.ENTER && portal1.edge() != portal2.edge()) {
+              return OptionalInt.of(1);
+            }
+
+            return OptionalInt.empty();
+          }
+
+          if (portal1.direction() == Portal.Direction.ENTER) {
+            return OptionalInt.empty();
+          }
+
+          return findPathOnGrid(grid, portal1.position(), portal2.position());
+        })
+        .withDefaultIntAssignment()
+        .build();
+
+    var entranceNode = graph.getNode(P_ENTRANCE).map(DataIntGraphNode::getData).orElseThrow();
+    var exitNode = graph.getNode(P_EXIT).map(DataIntGraphNode::getData).orElseThrow();
 
     var path = GraphUtil.aStar(
-        "AA",
-        "ZZ",
+        entranceNode,
+        exitNode,
         portal -> {
-          int level;
-          if (portal.length() == 2 || portal.length() == 5) {
-            level = 0;
-          } else {
-            level = Integer.parseInt(portal.substring(5));
-            portal = portal.substring(0, 5);
-          }
+          int level = portal.level();
 
           if (level > 50) {
             return List.of();
           }
 
-          var neighborStream = graph.getNodes().get(portal).getOutNodes().stream().map(GraphNode::getId);
+          if (portal.direction() == Portal.Direction.ENTER) {
+            var exitPortal = graph
+                .getNode(portal)
+                .flatMap(AbsIntGraphNode::lastOutNode)
+                .map(DataIntGraphNode::getData)
+                .orElseThrow();
 
-          if (level == 0) {
-            neighborStream = neighborStream.filter(s -> s.length() == 2 || s.charAt(3) != 'E');
-          } else {
-            neighborStream = neighborStream.filter(s -> s.length() != 2);
+            return List.of(level == 0 ? exitPortal : new Portal(exitPortal, level));
           }
 
+          var potentialNeighbors = graph
+              .getNode(portal)
+              .map(DataIntGraphNode::outNodes)
+              .orElseThrow();
+
+          var neighbors = new ArrayList<Portal>();
           if (level == 0) {
-            if (portal.length() == 2 || !portal.endsWith("A")) {
-              neighborStream = neighborStream.map(s -> s.length() == 2 ? s : s + "1");
+            for (DataIntGraphNode<Portal> node : potentialNeighbors) {
+              if (node.getData().equals(exitNode)) {
+                neighbors.add(node.getData());
+              } else if (node.getData().edge() == Portal.Edge.INTERIOR) {
+                neighbors.add(new Portal(node.getData(), 1));
+              }
             }
           } else {
-            if (portal.endsWith("A")) {
-              neighborStream = neighborStream.map(s -> s.substring(0, 5) + level);
-            } else {
-              neighborStream = neighborStream.map(s -> s.substring(0, 5) + (s.charAt(3) == 'E' ? level - 1 : level + 1));
+            for (DataIntGraphNode<Portal> node : potentialNeighbors) {
+              if (node.getData().name().equals(ENTRANCE_EXIT_NAME)) {
+                continue;
+              }
+
+              neighbors.add(new Portal(node.getData(), node.getData().edge() == Portal.Edge.EXTERIOR ? level - 1 : level + 1));
             }
           }
 
-          return neighborStream.collect(Collectors.toList());
+          return neighbors;
         },
-        (ToIntFunction<String>) __ -> 0,
-        (left, right) -> {
-          var leftIdx = ptIdx.get(idToPt.get(left.length() == 2 ? left : left.substring(0, 4)));
-          var rightIdx = ptIdx.get(idToPt.get(right.length() == 2 ? right : right.substring(0, 4)));
-
-          return adjacencyMatrix[leftIdx][rightIdx];
-        }
+        (ToIntFunction<Portal>) __ -> 0,
+        (left, right) -> graph.getCost(graph.getNode(left).orElseThrow(), graph.getNode(right).orElseThrow())
     );
 
-    return Objects.requireNonNull(path).length();
+    return Optional.ofNullable(path).map(GraphPath::length).orElseThrow();
   }
 
   private static HashMap<Point2D, String> findPortals(Grid grid) {
@@ -325,5 +245,56 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
     }
 
     return baseName + "_" + (pointRadius < otherPointRadius ? "I" : "E");
+  }
+
+  private static OptionalInt findPathOnGrid(Grid grid, Point2D start, Point2D end) {
+    var path = GraphUtil.aStar(
+        start,
+        end,
+        pos -> GridUtil
+            .orthogonalNeighbors(grid, pos)
+            .stream()
+            .filter(neighbor -> grid.configuration().isEmptySpace(grid.get(neighbor)) || neighbor.equals(end))
+            .collect(Collectors.toList())
+    );
+
+    return Optional
+        .ofNullable(path)
+        .map(GraphPath::length)
+        .map(length -> OptionalInt.of(length - 2))
+        .orElseGet(OptionalInt::empty);
+  }
+
+  private static record Portal(Point2D position,
+                               String name,
+                               Edge edge,
+                               Direction direction,
+                               int level) {
+    private enum Edge {
+      INTERIOR, EXTERIOR
+    }
+
+    private enum Direction {
+      ENTER, EXIT
+    }
+
+    public Portal(@NotNull Portal portal, Point2D newPosition) {
+      this(newPosition, portal.name, portal.edge, portal.direction, portal.level);
+    }
+
+    public Portal(@NotNull Portal portal, int newLevel) {
+      this(portal.position, portal.name, portal.edge, portal.direction, newLevel);
+    }
+
+    public Portal(@NotNull Point2D position,
+                  @NotNull String portalStr,
+                  @NotNull Direction direction) {
+      this(position,
+          portalStr.substring(0, 2),
+          portalStr.substring(3).equals("I") ? Portal.Edge.INTERIOR : Portal.Edge.EXTERIOR,
+          direction,
+          0
+      );
+    }
   }
 }
