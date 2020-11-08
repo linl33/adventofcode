@@ -11,27 +11,27 @@ import java.util.function.*;
 public final class GraphUtil {
   private static final Logger LOGGER = LogManager.getLogger(GraphUtil.class);
 
-  public static <T> GraphPath<T> aStar(T start, T end, Function<T, ? extends Iterable<T>> neighborsFunc) {
+  public static <T> GraphPath<T> aStar(T start, T end, Function<T, ? extends Collection<T>> neighborsFunc) {
     return aStar(start, end, neighborsFunc, (ToIntFunction<T>) GraphUtil::aStarNullHeuristic, GraphUtil::aStarNullCost);
   }
 
   public static <T> GraphPath<T> aStar(T start,
                                        T end,
-                                       Function<T, ? extends Iterable<T>> neighborsFunc,
+                                       Function<T, ? extends Collection<T>> neighborsFunc,
                                        ToIntFunction<T> heuristic) {
     return aStar(start, end, neighborsFunc, heuristic, GraphUtil::aStarNullCost);
   }
 
   public static <T> GraphPath<T> aStar(T start,
                                        T end,
-                                       Function<T, ? extends Iterable<T>> neighborsFunc,
+                                       Function<T, ? extends Collection<T>> neighborsFunc,
                                        Function<T, ToIntFunction<T>> heuristic) {
     return aStar(start, end, neighborsFunc, heuristic.apply(end), GraphUtil::aStarNullCost);
   }
 
   public static <T> GraphPath<T> aStar(T start,
                                        T end,
-                                       Function<T, ? extends Iterable<T>> neighborsFunc,
+                                       Function<T, ? extends Collection<T>> neighborsFunc,
                                        Function<T, ToIntFunction<T>> heuristic,
                                        ToIntBiFunction<T, T> cost) {
     return aStar(start, end, neighborsFunc, heuristic.apply(end), cost);
@@ -39,11 +39,13 @@ public final class GraphUtil {
 
   public static <T> GraphPath<T> aStar(T start,
                                        T end,
-                                       Function<T, ? extends Iterable<T>> neighborsFunc,
+                                       Function<T, ? extends Collection<T>> neighborsFunc,
                                        ToIntFunction<T> heuristic,
                                        ToIntBiFunction<T, T> cost) {
+    // TODO: return Optional
+
     var cameFrom = new HashMap<T, T>();
-    var neighborCache = new HashMap<T, Iterable<T>>();
+    var neighborCache = new HashMap<T, Collection<T>>();
 
     var gScore = new HashMap<>(Collections.singletonMap(start, 0));
     var fScore = new HashMap<>(Collections.singletonMap(start, gScore.get(start) + heuristic.applyAsInt(start)));
@@ -71,7 +73,8 @@ public final class GraphUtil {
       }
 
       visitCounter++;
-      for (var neighbor : neighborCache.computeIfAbsent(current, neighborsFunc)) {
+      var neighbors = neighborCache.computeIfAbsent(current, neighborsFunc);
+      for (var neighbor : neighbors) {
         var tentativeGScore = gScore.get(current) + cost.applyAsInt(current, neighbor);
         if (tentativeGScore < gScore.getOrDefault(neighbor, Integer.MAX_VALUE)) {
           cameFrom.put(neighbor, current);
@@ -92,6 +95,8 @@ public final class GraphUtil {
                                     IntUnaryOperator heuristic,
                                     IntBinaryOperator cost,
                                     int size) {
+    // TODO: return OptionalInt
+
     var gScore = new int[size];
     Arrays.fill(gScore, Integer.MAX_VALUE);
     gScore[start] = 0;
@@ -154,7 +159,7 @@ public final class GraphUtil {
   }
 
   public static <T> Function<T, GraphPath<T>> adaptAStar(T end,
-                                                      Function<T, ? extends Iterable<T>> neighborsFunc,
+                                                      Function<T, ? extends Collection<T>> neighborsFunc,
                                                       Function<T, ToIntFunction<T>> heuristic) {
     return start -> aStar(start, end, neighborsFunc, heuristic.apply(end));
   }
