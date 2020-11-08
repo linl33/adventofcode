@@ -40,6 +40,7 @@
         <!-- Other Dependencies -->
         <org.apache.logging.log4j.version>2.13.3</org.apache.logging.log4j.version>
         <org.openjdk.jmh.version>1.26</org.openjdk.jmh.version>
+        <org.jetbrains.annotations.version>20.1.0</org.jetbrains.annotations.version>
 
         <!-- Testing -->
         <org.junit.jupiter.version>5.7.0</org.junit.jupiter.version>
@@ -159,6 +160,12 @@
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-generator-annprocess</artifactId>
                 <version>${org.openjdk.jmh.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.jetbrains</groupId>
+                <artifactId>annotations</artifactId>
+                <version>${org.jetbrains.annotations.version}</version>
             </dependency>
 
             <dependency>
