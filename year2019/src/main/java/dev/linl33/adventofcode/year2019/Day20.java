@@ -1,14 +1,15 @@
 package dev.linl33.adventofcode.year2019;
 
 import dev.linl33.adventofcode.lib.graph.GraphPath;
-import dev.linl33.adventofcode.lib.graph.AbsIntGraphNode;
-import dev.linl33.adventofcode.lib.graph.DataIntGraphNode;
-import dev.linl33.adventofcode.lib.graph.IntGraph;
+import dev.linl33.adventofcode.lib.graph.GraphUtil;
+import dev.linl33.adventofcode.lib.graph.intgraph.AbsIntGraphNode;
+import dev.linl33.adventofcode.lib.graph.intgraph.DataIntGraphNode;
+import dev.linl33.adventofcode.lib.graph.intgraph.IdLayoutBuilder;
+import dev.linl33.adventofcode.lib.graph.intgraph.IntGraphBuilder;
 import dev.linl33.adventofcode.lib.grid.Grid;
 import dev.linl33.adventofcode.lib.grid.GridVisitResult;
 import dev.linl33.adventofcode.lib.grid.RowArrayGrid;
 import dev.linl33.adventofcode.lib.point.Point2D;
-import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import dev.linl33.adventofcode.lib.util.GridUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,7 +35,11 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
 
     var ptToId = findPortals(grid);
 
-    var graphBuilder = new IntGraph.Builder<Portal>();
+    var idLayoutBuilder = new IdLayoutBuilder<Portal>()
+        .addField("portal_name", Portal::name)
+        .addField("portal_edge", Portal::edge);
+
+    var graphBuilder = new IntGraphBuilder<Portal>();
 
     for (Map.Entry<Point2D, String> entry : ptToId.entrySet()) {
       Portal r;
@@ -49,7 +54,7 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
     }
 
     var graph = graphBuilder
-        .withAccessors(List.of(Portal::name, Portal::edge))
+        .withIdLayoutBuilder(idLayoutBuilder)
         .withCostFunction((n1, n2) -> {
           if (n1.getData().name().equals(n2.getData().name()) && !n1.getData().name().equals(ENTRANCE_EXIT_NAME)) {
             return OptionalInt.of(1);
@@ -57,7 +62,6 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
 
           return findPathOnGrid(grid, n1.getData().position(), n2.getData().position());
         })
-        .withDefaultIntAssignment()
         .build();
 
     var entrance = graph.getNode(P_ENTRANCE).orElseThrow();
@@ -75,7 +79,12 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
 
     var ptToId = findPortals(grid);
 
-    var graphBuilder = new IntGraph.Builder<Portal>();
+    var idLayoutBuilder = new IdLayoutBuilder<Portal>()
+        .addField(Portal::name)
+        .addField(Portal::edge)
+        .addField(Portal::direction);
+
+    var graphBuilder = new IntGraphBuilder<Portal>();
 
     for (Map.Entry<Point2D, String> entry : ptToId.entrySet()) {
       var portalStr = entry.getValue();
@@ -91,7 +100,7 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
     }
 
     var graph = graphBuilder
-        .withAccessors(List.of(Portal::name, Portal::edge, Portal::direction))
+        .withIdLayoutBuilder(idLayoutBuilder)
         .withCostFunction((n1, n2) -> {
           var portal1 = n1.getData();
           var portal2 = n2.getData();
@@ -120,7 +129,6 @@ public class Day20 extends AdventSolution2019<Integer, Integer> {
 
           return findPathOnGrid(grid, portal1.position(), portal2.position());
         })
-        .withDefaultIntAssignment()
         .build();
 
     var entranceNode = graph.getNode(P_ENTRANCE).map(DataIntGraphNode::getData).orElseThrow();

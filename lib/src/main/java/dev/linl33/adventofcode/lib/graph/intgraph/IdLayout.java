@@ -1,27 +1,30 @@
-package dev.linl33.adventofcode.lib.graph;
+package dev.linl33.adventofcode.lib.graph.intgraph;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.function.Function;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.ToIntFunction;
 
 public record IdLayout<T>(int length,
                           int allocationSize,
                           @NotNull List<LayoutElement<T>> elements) {
-  public static record LayoutElement<T>(int length, int maxId, @NotNull Function<T, ?> accessor) {
+  public static record LayoutElement<T>(int bits,
+                                        int maxId,
+                                        @NotNull ToIntFunction<T> objIntAssignment) {
     public LayoutElement {
-      if (length < 0 || length > (Integer.SIZE - 2)) {
-        throw new IllegalArgumentException("invalid length");
+      if (bits < 0 || bits > (Integer.SIZE - 2)) {
+        throw new IllegalArgumentException("Invalid bits");
       }
 
-      if (maxId > (1 << length)) {
+      if (maxId > (1 << bits)) {
         throw new IllegalArgumentException("Invalid maxId");
       }
     }
   }
 
   public IdLayout(@NotNull List<LayoutElement<T>> elements) {
-    this(elements.stream().mapToInt(LayoutElement::length).sum(), calculateAllocationSize(elements), elements);
+    this(elements.stream().mapToInt(LayoutElement::bits).sum(), calculateAllocationSize(elements), elements);
   }
 
   public IdLayout {
@@ -38,7 +41,7 @@ public record IdLayout<T>(int length,
     var size = elements.get(0).maxId;
 
     for (int i = 1; i < elements.size(); i++) {
-      size *= (1 << elements.get(i).length);
+      size *= (1 << elements.get(i).bits);
     }
 
     return size;

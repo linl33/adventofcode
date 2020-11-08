@@ -1,7 +1,7 @@
 package dev.linl33.adventofcode.year2019;
 
-import dev.linl33.adventofcode.lib.graph.IntGraph;
-import dev.linl33.adventofcode.lib.graph.IntGraphNode;
+import dev.linl33.adventofcode.lib.graph.intgraph.IntGraphBuilder;
+import dev.linl33.adventofcode.lib.graph.intgraph.IntGraphNode;
 
 import java.io.BufferedReader;
 import java.util.Arrays;
@@ -15,7 +15,7 @@ public class Day6 extends AdventSolution2019<Integer, Integer> {
 
   @Override
   public Integer part1(BufferedReader reader) {
-    var graphBuilder = new IntGraph.Builder<String>();
+    var graphBuilder = new IntGraphBuilder<String>();
     var edges = new HashMap<String, Map<String, Integer>>();
 
     reader
@@ -30,8 +30,6 @@ public class Day6 extends AdventSolution2019<Integer, Integer> {
         });
 
     var graph = graphBuilder
-        .withDefaultAccessors(String.class)
-        .withDefaultIntAssignment()
         .withEdges(edges)
         .build();
 
@@ -42,7 +40,7 @@ public class Day6 extends AdventSolution2019<Integer, Integer> {
 
   @Override
   public Integer part2(BufferedReader reader) {
-    var graphBuilder = new IntGraph.Builder<String>();
+    var graphBuilder = new IntGraphBuilder<String>();
     var edges = new HashMap<String, Map<String, Integer>>();
 
     reader
@@ -58,8 +56,6 @@ public class Day6 extends AdventSolution2019<Integer, Integer> {
         });
 
     var graph = graphBuilder
-        .withDefaultAccessors(String.class)
-        .withDefaultIntAssignment()
         .withEdges(edges)
         .build();
 

@@ -1,4 +1,4 @@
-package dev.linl33.adventofcode.lib.graph;
+package dev.linl33.adventofcode.lib.graph.intgraph;
 
 import org.jetbrains.annotations.NotNull;
 

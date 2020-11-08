@@ -1,6 +1,7 @@
-package dev.linl33.adventofcode.lib.graph;
+package dev.linl33.adventofcode.lib.graph.intgraph;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.*;
 
@@ -24,7 +25,7 @@ public abstract class AbsIntGraphNode<T extends AbsIntGraphNode<T>> implements I
   }
 
   @Override
-  public @NotNull Collection<T> inNodes() {
+  public @NotNull @UnmodifiableView Collection<T> inNodes() {
     if (updateInNodeUnmodifiable) {
       inNodesUnmodifiable = Collections.unmodifiableCollection(inNodes);
     }
@@ -33,7 +34,7 @@ public abstract class AbsIntGraphNode<T extends AbsIntGraphNode<T>> implements I
   }
 
   @Override
-  public @NotNull Collection<T> outNodes() {
+  public @NotNull @UnmodifiableView Collection<T> outNodes() {
     if (updateOutNodeUnmodifiable) {
       outNodesUnmodifiable = Collections.unmodifiableCollection(outNodes);
     }
