@@ -51,7 +51,8 @@ public class MutableGraph {
     return this;
   }
 
-  @NotNull MutableGraph removeEdge(@NotNull String fromNode, @NotNull String toNode) {
+  @NotNull
+  MutableGraph removeEdge(@NotNull String fromNode, @NotNull String toNode) {
     var from = nodes.get(fromNode);
     var to = nodes.get(toNode);
 

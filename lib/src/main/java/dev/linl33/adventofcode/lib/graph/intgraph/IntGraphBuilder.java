@@ -10,12 +10,14 @@ import java.util.function.Supplier;
 
 public class IntGraphBuilder<T> {
   private final Collection<T> nodes;
+  private final Map<T, Map<T, Integer>> edges;
   private Supplier<IdLayout<T>> layoutSupplier;
   private IdGenerator<T> idGenerator;
   private BiFunction<DataIntGraphNode<T>, DataIntGraphNode<T>, OptionalInt> costFunction;
 
   public IntGraphBuilder() {
     this.nodes = new ArrayList<>();
+    this.edges = new HashMap<>();
     this.layoutSupplier = null;
     this.idGenerator = null;
     this.costFunction = null;
@@ -46,19 +48,6 @@ public class IntGraphBuilder<T> {
   }
 
   @Contract(value = "_ -> this", mutates = "this")
-  public IntGraphBuilder<T> withEdges(@NotNull Map<T, Map<T, Integer>> edges) {
-    // TODO: make sure withEdges/withCostFunction are not both called
-    // TODO: allow adding edges with builder pattern
-
-    this.costFunction = (n1, n2) -> Optional
-        .ofNullable(edges.getOrDefault(n1.getData(), Map.of()).get(n2.getData()))
-        .map(OptionalInt::of)
-        .orElseGet(OptionalInt::empty);
-
-    return this;
-  }
-
-  @Contract(value = "_ -> this", mutates = "this")
   public IntGraphBuilder<T> addNode(@NotNull T data) {
     // TODO: support SimpleIntGraphNode
 
@@ -66,13 +55,22 @@ public class IntGraphBuilder<T> {
     return this;
   }
 
+  @Contract(value = "_, _, _ -> this", mutates = "this")
+  public IntGraphBuilder<T> addEdge(@NotNull T from, @NotNull T to, int cost) {
+    if (cost < 0) {
+      throw new IllegalArgumentException("Negative edge cost unsupported");
+    }
+
+    edges.computeIfAbsent(from, __ -> new HashMap<>()).put(to, cost);
+    return this;
+  }
+
   @NotNull
   public IntGraph<T, DataIntGraphNode<T>> build() {
-    layoutSupplier = Objects.<Supplier<IdLayout<T>>>requireNonNullElseGet(layoutSupplier, () -> this::defaultIdLayoutBuilder);
-    var layout = layoutSupplier.get();
+    var layout = Objects.requireNonNullElse(layoutSupplier, this::defaultIdLayoutBuilder).get();
 
     idGenerator = Objects.requireNonNullElseGet(idGenerator, () -> IdGenerator.asIdGenerator(layout));
-    costFunction = Objects.requireNonNullElseGet(costFunction, () -> (a, b) -> OptionalInt.of(1));
+    costFunction = Objects.requireNonNullElse(costFunction, this::defaultCostFunction);
 
     @SuppressWarnings("unchecked")
     DataIntGraphNode<T>[] nodeArr = new DataIntGraphNode[layout.allocationSize()];
@@ -88,5 +86,13 @@ public class IntGraphBuilder<T> {
   @NotNull
   private IdLayout<T> defaultIdLayoutBuilder() {
     return new IdLayoutBuilder<T>().addField(Function.identity()).build(nodes);
+  }
+
+  @NotNull
+  private OptionalInt defaultCostFunction(DataIntGraphNode<T> from, DataIntGraphNode<T> to) {
+    return Optional
+        .ofNullable(edges.getOrDefault(from.getData(), Map.of()).get(to.getData()))
+        .map(OptionalInt::of)
+        .orElseGet(OptionalInt::empty);
   }
 }
