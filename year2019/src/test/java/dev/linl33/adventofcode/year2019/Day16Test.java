@@ -4,7 +4,6 @@ import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
 import dev.linl33.adventofcode.testlib.AdventSolutionTestUtil;
 import dev.linl33.adventofcode.testlib.TestPart;
-import org.junit.jupiter.api.Disabled;
 
 import java.util.Map;
 
@@ -28,19 +27,14 @@ class Day16Test implements AdventSolutionTest<String, String> {
   public Map<String, String> getPart2Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), "62938399",
-        "string:03036732577212944063491565474664", "84462026"/*,
+        "string:03036732577212944063491565474664", "84462026",
         "string:02935109699940807407585447034323", "78725270",
-        "string:03081770884921959731165446850517", "53553731"*/
+        "string:03081770884921959731165446850517", "53553731"
     );
   }
 
   @Override
   public Map<TestPart, Map<String, String>> getDisabledTests() {
     return AdventSolutionTestUtil.disableSlowPart2(this);
-  }
-
-  @Override
-  public TestPart[] getTestParts() {
-    return new TestPart[] {TestPart.PART_2};
   }
 }

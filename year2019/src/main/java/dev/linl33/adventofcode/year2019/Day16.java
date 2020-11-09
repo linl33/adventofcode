@@ -79,23 +79,8 @@ public class Day16 extends AdventSolution2019<String, String> {
   }
 
   private static int fftSingleDigit(int[] input, int digitIdx) {
-    var inputLength = input.length;
     int digitIdxPlusOne = digitIdx + 1;
     int jIncrement = digitIdxPlusOne * 3;
-    int negativeOneOffSet = digitIdx + digitIdxPlusOne * 2;
-
-//    var sum = 0;
-//    for (var j = digitIdx; j < inputLength; j += jIncrement) {
-//      for (var k = 0; k < digitIdxPlusOne && j < inputLength; k++) {
-//        sum += input[j++];
-//      }
-//    }
-//
-//    for (var j = negativeOneOffSet; j < inputLength; j += jIncrement) {
-//      for (var k = 0; k < digitIdxPlusOne && j < inputLength; k++) {
-//        sum -= input[j++];
-//      }
-//    }
 
     var sum = singleDigitPart1(digitIdx, jIncrement, input) + singleDigitPart2(digitIdx, jIncrement, input);
 
