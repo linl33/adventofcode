@@ -19,7 +19,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <java.version>16</java.version>
+        <java.version>15</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
@@ -57,7 +57,7 @@
                         <release>${java.version}</release>
                         <compilerArgs>
                             <arg>--enable-preview</arg>
-                            <arg>--add-modules=jdk.incubator.vector</arg>
+<!--                            <arg>&#45;&#45;add-modules=jdk.incubator.vector</arg>-->
                         </compilerArgs>
                     </configuration>
                 </plugin>
@@ -124,7 +124,7 @@
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <argLine>--enable-preview</argLine>
-                        <argLine>--add-modules=jdk.incubator.vector</argLine>
+<!--                        <argLine>&#45;&#45;add-modules=jdk.incubator.vector</argLine>-->
                     </configuration>
                 </plugin>
             </plugins>
