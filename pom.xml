@@ -39,7 +39,7 @@
         <org.codehaus.mojo.exec-plugin.version>3.0.0</org.codehaus.mojo.exec-plugin.version>
 
         <!-- Other Dependencies -->
-        <org.apache.logging.log4j.version>2.13.3</org.apache.logging.log4j.version>
+        <org.apache.logging.log4j.version>2.14.0</org.apache.logging.log4j.version>
         <org.openjdk.jmh.version>1.26</org.openjdk.jmh.version>
         <org.jetbrains.annotations.version>20.1.0</org.jetbrains.annotations.version>
 
