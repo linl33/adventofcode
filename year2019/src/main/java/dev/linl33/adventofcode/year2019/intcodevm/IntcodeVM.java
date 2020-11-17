@@ -213,6 +213,9 @@ public class IntcodeVM {
           pc.add(width);
         }
 
+        // TODO: generalize input/output handling with input/output callback
+        //       primary use case is day23, to supply default value when input is empty
+
         case Instruction.INPUT -> {
           if (nonBlocking) {
             var inputVal = getInput().pollFirst();
