@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.lib.graph.intgraph;
 
+import dev.linl33.adventofcode.lib.graph.GraphPath;
 import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,7 +69,21 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
         neighborFunc.apply(this::defaultNeighborFunction),
         __ -> 0,
         this::defaultCostFunction,
-        getIdLayout().allocationSize()
+        cardinality()
+    );
+  }
+
+  @NotNull
+  public Optional<GraphPath<TNode>> findPathFull(@NotNull TNode start,
+                                                 @NotNull TNode end) {
+    return GraphUtil.aStar(
+        start.id(),
+        end.id(),
+        this::defaultNeighborFunction,
+        __ -> 0,
+        this::defaultCostFunction,
+        i -> getNodes()[i],
+        cardinality()
     );
   }
 

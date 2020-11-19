@@ -32,7 +32,7 @@ public interface AdventSolutionTest<T1, T2> {
   }
 
   default TestPart[] getTestParts() {
-    return TestPart.values();
+    return newSolutionInstance().getDay() != 25 ? TestPart.values() : new TestPart[] {TestPart.PART_1};
   }
 
   @TestFactory

@@ -92,7 +92,7 @@ public interface AdventSolution<T1, T2> {
   }
 
   default SolutionPart[] getSolutionParts() {
-    return SolutionPart.values();
+    return getDay() != 25 ? SolutionPart.values() : new SolutionPart[] {SolutionPart.PART_1};
   }
 
   default BufferedReader resourceSupplier(String resource) {

@@ -1,9 +1,9 @@
 package dev.linl33.adventofcode.lib.util;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
+
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -101,5 +101,96 @@ public final class AdventUtil {
             Map.Entry::getValue,
             Map.Entry::getKey
         ));
+  }
+
+  @NotNull
+  public static <T> List<? extends Collection<T>> generateCombinations(@NotNull List<T> choices) {
+    if (choices.isEmpty()) {
+      return new ArrayList<>(new ArrayList<>());
+    }
+
+    var choiceCount = choices.size();
+    if (choiceCount < Integer.SIZE - 2) {
+      return generateCombinationsSmall(choices, choiceCount);
+    }
+
+    var prevList = choices.stream().map(Set::of).collect(Collectors.toUnmodifiableSet());
+    var result = new ArrayList<>(prevList);
+
+    for (int i = 1; i < choiceCount; i++) {
+      var newList = new HashSet<Set<T>>();
+
+      for (T choice : choices) {
+        for (Set<T> ts : prevList) {
+          if (!ts.contains(choice)) {
+            var newSet = new HashSet<>(ts);
+            newSet.add(choice);
+
+            newList.add(newSet);
+          }
+        }
+      }
+
+      result.addAll(newList);
+      prevList = newList;
+    }
+
+    return result;
+  }
+
+  @NotNull
+  private static <T> List<List<T>> generateCombinationsSmall(@NotNull List<T> choices,
+                                                             @Range(from = 1, to = Integer.SIZE - 2) int choiceCount) {
+    var result = new ArrayList<List<T>>((1 << choiceCount) - 1);
+
+    @SuppressWarnings("unchecked")
+    var allChoices = (T[][]) new Object[1 << choiceCount][];
+    var prevIdx = new int[choiceCount];
+
+    for (int i = 0; i < choiceCount; i++) {
+      @SuppressWarnings("unchecked")
+      var choiceArr = (T[]) new Object[] {choices.get(i)};
+
+      allChoices[1 << i] = choiceArr;
+      prevIdx[i] = 1 << i;
+      result.add(Arrays.asList(choiceArr));
+    }
+
+    for (int i = 2; i <= choiceCount; i++) {
+      var newIdx = new int[MathUtil.choose(choiceCount, i)];
+      var counter = 0;
+
+      for (int j = 0; j < choiceCount; j++) {
+        var currChoice = choices.get(j);
+
+        for (int idx : prevIdx) {
+          int nextIdx;
+          if ((nextIdx = (idx | (1 << j))) == idx || allChoices[nextIdx] != null) {
+            continue;
+          }
+
+          @SuppressWarnings("unchecked")
+          var choiceArr = (T[]) new Object[i];
+          choiceArr[i - 1] = currChoice;
+          System.arraycopy(allChoices[idx], 0, choiceArr, 0, i - 1);
+
+          allChoices[nextIdx] = choiceArr;
+          newIdx[counter++] = nextIdx;
+          result.add(Arrays.asList(choiceArr));
+
+          if (counter == newIdx.length) {
+            break;
+          }
+        }
+
+        if (counter == newIdx.length) {
+          break;
+        }
+      }
+
+      prevIdx = newIdx;
+    }
+
+    return result;
   }
 }

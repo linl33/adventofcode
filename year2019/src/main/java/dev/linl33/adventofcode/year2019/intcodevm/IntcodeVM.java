@@ -1,5 +1,7 @@
 package dev.linl33.adventofcode.year2019.intcodevm;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.BufferedReader;
 import java.util.*;
 import java.util.concurrent.*;
@@ -81,9 +83,9 @@ public class IntcodeVM {
   }
 
   private IntcodeVM(long[] memory,
-                    EnumMap<Register, Integer> registers,
-                    BlockingDeque<Long> input,
-                    BlockingDeque<Long> output) {
+                    @Nullable EnumMap<Register, Integer> registers,
+                    @Nullable BlockingDeque<Long> input,
+                    @Nullable BlockingDeque<Long> output) {
     this.memory = memory;
     this.registers = Objects.requireNonNullElseGet(registers, () -> new EnumMap<>(Register.class));
     this.verb = null;
@@ -137,6 +139,17 @@ public class IntcodeVM {
     var registers = new EnumMap<>(getRegisters());
 
     return new IntcodeVM(memory, registers, getInput(), getOutput());
+  }
+
+  public IntcodeVM forkNewIO() {
+    // TODO: clean up these 2 forks
+
+    var memory = Arrays.copyOf(getMemory(), getMemory().length);
+    var registers = new EnumMap<>(getRegisters());
+
+    var fork = new IntcodeVM(memory, registers, null, null);
+    fork.state = state;
+    return fork;
   }
 
   public String printMemory() {

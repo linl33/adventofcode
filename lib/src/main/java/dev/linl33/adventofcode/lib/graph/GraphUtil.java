@@ -1,8 +1,10 @@
 package dev.linl33.adventofcode.lib.graph;
 
+import dev.linl33.adventofcode.lib.function.BiIntConsumer;
 import dev.linl33.adventofcode.lib.point.Point;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.*;
@@ -44,8 +46,8 @@ public final class GraphUtil {
     var cameFrom = new HashMap<T, T>();
     var neighborCache = new HashMap<T, Collection<T>>();
 
-    var gScore = new HashMap<>(Collections.singletonMap(start, 0));
-    var fScore = new HashMap<>(Collections.singletonMap(start, gScore.get(start) + heuristic.applyAsInt(start)));
+    var gScore = new HashMap<>(Map.of(start, 0));
+    var fScore = new HashMap<>(Map.of(start, gScore.get(start) + heuristic.applyAsInt(start)));
 
     var openSet = new PriorityQueue<T>(Comparator.comparing(fScore::get));
     openSet.add(start);
@@ -62,11 +64,11 @@ public final class GraphUtil {
         var pathPointer = end;
         while (!pathPointer.equals(start)) {
           var pathNext = cameFrom.get(pathPointer);
-          path.put(pathPointer, pathNext);
+          path.put(pathNext, pathPointer);
           pathPointer = pathNext;
         }
 
-        return Optional.of(new GraphPath<>(path, gScore.get(end)));
+        return Optional.of(new GraphPath<>(path, start, end, gScore.get(end)));
       }
 
       visitCounter++;
@@ -88,10 +90,70 @@ public final class GraphUtil {
 
   public static OptionalInt aStarLengthOnly(int start,
                                             int end,
-                                            IntFunction<int[]> neighborsFunc,
-                                            IntUnaryOperator heuristic,
-                                            IntBinaryOperator cost,
+                                            @NotNull IntFunction<int[]> neighborsFunc,
+                                            @NotNull IntUnaryOperator heuristic,
+                                            @NotNull IntBinaryOperator cost,
                                             int size) {
+    return aStarIntInternal(
+        start,
+        end,
+        neighborsFunc,
+        heuristic,
+        cost,
+        size,
+        BiIntConsumer.IDENTITY,
+        gScore -> OptionalInt.of(gScore[end]),
+        OptionalInt.empty()
+    );
+  }
+
+  public static <T> Optional<GraphPath<T>> aStar(int start,
+                                                 int end,
+                                                 @NotNull IntFunction<int[]> neighborsFunc,
+                                                 @NotNull IntUnaryOperator heuristic,
+                                                 @NotNull IntBinaryOperator cost,
+                                                 @NotNull IntFunction<T> idToNode,
+                                                 int size) {
+    var cameFrom = new int[size];
+
+    return aStarIntInternal(
+        start,
+        end,
+        neighborsFunc,
+        heuristic,
+        cost,
+        size,
+        (current, neighbor) -> cameFrom[neighbor] = current,
+        gScore -> {
+          var path = new HashMap<T, T>();
+
+          var pathPointer = end;
+          while (pathPointer != start) {
+            var pathNext = cameFrom[pathPointer];
+            path.put(idToNode.apply(pathNext), idToNode.apply(pathPointer));
+            pathPointer = pathNext;
+          }
+
+          return Optional.of(new GraphPath<>(
+              path,
+              idToNode.apply(start),
+              idToNode.apply(end),
+              gScore[end]
+          ));
+        },
+        Optional.empty()
+    );
+  }
+
+  private static <R> R aStarIntInternal(int start,
+                                       int end,
+                                       @NotNull IntFunction<int[]> neighborsFunc,
+                                       @NotNull IntUnaryOperator heuristic,
+                                       @NotNull IntBinaryOperator cost,
+                                       int size,
+                                       @NotNull BiIntConsumer onNewEdge,
+                                       @NotNull Function<int[], R> onPathFound,
+                                       @NotNull R noPathValue) {
     var gScore = new int[size];
     Arrays.fill(gScore, Integer.MAX_VALUE);
     gScore[start] = 0;
@@ -125,7 +187,7 @@ public final class GraphUtil {
       hasMin = false;
 
       if (minNode == end) {
-        return OptionalInt.of(gScore[end]);
+        return onPathFound.apply(gScore);
       }
 
       visitCounter++;
@@ -141,6 +203,8 @@ public final class GraphUtil {
           openSetFScore[neighbor] = tentativeGScore + heuristic.applyAsInt(neighbor);
           openSetCounter++;
 
+          onNewEdge.accept(current, neighbor);
+
           if (openSetFScore[neighbor] < minFScore || openSetCounter == 1) {
             minFScore = openSetFScore[neighbor];
             minNode = neighbor;
@@ -150,7 +214,7 @@ public final class GraphUtil {
       }
     }
 
-    return OptionalInt.empty();
+    return noPathValue;
   }
 
   public static <T> Function<T, Optional<GraphPath<T>>> adaptAStar(T end,

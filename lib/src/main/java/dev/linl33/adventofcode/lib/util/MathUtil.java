@@ -1,6 +1,7 @@
 package dev.linl33.adventofcode.lib.util;
 
 import dev.linl33.adventofcode.lib.point.Point2D;
+import org.jetbrains.annotations.Range;
 
 public final class MathUtil {
   public static int gcd(int a, int b) {
@@ -114,7 +115,9 @@ public final class MathUtil {
     return new Point2D(intercept, slope);
   }
 
-  public static int choose(int n, int r) {
+  @Range(from = 0, to = Integer.MAX_VALUE)
+  public static int choose(@Range(from = 0, to = Integer.MAX_VALUE) int n,
+                           @Range(from = 0, to = Integer.MAX_VALUE) int r) {
     if (n < r) {
       return 0;
     }
