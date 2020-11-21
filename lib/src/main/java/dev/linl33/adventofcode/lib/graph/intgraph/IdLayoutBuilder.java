@@ -94,11 +94,11 @@ public class IdLayoutBuilder<T> {
   private void populateDefaultIntAssignment(@NotNull Collection<T> nodes) {
     fields.forEach((k, accessor) -> intAssignments.computeIfAbsent(
         k,
-        fieldName -> {
+        __ -> {
           var fieldIMap = new HashMap<Object, Integer>();
 
           for (T nodeData : nodes) {
-            fieldIMap.computeIfAbsent(accessor.apply(nodeData), __ -> fieldIMap.size());
+            fieldIMap.putIfAbsent(accessor.apply(nodeData), fieldIMap.size());
           }
 
           return fieldIMap;
