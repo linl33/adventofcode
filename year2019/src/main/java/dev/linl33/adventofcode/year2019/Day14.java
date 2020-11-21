@@ -1,228 +1,128 @@
 package dev.linl33.adventofcode.year2019;
 
-import dev.linl33.adventofcode.lib.solution.SolutionPart;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
-import java.util.*;
-import java.util.function.Function;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class Day14 extends AdventSolution2019<Integer, Integer> {
-  public static void main(String[] args) {
-//    new Day14().runAndPrintAll();
+  private static final long ORE_TOTAL = 1000000000000L;
 
-    new Day14().print(SolutionPart.PART_1, "day14test5");
+  public static void main(String[] args) {
+    new Day14().runAndPrintAll();
   }
 
   @Override
   public Integer part1(BufferedReader reader) throws Exception {
-    var recipes = reader
-        .lines()
-        .map(Recipe::parse)
-        .collect(Collectors.toUnmodifiableMap(
-            Recipe::product,
-            Recipe::ingredients
-        ));
-
-    var quantityMap = recipes
-        .keySet()
-        .stream()
-        .collect(Collectors.toUnmodifiableMap(
-            Item::name,
-            Item::quantity
-        ));
-
-    var ingrMap = recipes
-        .entrySet()
-        .stream()
-        .collect(Collectors.toUnmodifiableMap(
-            kv -> kv.getKey().name(),
-            Map.Entry::getValue
-        ));
-
-    var ingrDeque = new ArrayDeque<String>();
-    ingrDeque.add("FUEL");
-
-    var itemTally = new HashMap<String, Integer>();
-    itemTally.put("FUEL", 1);
-
-    var excessItem = new HashMap<String, Integer>();
-
-    while (!ingrDeque.isEmpty()) {
-      var currIngr = ingrDeque.pop();
-      var unitQuantity = quantityMap.get(currIngr);
-      var requestedQuantity = itemTally.get(currIngr);
-
-      if (requestedQuantity == null) {
-        continue;
-      }
-
-      var units = requestedQuantity / unitQuantity;
-      var missing = requestedQuantity % unitQuantity;
-
-      if (units == 0) {
-        units = 1;
-        missing = 0;
-      }
-
-      if (missing > 0) {
-        units++;
-      }
-
-      var excess = units * unitQuantity - requestedQuantity;
-      excessItem.compute(currIngr, (item, currExcess) -> currExcess == null ? excess : currExcess + excess);
-
-      itemTally.remove(currIngr);
-
-      var ingredients = ingrMap.get(currIngr);
-      for (var ingr : ingredients) {
-        var stock = excessItem.getOrDefault(ingr.name(), 0);
-        var totalIngrQuantity = ingr.quantity() * units;
-        int actualQuantity = Math.max(0, totalIngrQuantity - stock);
-
-        excessItem.put(ingr.name(), Math.max(0, stock - totalIngrQuantity));
-        if (actualQuantity == 0) {
-          continue;
-        }
-
-        itemTally.compute(ingr.name(), (item, currQuantity) -> currQuantity == null ? actualQuantity : currQuantity + actualQuantity);
-
-        if (!ingr.name().equals("ORE")) {
-          ingrDeque.push(ingr.name());
-        }
-      }
-    }
-
-    return itemTally.get("ORE");
+    var recipeBook = RecipeBook.parse(reader);
+    return (int) produceFuel(
+        new long[recipeBook.recipeQuantity.length + 1],
+        recipeBook.recipeQuantity,
+        recipeBook.recipeIngredients,
+        1
+    );
   }
 
   @Override
   public Integer part2(BufferedReader reader) {
-    var recipes = reader
-        .lines()
-        .map(Recipe::parse)
-        .collect(Collectors.toUnmodifiableMap(
-            Recipe::product,
-            Recipe::ingredients
-        ));
+    var recipeBook = RecipeBook.parse(reader);
+    var recipeQuantity = recipeBook.recipeQuantity;
+    var recipeIngredients = recipeBook.recipeIngredients;
+    var itemCount = recipeQuantity.length + 1;
 
-    var recipeMap = recipes
-        .keySet()
-        .stream()
-        .collect(Collectors.toUnmodifiableMap(
-            Item::name,
-            Function.identity()
-        ));
+    var unitCost = produceFuel(new long[itemCount], recipeQuantity, recipeIngredients, 1);
 
-    var cache = new HashSet<Integer>();
-    var cache2 = new HashSet<String>();
-    var cache3 = new HashMap<String, Integer>();
+    var excess = new long[itemCount];
+    var fuelCount = (int) (ORE_TOTAL / unitCost);
+    var oresLeft = ORE_TOTAL - produceFuel(excess, recipeQuantity, recipeIngredients, fuelCount);
 
-    var excessItem = new HashMap<String, Integer>();
-    recipes.keySet().forEach(i -> excessItem.put(i.name(), 0));
+    var guess = fuelCount >> 2;
 
-    var oresLeft = 1000000000000L;
-    var fuelCount = 0;
+    while (oresLeft > 0 && guess > 1) {
+      long guessCost;
+      long[] excessCopy;
+      do {
+        excessCopy = Arrays.copyOf(excess, itemCount);
+        guessCost = produceFuel(excessCopy, recipeQuantity, recipeIngredients, guess);
+      } while (guessCost > oresLeft && (guess >>= 1) > 1);
+
+      guessCost = produceFuel(excessCopy, recipeQuantity, recipeIngredients, guess);
+
+      excess = excessCopy;
+      oresLeft -= guessCost;
+      fuelCount += guess;
+    }
 
     while (oresLeft > 0) {
-      var leftOver = excessItem.toString();
+      oresLeft -= produceFuel(excess, recipeQuantity, recipeIngredients, 1);
+      fuelCount++;
+    }
 
-      var cachedValue = cache3.get(leftOver);
-      if (cachedValue != null) {
-        oresLeft -= cachedValue;
-        fuelCount++;
-        continue;
-      }
+    return fuelCount - (oresLeft == 0 ? 0 : 1);
+  }
 
-      var ingrDeque = new ArrayDeque<Item>();
-      ingrDeque.add(new Item("FUEL", 1));
+  private static long produceFuel(long[] excess, int[] recipeQuantity, int[][] recipeIngr, int fuelQuantity) {
+    var requestTally = new long[excess.length];
+    requestTally[0] = fuelQuantity;
 
-      var itemTally = new HashMap<String, Integer>();
-      itemTally.put("FUEL", 1);
+    boolean finished;
+    do {
+      finished = true;
 
-      var itemProduced = new HashMap<String, Integer>();
-
-      while (!ingrDeque.isEmpty()) {
-        var nextProduct = ingrDeque.pop();
-        var requestedQuantity = itemTally.get(nextProduct.name());
-
-        if (requestedQuantity == null) {
+      for (int currItem = 0; currItem < requestTally.length - 1; currItem++) {
+        if (requestTally[currItem] == 0) {
           continue;
         }
 
-        var crafts = requestedQuantity / nextProduct.quantity();
-        var missing = requestedQuantity % nextProduct.quantity();
+        finished = false;
 
-        if (crafts == 0) {
-          crafts = 1;
+        var unitQuantity = recipeQuantity[currItem];
+        var requestedQuantity = requestTally[currItem];
+
+        if (requestedQuantity == 0) {
+          continue;
+        }
+
+        var units = requestedQuantity / unitQuantity;
+        var missing = requestedQuantity % unitQuantity;
+
+        if (units == 0) {
+          units = 1;
           missing = 0;
         }
 
         if (missing > 0) {
-          crafts++;
+          units++;
         }
 
-        var excess = crafts * nextProduct.quantity() - requestedQuantity;
-        excessItem.compute(nextProduct.name(), (item, currExcess) -> currExcess == null ? excess : currExcess + excess);
+        excess[currItem] += units * unitQuantity - requestedQuantity;
+        requestTally[currItem] = 0;
 
-        itemTally.remove(nextProduct.name());
+        var ingredients = recipeIngr[currItem];
+        for (int ingrId = 0; ingrId < ingredients.length; ingrId++) {
+          int ingrQuantity = ingredients[ingrId];
+          if (ingrQuantity < 1) {
+            continue;
+          }
 
-        int finalCrafts = crafts;
-        itemProduced.compute(nextProduct.name(), (s, integer) -> (integer == null ? 0 : integer) + (finalCrafts * nextProduct.quantity()));
+          var stock = excess[ingrId];
+          var totalIngrQuantity = ingrQuantity * units;
+          var actualQuantity = Math.max(0, totalIngrQuantity - stock);
 
-        var ingredients = recipes.get(nextProduct);
-        for (var ingr : ingredients) {
-          var stock = excessItem.getOrDefault(ingr.name(), 0);
-          var totalIngrQuantity = ingr.quantity() * crafts;
-          int actualQuantity = Math.max(0, totalIngrQuantity - stock);
-
-          excessItem.put(ingr.name(), Math.max(0, stock - totalIngrQuantity));
+          excess[ingrId] = Math.max(0, stock - totalIngrQuantity);
           if (actualQuantity == 0) {
             continue;
           }
 
-          itemTally.compute(ingr.name(), (item, currQuantity) -> currQuantity == null ? actualQuantity : currQuantity + actualQuantity);
-
-          if (!ingr.name().equals("ORE")) {
-            ingrDeque.push(recipeMap.get(ingr.name()));
-          }
+          requestTally[ingrId] += actualQuantity;
         }
       }
+    } while (!finished);
 
-      var cost = itemTally.get("ORE");
-      oresLeft -= cost;
-      fuelCount++;
-
-      cache3.put(leftOver, cost);
-
-//      System.out.println(excessItem);
-//      System.out.println(itemProduced);
-
-//      if (!cache.add(cost)) {
-//        cache2.add(cost + " -> " + leftOver);
-//      }
-    }
-
-//    System.out.println("!!");
-//
-//    var byLeftOver = cache2
-//        .stream()
-//        .collect(Collectors.groupingBy(s -> s.split(" -> ")[1], Collectors.toSet()));
-//    byLeftOver
-//        .values()
-//        .stream()
-//        .filter(s -> s.size() > 1)
-//        .findAny()
-//        .ifPresent(__ -> System.out.println("FOUND"));
-//
-//    cache2
-//        .stream()
-//        .filter(s -> s.startsWith("2203242") || s.startsWith("2203948"))
-//        .sorted()
-//        .forEach(System.out::println);
-
-    return fuelCount - (oresLeft == 0 ? 0 : 1);
+    return requestTally[requestTally.length - 1];
   }
 
   private static record Item(@NotNull String name, int quantity) {
@@ -231,33 +131,53 @@ public class Day14 extends AdventSolution2019<Integer, Integer> {
       var parts = itemStr.split(" ");
       return new Item(parts[1], Integer.parseInt(parts[0]));
     }
+  }
 
-    @Override
-    public boolean equals(Object o) {
-      if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
-
-      Item item = (Item) o;
-
-      return name.equals(item.name);
-    }
-
-    @Override
-    public int hashCode() {
-      return name.hashCode();
+  private static record Recipe(@NotNull List<Item> ingredients, @NotNull Item product) {
+    @NotNull
+    public static Recipe parse(@NotNull String recipeStr) {
+      var parts = recipeStr.split(" => ");
+      return Arrays
+          .stream(parts[0].split(", "))
+          .map(Item::parse)
+          .collect(Collectors.collectingAndThen(
+              Collectors.toUnmodifiableList(),
+              list -> new Recipe(list, Item.parse(parts[1]))
+          ));
     }
   }
 
-  private static record Recipe(List<Item> ingredients, Item product) {
-    @NotNull
-    public static Recipe parse(String recipeStr) {
-      var parts = recipeStr.split(" => ");
-      var ingredientsList = Arrays
-          .stream(parts[0].split(", "))
-          .map(Item::parse)
-          .collect(Collectors.toUnmodifiableList());
+  private static record RecipeBook(int[] recipeQuantity, int[][] recipeIngredients) {
+    private static final String FUEL = "FUEL";
+    private static final String ORE = "ORE";
 
-      return new Recipe(ingredientsList, Item.parse(parts[1]));
+    @NotNull
+    public static RecipeBook parse(@NotNull BufferedReader reader) {
+      var recipes = reader
+          .lines()
+          .map(Recipe::parse)
+          .collect(Collectors.toUnmodifiableList());
+      var recipeCount = recipes.size();
+      var itemCount = recipeCount + 1;
+
+      var recipeQuantity = new int[recipeCount];
+      var recipeIngr = new int[recipeCount][itemCount];
+
+      var recipeId = new HashMap<String, Integer>(itemCount);
+      recipeId.put(FUEL, 0);
+      recipeId.put(ORE, recipeCount);
+
+      for (Recipe recipe : recipes) {
+        var id = recipeId.computeIfAbsent(recipe.product().name(), __ -> recipeId.size() - 1);
+        recipeQuantity[id] = recipe.product().quantity();
+
+        for (var ingr : recipe.ingredients()) {
+          var ingrId = recipeId.computeIfAbsent(ingr.name(), __ -> recipeId.size() - 1);
+          recipeIngr[id][ingrId] = ingr.quantity();
+        }
+      }
+
+      return new RecipeBook(recipeQuantity, recipeIngr);
     }
   }
 }

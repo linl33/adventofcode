@@ -2,21 +2,13 @@ package dev.linl33.adventofcode.year2019;
 
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
-import dev.linl33.adventofcode.testlib.TestPart;
 
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class Day14Test implements AdventSolutionTest<Integer, Integer> {
   @Override
   public AdventSolution<Integer, Integer> newSolutionInstance() {
     return new Day14();
-  }
-
-  @Override
-  public TestPart[] getTestParts() {
-    return new TestPart[] {TestPart.PART_1};
   }
 
   @Override
