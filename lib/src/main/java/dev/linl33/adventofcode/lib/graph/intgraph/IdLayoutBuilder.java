@@ -39,16 +39,9 @@ public class IdLayoutBuilder<T> {
   }
 
   @NotNull
-  public <R extends Record> IdLayoutBuilder<T> addFieldsFromRecord(@NotNull Class<R> tClass) {
-    // check that T == R
-    if (!(tClass.getGenericSuperclass() instanceof ParameterizedType typeR) ||
-        !(getClass().getGenericSuperclass() instanceof ParameterizedType typeT) ||
-        !typeR.getActualTypeArguments()[0].equals(typeT.getActualTypeArguments()[0])) {
-      throw new IllegalArgumentException("T must be equal to R");
-    }
-
+  public <R extends Record> IdLayoutBuilder<T> addFieldsFromRecord(@NotNull Class<R> rClass) {
     Arrays
-        .stream(tClass.getRecordComponents())
+        .stream(rClass.getRecordComponents())
         .forEach(comp -> fields.put(
             comp.toString(),
             (T t) -> {

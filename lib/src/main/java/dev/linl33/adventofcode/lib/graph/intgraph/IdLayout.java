@@ -24,7 +24,14 @@ public record IdLayout<T>(int length,
   }
 
   public IdLayout(@NotNull List<LayoutElement<T>> elements) {
-    this(elements.stream().mapToInt(LayoutElement::bits).sum(), calculateAllocationSize(elements), elements);
+    this(
+        elements
+            .stream()
+            .mapToInt(LayoutElement::bits)
+            .sum(),
+        calculateAllocationSize(elements),
+        elements
+    );
   }
 
   public IdLayout {
