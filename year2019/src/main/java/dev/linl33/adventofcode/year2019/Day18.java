@@ -1,6 +1,10 @@
 package dev.linl33.adventofcode.year2019;
 
 import dev.linl33.adventofcode.lib.graph.GraphPath;
+import dev.linl33.adventofcode.lib.graph.intgraph.DataIntGraphNode;
+import dev.linl33.adventofcode.lib.graph.intgraph.IdLayoutBuilder;
+import dev.linl33.adventofcode.lib.graph.intgraph.IntGraph;
+import dev.linl33.adventofcode.lib.graph.intgraph.IntGraphBuilder;
 import dev.linl33.adventofcode.lib.point.Point2D;
 import dev.linl33.adventofcode.lib.solution.SolutionPart;
 import dev.linl33.adventofcode.lib.util.AdventUtil;
@@ -24,7 +28,7 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
   public static void main(String[] args) {
 //    new Day18().runAndPrintAll();
 
-    new Day18().print(SolutionPart.PART_2);
+    new Day18().print(SolutionPart.PART_1);
   }
 
 //  @Override
@@ -148,6 +152,8 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
   private static int solveVault(VaultState init) {
     var keyCount = init.keyCount();
     var maskLength = (int) Math.pow(2, keyCount);
+
+
 
     var store = new int[keyCount][maskLength];
 
@@ -486,6 +492,20 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
     return parts;
   }
 
+  public static record VaultNode(char id, NodeType type) {
+    public enum NodeType {
+      KEY, DOOR, ENTRANCE
+    }
+
+    public static VaultNode parse(int i) {
+      if (i > 51) {
+        return new VaultNode((char) (i - 2 * MAX_COUNT + 'a'), NodeType.ENTRANCE);
+      } else {
+        return new VaultNode(AdventUtil.intToAlphabet(i % 26), i > 25 ? NodeType.DOOR : NodeType.KEY);
+      }
+    }
+  }
+
   private static record VaultState(char[][] vault,
                                    Point2D[] entrance,
                                    int keys,
@@ -508,7 +528,11 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
     public static VaultState newVault(char[][] vault, boolean includeEntrances) {
       var vaultCopy = copyVault(vault); // TODO: remove the copy
 
+      var builder = new IntGraphBuilder<VaultNode>()
+          .withIdLayoutBuilder(new IdLayoutBuilder<VaultNode>().addFieldsFromRecord(VaultNode.class));
+
       var entrances = new ArrayList<Point2D>();
+      var entranceCounter = 'a';
 
       var keys = 0;
       var doors = 0;
@@ -532,6 +556,9 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
 
           if (c == '@') {
             entrances.add(pos);
+            if (includeEntrances) {
+              builder.addNode(new VaultNode(entranceCounter++, VaultNode.NodeType.ENTRANCE));
+            }
             vault[y][x] = DOT_CHAR;
             continue;
           }
@@ -546,6 +573,7 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
           } else {
             keys |= 1 << idx;
             keyCount++;
+            builder.addNode(new VaultNode(c, VaultNode.NodeType.KEY));
           }
         }
       }
@@ -563,6 +591,12 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
 
       for (var d : removedDoors) {
         doors &= ~(1 << d);
+      }
+
+      for (int i = 0; i < MAX_COUNT; i++) {
+        if (((1 << i) & doors) > 0) {
+          builder.addNode(new VaultNode(AdventUtil.intToAlphabet(i), VaultNode.NodeType.DOOR));
+        }
       }
 
       vault = vaultCopy;
@@ -613,7 +647,9 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
                 if (path.isPresent()) {
                   var pathLength = path.get().length();
 
-                  adjacencyMatrix[currInt][n2Int] = pathLength;
+                  builder.addEdge(VaultNode.parse(currInt), VaultNode.parse(n2Int), pathLength);
+
+//                  adjacencyMatrix[currInt][n2Int] = pathLength;
                   edges[edgeCount++] = n2Int;
 
                   var currStr = currInt > 51 ? ("@" + (currInt - 51)) : String.valueOf(AdventUtil.intToAlphabet(currInt));
@@ -621,7 +657,7 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
 
                   LOGGER.debug("{} -> {} {}", currStr, n2Str, pathLength);
                 } else {
-                  adjacencyMatrix[currInt][n2Int] = Integer.MIN_VALUE;
+//                  adjacencyMatrix[currInt][n2Int] = Integer.MIN_VALUE;
                 }
               }
 
@@ -629,6 +665,10 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
             }
         );
       }
+
+      var graph = builder.build();
+      adjacencyMatrix = graph.getAdjacencyMatrix();
+      adjacencyList = graph.getAdjacencyList();
 
       int[] keyPartition;
 
@@ -857,7 +897,7 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
             v -> GraphUtil.aStar(kEntrance, kPos, pt -> listNeighbors(pt, v))
         );
 
-        if (pathToKey != null) {
+        if (pathToKey.isPresent()) {
           continue;
         }
 
