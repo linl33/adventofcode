@@ -14,16 +14,18 @@ public class Day1 extends AdventSolution2020<Integer, Integer> {
 
   @Override
   public Integer part1(BufferedReader reader) {
+    // assume that inputs are non-negative and less than 2020
+    var intBoolArr = new boolean[SUM_TARGET];
+
     var intArr = reader
         .lines()
         .mapToInt(Integer::parseInt)
+        .peek(i -> intBoolArr[i] = true)
         .toArray();
 
-    for (int first = 0; first < intArr.length; first++) {
-      for (int second = first + 1; second < intArr.length; second++) {
-        if (intArr[first] + intArr[second] == SUM_TARGET) {
-          return intArr[first] * intArr[second];
-        }
+    for (int partial : intArr) {
+      if (intBoolArr[SUM_TARGET - partial]) {
+        return partial * (SUM_TARGET - partial);
       }
     }
 
@@ -32,17 +34,20 @@ public class Day1 extends AdventSolution2020<Integer, Integer> {
 
   @Override
   public Integer part2(BufferedReader reader) {
+    // assume that inputs are non-negative and less than 2020
+    var intBoolArr = new boolean[SUM_TARGET];
+
     var intArr = reader
         .lines()
         .mapToInt(Integer::parseInt)
+        .peek(i -> intBoolArr[i] = true)
         .toArray();
 
     for (int first = 0; first < intArr.length; first++) {
       for (int second = first + 1; second < intArr.length; second++) {
-        for (int third = second + 1; third < intArr.length; third++) {
-          if (intArr[first] + intArr[second] + intArr[third] == SUM_TARGET) {
-            return intArr[first] * intArr[second] * intArr[third];
-          }
+        var partial = intArr[first] + intArr[second];
+        if (partial < SUM_TARGET && intBoolArr[SUM_TARGET - partial]) {
+          return intArr[first] * intArr[second] * (SUM_TARGET - partial);
         }
       }
     }
