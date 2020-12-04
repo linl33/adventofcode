@@ -40,15 +40,17 @@ public class Day4 extends AdventSolution2020<Integer, Integer> {
             return null;
           }
 
-          var newEntry = new HashMap<String, String>();
+          @SuppressWarnings("unchecked")
+          var newEntry = (Map.Entry<String, String>[]) new Map.Entry[8];
+          var index = 0;
 
           String token;
           while (inputIt.hasNext() && !(token = inputIt.next()).isEmpty()) {
             var pair = token.split(":");
-            newEntry.put(pair[0], pair[1]);
+            newEntry[index++] = Map.entry(pair[0], pair[1]);
           }
 
-          return newEntry;
+          return Map.ofEntries(Arrays.copyOf(newEntry, index));
         })
         .takeWhile(Objects::nonNull)
         .map(Passport::parse);
