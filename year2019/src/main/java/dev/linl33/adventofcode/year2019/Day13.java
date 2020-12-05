@@ -2,12 +2,11 @@ package dev.linl33.adventofcode.year2019;
 
 import dev.linl33.adventofcode.lib.point.Point2D;
 import dev.linl33.adventofcode.lib.point.Point3D;
+import dev.linl33.adventofcode.lib.util.PredicateUtil;
 import dev.linl33.adventofcode.year2019.intcodevm.IntcodeVM;
 
 import java.io.BufferedReader;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.concurrent.BlockingDeque;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -57,17 +56,12 @@ public class Day13 extends AdventSolution2019<Long, Long> {
     return map.values().stream().filter(value -> value == valueToCount).count();
   }
 
-  private static long findInQueue(BlockingDeque<Long> queue,
+  private static long findInQueue(Deque<Long> queue,
                                   Predicate<Long> valPredicate,
                                   BiPredicate<Long, Long> coordPredicate,
-                                  ToLongFunction<Point3D> toLongFunction) {
-    if (valPredicate == null) {
-      valPredicate = v -> true;
-    }
-
-    if (coordPredicate == null) {
-      coordPredicate = (x, y) -> true;
-    }
+                                  ToLongFunction<Point3D> extractValue) {
+    valPredicate = Objects.requireNonNullElseGet(valPredicate, PredicateUtil::truePredicate);
+    coordPredicate = Objects.requireNonNullElseGet(coordPredicate, PredicateUtil::trueBiPredicate);
 
     var it = queue.descendingIterator();
 
@@ -77,7 +71,7 @@ public class Day13 extends AdventSolution2019<Long, Long> {
       var xCoord = it.next();
 
       if (valPredicate.test(val) && coordPredicate.test(xCoord, yCoord)) {
-        return toLongFunction.applyAsLong(new Point3D(xCoord.intValue(), yCoord.intValue(), val.intValue()));
+        return extractValue.applyAsLong(new Point3D(xCoord.intValue(), yCoord.intValue(), val.intValue()));
       }
     }
 
