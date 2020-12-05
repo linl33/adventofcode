@@ -11,6 +11,8 @@ public class SolutionUtil {
                                String inputResource) {
     try (var reader = solution.resourceSupplier(inputResource)) {
       return solutionMethod.apply(solution, reader);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -24,6 +26,8 @@ public class SolutionUtil {
       printMapping
           .andThenConsume(PrintUtil::enhancedPrint)
           .accept(solution, adaptPartToRun(solution, solutionMethod, inputResource));
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
