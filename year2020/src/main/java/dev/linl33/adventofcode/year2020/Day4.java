@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.year2020;
 
+import dev.linl33.adventofcode.lib.util.AdventUtil;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
@@ -7,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Day4 extends AdventSolution2020<Integer, Integer> {
@@ -29,30 +31,16 @@ public class Day4 extends AdventSolution2020<Integer, Integer> {
   }
 
   private static Stream<Passport> readCredentialEntries(BufferedReader reader) {
-    var inputIt = reader
-        .lines()
-        .flatMap(line -> Arrays.stream(line.split(" ")))
-        .iterator();
-
-    return Stream
-        .generate(() -> {
-          if (!inputIt.hasNext()) {
-            return null;
-          }
-
-          @SuppressWarnings("unchecked")
-          var newEntry = (Map.Entry<String, String>[]) new Map.Entry[8];
-          var index = 0;
-
-          String token;
-          while (inputIt.hasNext() && !(token = inputIt.next()).isEmpty()) {
-            var pair = token.split(":");
-            newEntry[index++] = Map.entry(pair[0], pair[1]);
-          }
-
-          return Map.ofEntries(Arrays.copyOf(newEntry, index));
-        })
-        .takeWhile(Objects::nonNull)
+    return AdventUtil
+        .readInputAsGroups(reader)
+        .map(stream -> stream.flatMap(str -> Arrays.stream(str.split(" "))))
+        .map(stream -> stream
+            .map(str -> str.split(":"))
+            .collect(Collectors.toUnmodifiableMap(
+                arr -> arr[0],
+                arr -> arr[1]
+            ))
+        )
         .map(Passport::parse);
   }
 
