@@ -196,13 +196,13 @@ public final class AdventUtil {
     return result;
   }
 
-  public static Stream<Stream<String>> readInputAsGroups(@NotNull BufferedReader reader) {
-    return readInputAsGroups(reader, String::isEmpty);
+  public static Stream<Stream<String>> readInputGrouped(@NotNull BufferedReader reader) {
+    return readInputGrouped(reader, String::isEmpty);
   }
 
-  public static Stream<Stream<String>> readInputAsGroups(@NotNull BufferedReader reader,
-                                                         @NotNull Predicate<String> endOfGroup) {
-    return AdventUtil.<Stream.Builder<String>, Stream<String>>readInputAsGroups(
+  public static Stream<Stream<String>> readInputGrouped(@NotNull BufferedReader reader,
+                                                        @NotNull Predicate<String> endOfGroup) {
+    return AdventUtil.<Stream.Builder<String>, Stream<String>>readInputGrouped(
         reader,
         endOfGroup,
         Stream::builder,
@@ -211,11 +211,11 @@ public final class AdventUtil {
     );
   }
 
-  public static <A, T> Stream<T> readInputAsGroups(@NotNull BufferedReader reader,
-                                                   @NotNull Predicate<String> endOfGroup,
-                                                   @NotNull Supplier<A> supplier,
-                                                   @NotNull BiConsumer<A, String> accumulator,
-                                                   @NotNull Function<A, T> finisher) {
+  public static <A, T> Stream<T> readInputGrouped(@NotNull BufferedReader reader,
+                                                  @NotNull Predicate<String> endOfGroup,
+                                                  @NotNull Supplier<A> supplier,
+                                                  @NotNull BiConsumer<A, String> accumulator,
+                                                  @NotNull Function<A, T> finisher) {
     var inputIt = reader
         .lines()
         .iterator();

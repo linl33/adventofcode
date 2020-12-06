@@ -14,7 +14,7 @@ public class Day6 extends AdventSolution2020<Integer, Integer> {
   @Override
   public Integer part1(BufferedReader reader) {
     return (int) AdventUtil
-        .readInputAsGroups(reader)
+        .readInputGrouped(reader)
         .map(stream -> stream.flatMapToInt(String::chars).distinct())
         .mapToLong(IntStream::count)
         .sum();
@@ -31,7 +31,7 @@ public class Day6 extends AdventSolution2020<Integer, Integer> {
 
   private static int solveInternal(BufferedReader reader, IntBinaryOperator reducer, int identity) {
     return AdventUtil
-        .readInputAsGroups(reader)
+        .readInputGrouped(reader)
         .mapToInt(stream -> stream
             .mapToInt(str -> str
                 .chars()

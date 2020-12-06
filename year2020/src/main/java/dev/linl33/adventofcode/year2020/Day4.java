@@ -32,7 +32,7 @@ public class Day4 extends AdventSolution2020<Integer, Integer> {
 
   private static Stream<Passport> readCredentialEntries(BufferedReader reader) {
     return AdventUtil
-        .readInputAsGroups(reader)
+        .readInputGrouped(reader)
         .map(stream -> stream.flatMap(str -> Arrays.stream(str.split(" "))))
         .map(stream -> stream
             .map(str -> str.split(":"))
