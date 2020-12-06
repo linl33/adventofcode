@@ -1,6 +1,6 @@
 package dev.linl33.adventofcode.year2020;
 
-import dev.linl33.adventofcode.lib.function.UncheckedBiFunction;
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -44,7 +44,7 @@ class Day1Test implements AdventSolutionTest<Integer, Integer> {
     assertEquals(expected, instance.run(adaptSolveByIntStream(numbers), resource));
   }
 
-  private static UncheckedBiFunction<Day1, BufferedReader, Integer> adaptSolveByIntStream(int numbers) {
+  private static ThrowingBiFunction<Day1, BufferedReader, Integer> adaptSolveByIntStream(int numbers) {
     return (Day1 sInstance, BufferedReader reader) -> sInstance.solveByIntStream(reader, numbers);
   }
 }

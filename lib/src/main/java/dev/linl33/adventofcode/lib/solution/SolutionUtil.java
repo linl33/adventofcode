@@ -1,13 +1,13 @@
 package dev.linl33.adventofcode.lib.solution;
 
-import dev.linl33.adventofcode.lib.function.UncheckedBiFunction;
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.util.PrintUtil;
 
 import java.io.BufferedReader;
 
 public class SolutionUtil {
   static Object adaptPartToRun(AdventSolution<?, ?> solution,
-                               UncheckedBiFunction<AdventSolution<?, ?>, BufferedReader, ?> solutionMethod,
+                               ThrowingBiFunction<AdventSolution<?, ?>, BufferedReader, ?> solutionMethod,
                                String inputResource) {
     try (var reader = solution.resourceSupplier(inputResource)) {
       return solutionMethod.apply(solution, reader);
@@ -19,8 +19,8 @@ public class SolutionUtil {
   }
 
   static void adaptPartToPrint(AdventSolution<?, ?> solution,
-                               UncheckedBiFunction<AdventSolution<?, ?>, BufferedReader, ?> solutionMethod,
-                               UncheckedBiFunction<AdventSolution<?, ?>, Object, ?> printMapping,
+                               ThrowingBiFunction<AdventSolution<?, ?>, BufferedReader, ?> solutionMethod,
+                               ThrowingBiFunction<AdventSolution<?, ?>, Object, ?> printMapping,
                                String inputResource) {
     try {
       printMapping
@@ -35,24 +35,24 @@ public class SolutionUtil {
 
   @SuppressWarnings("unchecked")
   public static <T1, T2, T extends AdventSolution<T1, T2>, TOut> TOut adaptPartToRunGeneric(T solution,
-                                                                                            UncheckedBiFunction<T, BufferedReader, TOut> solutionMethod,
+                                                                                            ThrowingBiFunction<T, BufferedReader, TOut> solutionMethod,
                                                                                             String inputResource) {
     return (TOut) adaptPartToRun(
         solution,
-        (UncheckedBiFunction<AdventSolution<?, ?>, BufferedReader, ?>) solutionMethod,
+        (ThrowingBiFunction<AdventSolution<?, ?>, BufferedReader, ?>) solutionMethod,
         inputResource
     );
   }
 
   @SuppressWarnings("unchecked")
   public static <T1, T2, T extends AdventSolution<T1, T2>, TOut> void adaptPartToPrintGeneric(T solution,
-                                                                                              UncheckedBiFunction<T, BufferedReader, TOut> solutionMethod,
-                                                                                              UncheckedBiFunction<T, TOut, ?> printMapping,
+                                                                                              ThrowingBiFunction<T, BufferedReader, TOut> solutionMethod,
+                                                                                              ThrowingBiFunction<T, TOut, ?> printMapping,
                                                                                               String inputResource) {
     adaptPartToPrint(
         solution,
-        (UncheckedBiFunction<AdventSolution<?, ?>, BufferedReader, ?>) solutionMethod,
-        (UncheckedBiFunction<AdventSolution<?, ?>, Object, ?>) printMapping,
+        (ThrowingBiFunction<AdventSolution<?, ?>, BufferedReader, ?>) solutionMethod,
+        (ThrowingBiFunction<AdventSolution<?, ?>, Object, ?>) printMapping,
         inputResource
     );
   }

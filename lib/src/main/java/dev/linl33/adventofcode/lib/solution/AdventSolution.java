@@ -1,6 +1,6 @@
 package dev.linl33.adventofcode.lib.solution;
 
-import dev.linl33.adventofcode.lib.function.UncheckedBiFunction;
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.util.LoggingUtil;
 import dev.linl33.adventofcode.lib.util.ResourceUtil;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +34,7 @@ public interface AdventSolution<T1, T2> {
         .forEachOrdered(this::print);
   }
 
-  default <U, V extends AdventSolution<T1, T2>> U run(UncheckedBiFunction<V, BufferedReader, U> customPart,
+  default <U, V extends AdventSolution<T1, T2>> U run(ThrowingBiFunction<V, BufferedReader, U> customPart,
                                                       String resource) {
     return SolutionUtil.adaptPartToRunGeneric((V) this, customPart, resource);
   }
@@ -47,8 +47,8 @@ public interface AdventSolution<T1, T2> {
     return solutionPart.part.apply(this, solutionPart.defaultResource.apply(this));
   }
 
-  default <U, V extends AdventSolution<T1, T2>> void print(UncheckedBiFunction<V, BufferedReader, U> customPart,
-                                                           UncheckedBiFunction<V, U, ?> printMapping,
+  default <U, V extends AdventSolution<T1, T2>> void print(ThrowingBiFunction<V, BufferedReader, U> customPart,
+                                                           ThrowingBiFunction<V, U, ?> printMapping,
                                                            String resource) {
     SolutionUtil.adaptPartToPrintGeneric((V) this, customPart, printMapping, resource);
   }
