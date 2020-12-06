@@ -3,6 +3,7 @@ package dev.linl33.adventofcode.year2020;
 import dev.linl33.adventofcode.lib.util.AdventUtil;
 
 import java.io.BufferedReader;
+import java.util.function.IntBinaryOperator;
 import java.util.stream.IntStream;
 
 public class Day6 extends AdventSolution2020<Integer, Integer> {
@@ -21,15 +22,22 @@ public class Day6 extends AdventSolution2020<Integer, Integer> {
 
   @Override
   public Integer part2(BufferedReader reader) {
+    return solveInternal(reader, (a, b) -> a & b, ~0);
+  }
+
+  public int part1ByLogicalOr(BufferedReader reader) {
+    return solveInternal(reader, (a, b) -> a | b, 0);
+  }
+
+  private static int solveInternal(BufferedReader reader, IntBinaryOperator reducer, int identity) {
     return AdventUtil
         .readInputAsGroups(reader)
         .mapToInt(stream -> stream
             .mapToInt(str -> str
                 .chars()
-                .map(i -> 1 << (i - 'a'))
-                .sum()
+                .reduce(0, (a, b) -> a | (1 << (b - 'a')))
             )
-            .reduce(Integer.MAX_VALUE, (a, b) -> a & b)
+            .reduce(identity, reducer)
         )
         .map(Integer::bitCount)
         .sum();
