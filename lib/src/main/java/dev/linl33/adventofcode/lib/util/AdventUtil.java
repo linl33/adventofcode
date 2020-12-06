@@ -3,9 +3,11 @@ package dev.linl33.adventofcode.lib.util;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
+import java.io.BufferedReader;
 import java.util.*;
-import java.util.function.Function;
+import java.util.function.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class AdventUtil {
   public static <K, V extends Comparable<V>> K argMax(Map<K, V> map) {
@@ -192,5 +194,47 @@ public final class AdventUtil {
     }
 
     return result;
+  }
+
+  public static Stream<Stream<String>> readInputAsGroups(@NotNull BufferedReader reader) {
+    return readInputAsGroups(reader, String::isEmpty);
+  }
+
+  public static Stream<Stream<String>> readInputAsGroups(@NotNull BufferedReader reader,
+                                                         @NotNull Predicate<String> endOfGroup) {
+    return AdventUtil.<Stream.Builder<String>, Stream<String>>readInputAsGroups(
+        reader,
+        endOfGroup,
+        Stream::builder,
+        Stream.Builder::accept,
+        Stream.Builder::build
+    );
+  }
+
+  public static <A, T> Stream<T> readInputAsGroups(@NotNull BufferedReader reader,
+                                                   @NotNull Predicate<String> endOfGroup,
+                                                   @NotNull Supplier<A> supplier,
+                                                   @NotNull BiConsumer<A, String> accumulator,
+                                                   @NotNull Function<A, T> finisher) {
+    var inputIt = reader
+        .lines()
+        .iterator();
+
+    return Stream
+        .generate(() -> {
+          if (!inputIt.hasNext()) {
+            return null;
+          }
+
+          var accu = supplier.get();
+
+          String token;
+          while (inputIt.hasNext() && !endOfGroup.test(token = inputIt.next())) {
+            accumulator.accept(accu, token);
+          }
+
+          return finisher.apply(accu);
+        })
+        .takeWhile(Objects::nonNull);
   }
 }
