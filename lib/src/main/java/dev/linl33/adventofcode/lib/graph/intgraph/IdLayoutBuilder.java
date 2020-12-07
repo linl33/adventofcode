@@ -75,12 +75,17 @@ public class IdLayoutBuilder<T> {
         .map(entry -> {
           var assignmentForField = intAssignments.get(entry.getKey());
 
+          if (assignmentForField.isEmpty()) {
+            return null;
+          }
+
           return new IdLayout.LayoutElement<>(
               sizeInBits(assignmentForField),
               assignmentForField.size(),
               objIntAssignmentFactory(entry.getValue(), assignmentForField)
           );
         })
+        .filter(Objects::nonNull)
         .collect(Collectors.collectingAndThen(Collectors.toList(), IdLayout::new));
   }
 

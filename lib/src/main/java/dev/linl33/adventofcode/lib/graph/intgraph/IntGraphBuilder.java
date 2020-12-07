@@ -70,7 +70,7 @@ public class IntGraphBuilder<T> {
     var layout = Objects.requireNonNullElse(layoutSupplier, this::defaultIdLayoutBuilder).get();
 
     idGenerator = Objects.requireNonNullElseGet(idGenerator, () -> IdGenerator.asIdGenerator(layout));
-    costFunction = Objects.requireNonNullElse(costFunction, this::defaultCostFunction);
+    costFunction = Objects.requireNonNullElse(costFunction, defaultCostFunction());
 
     @SuppressWarnings("unchecked")
     DataIntGraphNode<T>[] nodeArr = new DataIntGraphNode[layout.allocationSize()];
@@ -89,9 +89,23 @@ public class IntGraphBuilder<T> {
   }
 
   @NotNull
-  private OptionalInt defaultCostFunction(DataIntGraphNode<T> from, DataIntGraphNode<T> to) {
-    return Optional
-        .ofNullable(edges.getOrDefault(from.getData(), Map.of()).get(to.getData()))
+  private BiFunction<DataIntGraphNode<T>, DataIntGraphNode<T>, OptionalInt> defaultCostFunction() {
+    var idEdges = new HashMap<Integer, Map<Integer, Integer>>(edges.size());
+
+    // convert the edges from a map of [obj -> obj -> cost] into a map of [id -> id -> cost]
+    edges.forEach((edge, children) ->
+        children.forEach((node, cost) ->
+            idEdges
+                .computeIfAbsent(idGenerator.generateId(edge), __ -> new HashMap<>(children.size()))
+                .put(idGenerator.generateId(node), cost)
+        )
+    );
+
+    return (from, to) -> Optional
+        .ofNullable(idEdges
+            .getOrDefault(from.id(), Map.of())
+            .get(to.id())
+        )
         .map(OptionalInt::of)
         .orElseGet(OptionalInt::empty);
   }

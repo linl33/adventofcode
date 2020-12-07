@@ -14,11 +14,11 @@ public record IdLayout<T>(int length,
                                         @NotNull ToIntFunction<T> objIntAssignment) {
     public LayoutElement {
       if (bits < 0 || bits > (Integer.SIZE - 2)) {
-        throw new IllegalArgumentException("Invalid bits");
+        throw new IllegalArgumentException("Invalid bits " + bits);
       }
 
       if (maxId > (1 << bits)) {
-        throw new IllegalArgumentException("Invalid maxId");
+        throw new IllegalArgumentException("Invalid maxId " + maxId);
       }
     }
   }
@@ -37,7 +37,7 @@ public record IdLayout<T>(int length,
   public IdLayout {
     Objects.requireNonNull(elements);
 
-    if (length < elements.size() || allocationSize < (1 << (elements.size() - 1)) + 1 || elements.isEmpty()) {
+    if (length < elements.size() || allocationSize < (1 << (elements.size() - 1)) + 1) {
       throw new IllegalArgumentException();
     }
 
@@ -45,6 +45,10 @@ public record IdLayout<T>(int length,
   }
 
   private static <T> int calculateAllocationSize(@NotNull List<LayoutElement<T>> elements) {
+    if (elements.isEmpty()) {
+      return 0;
+    }
+
     var size = elements.get(0).maxId;
 
     for (int i = 1; i < elements.size(); i++) {
