@@ -1,5 +1,7 @@
-package dev.linl33.adventofcode.lib.graph;
+package dev.linl33.adventofcode.lib.graph.mutable;
 
+import dev.linl33.adventofcode.lib.graph.Graph;
+import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;

@@ -4,6 +4,8 @@ import dev.linl33.adventofcode.lib.graph.*;
 import dev.linl33.adventofcode.lib.graph.intgraph.DataIntGraphNode;
 import dev.linl33.adventofcode.lib.graph.intgraph.IdLayoutBuilder;
 import dev.linl33.adventofcode.lib.graph.intgraph.IntGraphBuilder;
+import dev.linl33.adventofcode.lib.graph.mutable.MutableGraphBuilder;
+import dev.linl33.adventofcode.lib.graph.mutable.MutableGraphNode;
 
 import java.io.BufferedReader;
 import java.util.ArrayList;

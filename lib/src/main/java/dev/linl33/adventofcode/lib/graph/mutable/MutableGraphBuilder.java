@@ -1,5 +1,6 @@
-package dev.linl33.adventofcode.lib.graph;
+package dev.linl33.adventofcode.lib.graph.mutable;
 
+import dev.linl33.adventofcode.lib.graph.GraphBuilder;
 import org.jetbrains.annotations.NotNull;
 
 public class MutableGraphBuilder implements GraphBuilder<MutableGraph, String, MutableGraphBuilder> {

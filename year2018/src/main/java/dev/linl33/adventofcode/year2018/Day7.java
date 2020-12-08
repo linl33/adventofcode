@@ -1,6 +1,6 @@
 package dev.linl33.adventofcode.year2018;
 
-import dev.linl33.adventofcode.lib.graph.MutableGraph;
+import dev.linl33.adventofcode.lib.graph.mutable.MutableGraph;
 
 import java.io.BufferedReader;
 import java.util.*;
