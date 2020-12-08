@@ -16,7 +16,7 @@ public class Day7 extends AdventSolution2018<String, Integer> {
     var graph = buildGraph(reader.lines());
 
     var sequence = new StringBuilder();
-    while (graph.getNodes().size() > 0) {
+    while (!graph.isEmpty()) {
       nextNode(graph, Set.of()).ifPresent(node -> {
         sequence.append(node);
         graph.removeNode(node);
@@ -49,7 +49,7 @@ public class Day7 extends AdventSolution2018<String, Integer> {
     }
 
     var queued = new HashSet<String>();
-    while (graph.getNodes().size() > 0) {
+    while (!graph.isEmpty()) {
       for (var worker : workers) {
         var wTime = worker.getTime();
 
@@ -101,13 +101,13 @@ public class Day7 extends AdventSolution2018<String, Integer> {
   }
 
   private static Optional<String> nextNode(MutableGraph graph, Set<String> excluded) {
-    for (var s : graph.getNodes().keySet()) {
-      if (excluded.contains(s)) {
+    for (var node : graph.getNodes()) {
+      if (excluded.contains(node.getLabel())) {
         continue;
       }
 
-      if (graph.getNodes().get(s).inNodes().size() == 0) {
-        return Optional.of(s);
+      if (node.inNodes().size() == 0) {
+        return Optional.ofNullable(node.getLabel());
       }
     }
 

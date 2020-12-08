@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.lib.graph.intgraph;
 
+import dev.linl33.adventofcode.lib.graph.GraphBuilder;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,7 +9,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class IntGraphBuilder<T> {
+public class IntGraphBuilder<T> implements GraphBuilder<IntGraph<T, DataIntGraphNode<T>>, T, IntGraphBuilder<T>> {
   private final Collection<T> nodes;
   private final Map<T, Map<T, Integer>> edges;
   private Supplier<IdLayout<T>> layoutSupplier;
@@ -48,7 +49,8 @@ public class IntGraphBuilder<T> {
   }
 
   @Contract(value = "_ -> this", mutates = "this")
-  public IntGraphBuilder<T> addNode(@NotNull T data) {
+  @Override
+  public @NotNull IntGraphBuilder<T> addNode(@NotNull T data) {
     // TODO: support SimpleIntGraphNode
 
     nodes.add(data);
@@ -56,7 +58,8 @@ public class IntGraphBuilder<T> {
   }
 
   @Contract(value = "_, _, _ -> this", mutates = "this")
-  public IntGraphBuilder<T> addEdge(@NotNull T from, @NotNull T to, int cost) {
+  @Override
+  public @NotNull IntGraphBuilder<T> addEdge(@NotNull T from, @NotNull T to, int cost) {
     if (cost < 0) {
       throw new IllegalArgumentException("Negative edge cost unsupported");
     }
@@ -66,6 +69,7 @@ public class IntGraphBuilder<T> {
   }
 
   @NotNull
+  @Override
   public IntGraph<T, DataIntGraphNode<T>> build() {
     var layout = Objects.requireNonNullElse(layoutSupplier, this::defaultIdLayoutBuilder).get();
 

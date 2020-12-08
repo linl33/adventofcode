@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.lib.graph.intgraph;
 
+import dev.linl33.adventofcode.lib.graph.Graph;
 import dev.linl33.adventofcode.lib.graph.GraphPath;
 import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +12,7 @@ import java.util.OptionalInt;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
-public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
+public class IntGraph<TData, TNode extends IntGraphNode<TNode>> implements Graph<TData, TNode> {
 
   private final TNode[] nodes;
   private final IdLayout<TData> idLayout;
@@ -19,6 +20,7 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
   private int[][] adjacencyMatrix;
   private int[][] adjacencyList;
 
+  @Override
   public TNode[] getNodes() {
     return nodes;
   }
@@ -126,14 +128,17 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> {
   }
 
   @NotNull
+  @Override
   public Optional<TNode> getNode(@NotNull TData nodeData) {
     return getNode(getIdGenerator().generateId(nodeData));
   }
 
+  @Override
   public int getCost(@NotNull TNode from, @NotNull TNode to) {
     return adjacencyMatrix[from.id()][to.id()];
   }
 
+  @Override
   public int cardinality() {
     return nodes.length;
   }
