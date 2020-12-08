@@ -1,16 +1,20 @@
 package dev.linl33.adventofcode.year2020;
 
+import dev.linl33.adventofcode.lib.graph.*;
 import dev.linl33.adventofcode.lib.graph.intgraph.DataIntGraphNode;
 import dev.linl33.adventofcode.lib.graph.intgraph.IdLayoutBuilder;
-import dev.linl33.adventofcode.lib.graph.intgraph.IntGraph;
 import dev.linl33.adventofcode.lib.graph.intgraph.IntGraphBuilder;
 
 import java.io.BufferedReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class Day7 extends AdventSolution2020<Integer, Integer> {
-  private static final Luggage SHINY_GOLD = new Luggage("shiny gold", 0);
+  private static final String SHINY_GOLD_COLOR = "shiny gold";
+  private static final Luggage SHINY_GOLD = new Luggage(SHINY_GOLD_COLOR, 0);
 
   public static void main(String[] args) {
     new Day7().runAndPrintAll();
@@ -18,37 +22,47 @@ public class Day7 extends AdventSolution2020<Integer, Integer> {
 
   @Override
   public Integer part1(BufferedReader reader) {
-    var graph = buildGraph(reader);
-    var shinyGold = graph.getNode(SHINY_GOLD).orElseThrow();
+    return solve(reader, Day7::buildIntGraph, SHINY_GOLD, Day7::countContainers);
+  }
 
-    // TODO: implement graph visitor
-
-    var count = 0;
-    for (DataIntGraphNode<Luggage> node : graph.getNodes()) {
-      if (node == shinyGold) {
-        continue;
-      }
-
-      if (graph.findPath(node, shinyGold).isPresent()) {
-        count++;
-      }
-    }
-
-    return count;
+  public int part1ByMutableGraph(BufferedReader reader) {
+    return solve(reader, Day7::buildMutableGraph, SHINY_GOLD_COLOR, Day7::countContainers);
   }
 
   @Override
   public Integer part2(BufferedReader reader) {
-    var graph = buildGraph(reader);
-    var shinyGold = graph.getNode(SHINY_GOLD).orElseThrow();
-
-    return countContainedBags(shinyGold, graph);
+    return solve(reader, Day7::buildIntGraph, SHINY_GOLD, Day7::countContainedBags);
   }
 
-  private static IntGraph<Luggage, DataIntGraphNode<Luggage>> buildGraph(BufferedReader reader) {
+  public int part2ByMutableGraph(BufferedReader reader) {
+    return solve(reader, Day7::buildMutableGraph, SHINY_GOLD_COLOR, Day7::countContainedBags);
+  }
+
+  private static <TData, TNode extends GraphNode<TNode>> int solve(
+      BufferedReader reader,
+      Function<BufferedReader, Graph<TData, TNode>> graphFactory,
+      TData shinyGoldNode,
+      BiFunction<TNode, Graph<TData, TNode>, Integer> solver) {
+
+    return graphFactory
+        .andThen(graph -> solver.apply(graph.getNode(shinyGoldNode).orElseThrow(), graph))
+        .apply(reader);
+  }
+
+  private static Graph<Luggage, DataIntGraphNode<Luggage>> buildIntGraph(BufferedReader reader) {
     var idLayoutBuilder = new IdLayoutBuilder<Luggage>().addField(Luggage::color);
     var builder = new IntGraphBuilder<Luggage>().withIdLayoutBuilder(idLayoutBuilder);
 
+    return buildGraph(reader, builder);
+  }
+
+  private static Graph<String, MutableGraphNode> buildMutableGraph(BufferedReader reader) {
+    var builder = new DelegatingGraphBuilder<>(new MutableGraphBuilder(), Luggage::color);
+    return buildGraph(reader, builder);
+  }
+
+  private static <G> G buildGraph(BufferedReader reader,
+                                  GraphBuilder<G, Luggage, ?> builder) {
     reader
         .lines()
         .map(LuggageRule::parse)
@@ -63,15 +77,23 @@ public class Day7 extends AdventSolution2020<Integer, Integer> {
     return builder.build();
   }
 
-  private static int countContainedBags(DataIntGraphNode<Luggage> node,
-                                        IntGraph<Luggage, DataIntGraphNode<Luggage>> graph) {
+  private static <TNode extends GraphNode<TNode>> int countContainedBags(TNode bag,
+                                                                         Graph<?, TNode> graph) {
     int result = 0;
 
-    for (DataIntGraphNode<Luggage> outNode : node.outNodes()) {
-      result += graph.getCost(node, outNode) * (countContainedBags(outNode, graph) + 1);
+    for (var outNode : bag.outNodes()) {
+      result += graph.getCost(bag, outNode) * (countContainedBags(outNode, graph) + 1);
     }
 
     return result;
+  }
+
+  private static <TNode extends GraphNode<TNode>> int countContainers(TNode bag, Graph<?, TNode> graph) {
+    return (int) Arrays
+        .stream(graph.getNodes())
+        .filter(node -> node != bag)
+        .filter(node -> graph.findPath(node, bag).isPresent())
+        .count();
   }
 
   private static record Luggage(String color, int count) {
