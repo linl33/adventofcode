@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
@@ -90,7 +91,11 @@ public interface AdventSolutionTest<T1, T2> {
           if (method.getName().equals("resourceSupplier") && args[0] instanceof String resource && resource.startsWith("string:")) {
             return new BufferedReader(new StringReader(resource.replaceFirst("string:", "")));
           } else {
-            return method.invoke(orig, args);
+            try {
+              return method.invoke(orig, args);
+            } catch (InvocationTargetException e) {
+              throw e.getTargetException();
+            }
           }
         }
     );
