@@ -1,13 +1,11 @@
 package dev.linl33.adventofcode.lib.graph.mutable;
 
 import dev.linl33.adventofcode.lib.graph.Graph;
-import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 public class MutableGraph implements Graph<String, MutableGraphNode> {
   private final Map<String, MutableGraphNode> nodes;
@@ -99,13 +97,5 @@ public class MutableGraph implements Graph<String, MutableGraphNode> {
   public int getCost(@NotNull MutableGraphNode from, @NotNull MutableGraphNode to) {
     // throws NPE when the edge is not found
     return edges.getOrDefault(from, Map.of()).get(to);
-  }
-
-  @Override
-  public @NotNull OptionalInt findPath(@NotNull MutableGraphNode from, @NotNull MutableGraphNode to) {
-    return GraphUtil
-        .aStar(from, to, MutableGraphNode::outNodes)
-        .map(opt -> OptionalInt.of(opt.length()))
-        .orElse(OptionalInt.empty());
   }
 }

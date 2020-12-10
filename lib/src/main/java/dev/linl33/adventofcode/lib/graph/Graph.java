@@ -21,5 +21,11 @@ public interface Graph<TData, TNode extends GraphNode<TNode>> {
   int getCost(@NotNull TNode from, @NotNull TNode to);
 
   @NotNull
-  OptionalInt findPath(@NotNull TNode from, @NotNull TNode to);
+  default OptionalInt findPath(@NotNull TNode from, @NotNull TNode to) {
+    return GraphUtil
+        .aStar(from, to, TNode::outNodes)
+        .map(GraphPath::length)
+        .map(OptionalInt::of)
+        .orElse(OptionalInt.empty());
+  }
 }
