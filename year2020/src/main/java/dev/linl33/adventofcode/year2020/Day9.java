@@ -29,8 +29,9 @@ public class Day9 extends AdventSolution2020<Long, Long> {
     return IntStream
         .range(preambleLength, input.length)
         .dropWhile(i -> isValid(input, preambleLength, i))
+        .limit(1)
         .mapToLong(i -> input[i])
-        .findFirst()
+        .findAny()
         .orElseThrow();
   }
 
@@ -77,16 +78,24 @@ public class Day9 extends AdventSolution2020<Long, Long> {
           return -1;
         })
         .dropWhile(l -> l < 0)
-        .findFirst()
+        .limit(1)
+        .findAny()
         .orElseThrow();
   }
 
   private static boolean isValid(long[] list, int length, int checkIdx) {
-    var start = checkIdx - length;
+    var checkVal = list[checkIdx];
 
-    for (int i = start; i < checkIdx - 1; i++) {
+    for (int i = checkIdx - length; i < checkIdx - 1; i++) {
+      var firstVal = list[i];
+      var diff = checkVal - firstVal;
+
+      if (diff < 0 || diff == firstVal) {
+        continue;
+      }
+
       for (int j = i + 1; j < checkIdx; j++) {
-        if (list[i] + list[j] == list[checkIdx]) {
+        if (list[j] == diff) {
           return true;
         }
       }
