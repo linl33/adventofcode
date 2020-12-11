@@ -1,50 +1,68 @@
 package dev.linl33.adventofcode.lib.grid;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 public class RowArrayGrid implements ArrayGrid {
-  private final int[][] gridArray;
+  private final int[] gridArray;
   private final int width;
   private final int height;
 
-  public RowArrayGrid(int[][] gridArray) {
+  public RowArrayGrid(int[] gridArray, int height, int width) {
     this.gridArray = gridArray;
-    this.height = gridArray.length;
-    this.width = gridArray[0].length;
+    this.height = height;
+    this.width = width;
   }
 
   public RowArrayGrid(BufferedReader reader) {
-    this(reader
-        .lines()
-        .map(line -> line.chars().toArray())
-        .toArray(int[][]::new));
+    String line;
+
+    try {
+      line = reader.readLine();
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+
+    var gridArray = Stream
+        .concat(
+            Stream.of(line),
+            reader.lines()
+        )
+        .flatMapToInt(String::chars)
+        .toArray();
+
+    this.gridArray = gridArray;
+    this.width = line.length();
+    this.height = gridArray.length / line.length();
   }
 
   public RowArrayGrid(int height, int width) {
-    this(new int[height][width]);
+    this(new int[height * width], height, width);
   }
 
   public ColumnArrayGrid asColumnArrayGrid() {
-    var columnArray = new int[width()][height()];
+    var columnArray = new int[width() * height()];
 
-    visit((GridConsumer) (x, y, value) -> columnArray[x][y] = value);
-
-    return new ColumnArrayGrid(columnArray);
+    visit((GridConsumer) (x, y, value) -> columnArray[x * height() + y] = value);
+    return new ColumnArrayGrid(columnArray, width(), height());
   }
 
   @Override
-  public int[][] array() {
+  public int[] array() {
     return gridArray;
   }
 
   @Override
   public int get(int x, int y) {
-    return gridArray[y][x];
+    return gridArray[y * width + x];
   }
 
   @Override
   public void set(int x, int y, int value) {
-    gridArray[y][x] = value;
+    gridArray[y * width + x] = value;
   }
 
   @Override
@@ -59,7 +77,7 @@ public class RowArrayGrid implements ArrayGrid {
 
   @Override
   public int[] row(int y) {
-    return gridArray[y];
+    return Arrays.copyOfRange(gridArray, y * width, y * width + width);
   }
 
   @Override
