@@ -9,6 +9,8 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
+        <module>solution-parent</module>
+
         <module>lib</module>
         <module>testlib</module>
 
