@@ -4,6 +4,9 @@ import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.util.LoggingUtil;
 import dev.linl33.adventofcode.lib.util.ResourceUtil;
 import org.apache.logging.log4j.Logger;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
+import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.BufferedReader;
 import java.util.Arrays;
@@ -97,5 +100,19 @@ public interface AdventSolution<T1, T2> {
 
   default BufferedReader resourceSupplier(String resource) {
     return ResourceUtil.readResource(getClass(), resource);
+  }
+
+  default void benchmark() {
+    var opt = new OptionsBuilder()
+        .include(SolutionBenchmark.class.getSimpleName())
+        .param("solutionClass", getClass().getName())
+        .forks(1)
+        .build();
+
+    try {
+      new Runner(opt).run();
+    } catch (RunnerException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
