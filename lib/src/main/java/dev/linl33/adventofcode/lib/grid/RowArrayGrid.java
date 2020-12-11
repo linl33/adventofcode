@@ -4,25 +4,24 @@ import java.io.BufferedReader;
 
 public class RowArrayGrid implements ArrayGrid {
   private final int[][] gridArray;
+  private final int width;
+  private final int height;
 
   public RowArrayGrid(int[][] gridArray) {
     this.gridArray = gridArray;
+    this.height = gridArray.length;
+    this.width = gridArray[0].length;
   }
 
   public RowArrayGrid(BufferedReader reader) {
     this(reader
         .lines()
-        .map(line -> {
-          var charArr = line.toCharArray();
-          var intArr = new int[line.length()];
-
-          for (int i = 0; i < charArr.length; i++) {
-            intArr[i] = charArr[i];
-          }
-
-          return intArr;
-        })
+        .map(line -> line.chars().toArray())
         .toArray(int[][]::new));
+  }
+
+  public RowArrayGrid(int height, int width) {
+    this(new int[height][width]);
   }
 
   public ColumnArrayGrid asColumnArrayGrid() {
@@ -50,12 +49,12 @@ public class RowArrayGrid implements ArrayGrid {
 
   @Override
   public int width() {
-    return gridArray[0].length;
+    return width;
   }
 
   @Override
   public int height() {
-    return gridArray.length;
+    return height;
   }
 
   @Override
