@@ -41,7 +41,7 @@
 
         <!-- Other Dependencies -->
         <org.apache.logging.log4j.version>2.14.0</org.apache.logging.log4j.version>
-        <org.openjdk.jmh.version>1.26</org.openjdk.jmh.version>
+        <org.openjdk.jmh.version>1.27</org.openjdk.jmh.version>
         <org.jetbrains.annotations.version>20.1.0</org.jetbrains.annotations.version>
 
         <!-- Testing -->
