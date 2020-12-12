@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.lib.util;
 
+import dev.linl33.adventofcode.lib.util.internal.LoggingUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

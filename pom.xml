@@ -172,12 +172,14 @@
                 <groupId>org.openjdk.jmh</groupId>
                 <artifactId>jmh-generator-annprocess</artifactId>
                 <version>${org.openjdk.jmh.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>
                 <groupId>org.jetbrains</groupId>
                 <artifactId>annotations</artifactId>
                 <version>${org.jetbrains.annotations.version}</version>
+                <scope>provided</scope>
             </dependency>
 
             <dependency>

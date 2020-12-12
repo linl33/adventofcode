@@ -1,8 +1,9 @@
 package dev.linl33.adventofcode.lib.solution;
 
 import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
-import dev.linl33.adventofcode.lib.util.LoggingUtil;
-import dev.linl33.adventofcode.lib.util.ResourceUtil;
+import dev.linl33.adventofcode.lib.solution.benchmark.SolutionBenchmark;
+import dev.linl33.adventofcode.lib.util.internal.LoggingUtil;
+import dev.linl33.adventofcode.lib.util.internal.ResourceUtil;
 import org.apache.logging.log4j.Logger;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
