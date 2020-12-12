@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class GridUtil {
   public enum TurningDirection {
-    RIGHT_90, LEFT_90, INVERT, NULL
+    RIGHT_90, LEFT_90, RIGHT_270, LEFT_270, INVERT, NULL
   }
 
   public static final int HEADING_NORTH = 0;
@@ -24,8 +24,8 @@ public class GridUtil {
 
   public static int turn(TurningDirection direction, int heading) {
     return switch (direction) {
-      case RIGHT_90 -> HEADINGS[(heading + 1) % 4];
-      case LEFT_90 -> HEADINGS[Math.floorMod(heading - 1, 4)];
+      case RIGHT_90, LEFT_270 -> HEADINGS[(heading + 1) % 4];
+      case LEFT_90, RIGHT_270 -> HEADINGS[Math.floorMod(heading - 1, 4)];
       case INVERT -> HEADINGS[(heading + 2) % 4];
       case NULL -> heading;
     };
