@@ -3,11 +3,9 @@ package dev.linl33.adventofcode.year2020;
 import dev.linl33.adventofcode.lib.point.Point;
 import dev.linl33.adventofcode.lib.point.Point2D;
 import dev.linl33.adventofcode.lib.util.GridUtil;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Day12 extends AdventSolution2020<Integer, Integer> {
   public static void main(String[] args) {
@@ -16,110 +14,52 @@ public class Day12 extends AdventSolution2020<Integer, Integer> {
 
   @Override
   public Integer part1(BufferedReader reader) throws Exception {
-    return solve(
-        reader,
-        stream -> {
-          var input = stream.collect(Collectors.toList());
-
-          var heading = GridUtil.HEADING_EAST;
-          var ferry = new Point2D(0, 0);
-
-          for (var instr : input) {
-            switch (instr.action) {
-              case LEFT, RIGHT -> heading = switch (instr.value) {
-                case 90 -> GridUtil.turn(
-                    instr.action == NavAction.LEFT ?
-                        GridUtil.TurningDirection.LEFT_90 :
-                        GridUtil.TurningDirection.RIGHT_90,
-                    heading
-                );
-                case 270 -> GridUtil.turn(
-                    instr.action == NavAction.LEFT ?
-                        GridUtil.TurningDirection.LEFT_270 :
-                        GridUtil.TurningDirection.RIGHT_270,
-                    heading
-                );
-                case 180 -> GridUtil.turn(GridUtil.TurningDirection.INVERT, heading);
-                default -> throw new IllegalArgumentException();
-              };
-
-              case NORTH, SOUTH, EAST, WEST, FORWARD -> ferry = GridUtil.move(
-                  ferry,
-                  switch (instr.action) {
-                    case NORTH -> GridUtil.HEADING_NORTH;
-                    case SOUTH -> GridUtil.HEADING_SOUTH;
-                    case EAST -> GridUtil.HEADING_EAST;
-                    case WEST -> GridUtil.HEADING_WEST;
-                    case FORWARD -> heading;
-                    default -> throw new IllegalStateException();
-                  },
-                  instr.value,
-                  false,
-                  false
-              );
-            }
-          }
-
-          return ferry;
-        }
-    );
+    return solve(reader, new WaypointNavInstrVisitor(new Point2D(1, 0)) {
+      @Override
+      public @NotNull Point2D visit(@NotNull Point2D ferry, @NotNull DirNavInstr instr) {
+        return movePointTowardsDir(ferry, instr);
+      }
+    });
   }
 
   @Override
   public Integer part2(BufferedReader reader) throws Exception {
-    return solve(
-        reader,
-        stream -> {
-          var input = stream.collect(Collectors.toList());
+    return solve(reader, new WaypointNavInstrVisitor(new Point2D(10, 1)) {
+      @Override
+      public @NotNull Point2D visit(@NotNull Point2D ferry, @NotNull DirNavInstr instr) {
+        setWaypoint(movePointTowardsDir(getWaypoint(), instr));
 
-          var ferry = new Point2D(0, 0);
-          var wp = new Point2D(10, 1);
-
-          for (var instr : input) {
-            switch (instr.action) {
-              case LEFT, RIGHT -> wp = wp.rotateAboutOrigin(switch (instr.value) {
-                case 90 -> instr.action == NavAction.LEFT ? Point2D.Rotation.CCW_90 : Point2D.Rotation.CW_90;
-                case 270 -> instr.action == NavAction.LEFT ? Point2D.Rotation.CCW_270 : Point2D.Rotation.CW_270;
-                case 180 -> Point2D.Rotation.R_180;
-                default -> throw new IllegalArgumentException();
-              });
-
-              case NORTH, SOUTH, EAST, WEST -> wp = GridUtil.move(
-                  wp,
-                  switch (instr.action) {
-                    case NORTH -> GridUtil.HEADING_NORTH;
-                    case SOUTH -> GridUtil.HEADING_SOUTH;
-                    case EAST -> GridUtil.HEADING_EAST;
-                    case WEST -> GridUtil.HEADING_WEST;
-                    default -> throw new IllegalArgumentException();
-                  },
-                  instr.value,
-                  false,
-                  false
-              );
-
-              case FORWARD -> ferry = ferry.translate(instr.value * wp.x(), instr.value * wp.y());
-            }
-          }
-
-          return ferry;
-        }
-    );
+        return ferry;
+      }
+    });
   }
 
-  private static int solve(BufferedReader reader,
-                           Function<Stream<NavInstr>, Point2D> applyNavInstr) {
-    var input = reader
+  private static int solve(BufferedReader reader, NavInstrVisitor visitor) {
+    return reader
         .lines()
-        .map(NavInstr::new);
-
-    return applyNavInstr.apply(input).manhattanDistance(Point.ORIGIN_2D);
+        .map(NavInstr::parse)
+        .reduce(
+            new Point2D(0, 0),
+            visitor::visit,
+            (first, second) -> first
+        )
+        .manhattanDistance(Point.ORIGIN_2D);
   }
 
-  private static record NavInstr(NavAction action, int value) {
-    public NavInstr(String str) {
-      this(NavAction.parse(str.charAt(0)), Integer.parseInt(str, 1, str.length(), 10));
-    }
+  public static Point2D movePointTowardsDir(Point2D pt, DirNavInstr vector) {
+    return GridUtil.move(
+        pt,
+        switch (vector.action) {
+          case NORTH -> GridUtil.HEADING_NORTH;
+          case SOUTH -> GridUtil.HEADING_SOUTH;
+          case EAST -> GridUtil.HEADING_EAST;
+          case WEST -> GridUtil.HEADING_WEST;
+          default -> throw new IllegalArgumentException();
+        },
+        vector.value,
+        false,
+        false
+    );
   }
 
   private enum NavAction {
@@ -136,6 +76,92 @@ public class Day12 extends AdventSolution2020<Integer, Integer> {
         case 'F' -> FORWARD;
         default -> throw new IllegalArgumentException();
       };
+    }
+  }
+
+  private interface NavInstr {
+    int value();
+
+    @NotNull
+    Point2D accept(@NotNull Point2D ferry, @NotNull NavInstrVisitor visitor);
+
+    @NotNull
+    static NavInstr parse(@NotNull String str) {
+      var action = NavAction.parse(str.charAt(0));
+      var value = Integer.parseInt(str, 1, str.length(), 10);
+
+      return switch (action) {
+        case NORTH, EAST, SOUTH, WEST -> new DirNavInstr(action, value);
+        case LEFT, RIGHT -> new RotNavInstr(action, value);
+        case FORWARD -> new ForwardNavInstr(value);
+      };
+    }
+  }
+
+  private static record RotNavInstr(NavAction action, int value) implements NavInstr {
+    @Override
+    public @NotNull Point2D accept(@NotNull Point2D ferry, @NotNull NavInstrVisitor visitor) {
+      return visitor.visit(ferry, this);
+    }
+  }
+
+  private static record DirNavInstr(NavAction action, int value) implements NavInstr {
+    @Override
+    public @NotNull Point2D accept(@NotNull Point2D ferry, @NotNull NavInstrVisitor visitor) {
+      return visitor.visit(ferry, this);
+    }
+  }
+
+  private static record ForwardNavInstr(int value) implements NavInstr {
+    @Override
+    public @NotNull Point2D accept(@NotNull Point2D ferry, @NotNull NavInstrVisitor visitor) {
+      return visitor.visit(ferry, this);
+    }
+  }
+
+  private interface NavInstrVisitor {
+    @NotNull
+    Point2D visit(@NotNull Point2D ferry, @NotNull RotNavInstr instr);
+    @NotNull
+    Point2D visit(@NotNull Point2D ferry, @NotNull DirNavInstr instr);
+    @NotNull
+    Point2D visit(@NotNull Point2D ferry, @NotNull ForwardNavInstr instr);
+
+    default Point2D visit(@NotNull Point2D ferry, @NotNull NavInstr instr) {
+      return instr.accept(ferry, this);
+    }
+  }
+
+  private static abstract class WaypointNavInstrVisitor implements NavInstrVisitor {
+    private Point2D waypoint;
+
+    public Point2D getWaypoint() {
+      return waypoint;
+    }
+
+    public void setWaypoint(Point2D waypoint) {
+      this.waypoint = waypoint;
+    }
+
+    public WaypointNavInstrVisitor(Point2D waypoint) {
+      this.waypoint = waypoint;
+    }
+
+    @Override
+    public @NotNull Point2D visit(@NotNull Point2D ferry, @NotNull RotNavInstr instr) {
+      waypoint = waypoint.rotateAboutOrigin(switch (instr.value) {
+        case 90 -> instr.action == NavAction.LEFT ? Point2D.Rotation.CCW_90 : Point2D.Rotation.CW_90;
+        case 270 -> instr.action == NavAction.LEFT ? Point2D.Rotation.CCW_270 : Point2D.Rotation.CW_270;
+        case 180 -> Point2D.Rotation.R_180;
+        default -> throw new IllegalArgumentException();
+      });
+
+      return ferry;
+    }
+
+    @Override
+    public @NotNull Point2D visit(@NotNull Point2D ferry, @NotNull ForwardNavInstr instr) {
+      return ferry.translate(instr.value * waypoint.x(), instr.value * waypoint.y());
     }
   }
 }
