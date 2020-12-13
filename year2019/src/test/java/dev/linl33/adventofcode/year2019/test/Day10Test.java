@@ -36,7 +36,7 @@ class Day10Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @Test
-  void part2Detailed(Day10 solutionInstance) {
+  void part2Detailed(AdventSolution<Integer, Integer> solutionInstance) {
     var asteroidList = solutionInstance.run(Day10::part2Detailed, "day10test4");
 
     assertEquals(299, asteroidList.size());

@@ -2,9 +2,9 @@ package dev.linl33.adventofcode.year2020.test;
 
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
+import dev.linl33.adventofcode.testlib.Part1Source;
 import dev.linl33.adventofcode.year2020.Day6;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Map;
 
@@ -33,11 +33,8 @@ class Day6Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @ParameterizedTest
-  @CsvSource({
-      "day6, 6310",
-      "day6test1, 11"
-  })
-  void testPart1ByLogicalOr(String resource, int expected, Day6 instance) {
+  @Part1Source
+  void testPart1ByLogicalOr(String resource, int expected, AdventSolution<Integer, Integer> instance) {
     assertEquals(expected, instance.run(Day6::part1ByLogicalOr, resource));
   }
 }

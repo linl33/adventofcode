@@ -1,10 +1,7 @@
 package dev.linl33.adventofcode.testlib;
 
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.DynamicContainer;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.io.BufferedReader;
@@ -13,6 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -32,24 +30,31 @@ public interface AdventSolutionTest<T1, T2> {
     return Collections.emptyMap();
   }
 
-  default TestPart[] getTestParts() {
-    return newSolutionInstance().getDay() != 25 ? TestPart.values() : new TestPart[] {TestPart.PART_1};
+  default TestPart[] getTestParts(AdventSolution<T1, T2> instance) {
+    return instance.getDay() != 25 ? TestPart.values() : new TestPart[] {TestPart.PART_1};
+  }
+
+  default AdventSolution<T1, T2> getSolutionInstanceProxy() {
+    return buildSolutionProxy(newSolutionInstance());
   }
 
   @TestFactory
-  default Stream<DynamicContainer> allParts() {
+  @DisplayName("allParts")
+  default Stream<DynamicContainer> allParts(AdventSolution<T1, T2> instance,
+                                            EnumMap<TestPart, String> defaultResources) {
     return Arrays
-        .stream(getTestParts())
+        .stream(getTestParts(instance))
         .map(testPart -> dynamicContainer(
             testPart.displayName,
             testPart.testSourceUri.apply(this),
-            buildDynamicTestsForPart(testPart)
+            buildDynamicTestsForPart(testPart, defaultResources)
         ));
   }
 
-  default Stream<DynamicTest> buildDynamicTestsForPart(TestPart testPart) {
+  default Stream<DynamicTest> buildDynamicTestsForPart(TestPart testPart,
+                                                       EnumMap<TestPart, String> defaultResources) {
     var cases = testPart.cases.apply(this);
-    var defaultResource = testPart.defaultResource.apply(newSolutionInstance());
+    var defaultResource = defaultResources.get(testPart);
     assertTrue(
         cases.containsKey(defaultResource),
         "Default resource (" + defaultResource + ") not covered by " + testPart.displayName
@@ -72,17 +77,15 @@ public interface AdventSolutionTest<T1, T2> {
 
               buildAssertion(
                   kv.getValue(),
-                  testPart.part.apply(buildSolutionProxy(), kv.getKey())
+                  testPart.part.apply(getSolutionInstanceProxy(), kv.getKey())
               );
             }
         ));
   }
 
   @SuppressWarnings("unchecked")
-  private AdventSolution<T1, T2> buildSolutionProxy() {
+  private AdventSolution<T1, T2> buildSolutionProxy(AdventSolution<T1, T2> delegateTo) {
     // TODO: avoid this proxy
-
-    var orig = newSolutionInstance();
 
     return (AdventSolution<T1, T2>) Proxy.newProxyInstance(
         getClass().getClassLoader(),
@@ -92,7 +95,7 @@ public interface AdventSolutionTest<T1, T2> {
             return new BufferedReader(new StringReader(resource.replaceFirst("string:", "")));
           } else {
             try {
-              return method.invoke(orig, args);
+              return method.invoke(delegateTo, args);
             } catch (InvocationTargetException e) {
               throw e.getTargetException();
             }

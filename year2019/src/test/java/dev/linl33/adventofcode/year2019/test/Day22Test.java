@@ -35,7 +35,7 @@ class Day22Test implements AdventSolutionTest<Integer, Long> {
       "day22test3, 6 3 0 7 4 1 8 5 2 9",
       "day22test4, 9 2 5 8 1 4 7 0 3 6"
   })
-  void testShuffleWholeDeck(String resource, String expected, Day22 day22) {
+  void testShuffleWholeDeck(String resource, String expected, AdventSolution<Integer, Long> day22) {
     assertArrayEquals(
         Arrays
             .stream(expected.split(" "))

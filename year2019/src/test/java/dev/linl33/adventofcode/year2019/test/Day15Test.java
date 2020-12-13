@@ -26,7 +26,7 @@ class Day15Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @Test
-  void part2ByPathFinding(Day15 day15) {
+  void part2ByPathFinding(AdventSolution<Integer, Integer> day15) {
     assertEquals(292, day15.run(Day15::part2ByPathFinding, day15.getPart2Resource()));
   }
 }

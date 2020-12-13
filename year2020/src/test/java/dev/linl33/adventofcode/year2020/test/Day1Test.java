@@ -3,9 +3,11 @@ package dev.linl33.adventofcode.year2020.test;
 import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
+import dev.linl33.adventofcode.testlib.TestCaseSource;
+import dev.linl33.adventofcode.testlib.TestPart;
 import dev.linl33.adventofcode.year2020.Day1;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.BufferedReader;
 import java.util.Map;
@@ -35,13 +37,8 @@ class Day1Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @ParameterizedTest
-  @CsvSource({
-      "day1, 902451, 2",
-      "day1test1, 514579, 2",
-      "day1, 85555470, 3",
-      "day1test1, 241861950, 3"
-  })
-  void testSolveByIntStream(String resource, int expected, int numbers, Day1 instance) {
+  @TestCaseSource(value = {TestPart.PART_1, TestPart.PART_2}, extraArgs = @ValueSource(ints = {2, 2, 3, 3}))
+  void testSolveByIntStream(String resource, int expected, int numbers, AdventSolution<Integer, Integer> instance) {
     assertEquals(expected, instance.run(adaptSolveByIntStream(numbers), resource));
   }
 

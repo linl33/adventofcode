@@ -26,7 +26,7 @@ class Day9Test implements AdventSolutionTest<Long, Long> {
   }
 
   @Test
-  void testPart1WithPreamble5(Day9 instance) {
+  void testPart1WithPreamble5(AdventSolution<Long, Long> instance) {
     assertEquals(
         127L,
         instance.<Long, Day9>run((__, reader) -> Day9.solvePart1(reader, 5), "day9test1")
@@ -34,7 +34,7 @@ class Day9Test implements AdventSolutionTest<Long, Long> {
   }
 
   @Test
-  void testPart2WithPreamble5(Day9 instance) {
+  void testPart2WithPreamble5(AdventSolution<Long, Long> instance) {
     assertEquals(
         62L,
         instance.<Long, Day9>run((__, reader) -> Day9.solvePart2(reader, 5), "day9test1")

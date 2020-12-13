@@ -31,7 +31,7 @@ class Day7Test implements AdventSolutionTest<String, Integer> {
   }
 
   @Test
-  void testPart2Simple(Day7 day7) {
+  void testPart2Simple(AdventSolution<String, Integer> day7) {
     assertEquals(
         Integer.valueOf(15),
         day7.run(

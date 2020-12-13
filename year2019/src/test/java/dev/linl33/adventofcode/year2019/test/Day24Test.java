@@ -30,7 +30,7 @@ class Day24Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @Test
-  void testPart2Example(Day24 day24) {
+  void testPart2Example(AdventSolution<Integer, Integer> day24) {
     assertEquals(99, day24.run((Day24 instance, BufferedReader reader) -> instance.part2Internal(reader, 10), "day24test1"));
   }
 }

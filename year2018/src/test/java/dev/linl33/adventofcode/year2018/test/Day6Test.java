@@ -30,7 +30,7 @@ class Day6Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @Test
-  void part2SmallRadius(Day6 day6) {
+  void part2SmallRadius(AdventSolution<Integer, Integer> day6) {
     assertEquals(
         Integer.valueOf(16),
         day6.run(

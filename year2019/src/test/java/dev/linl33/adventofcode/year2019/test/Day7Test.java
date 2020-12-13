@@ -2,6 +2,7 @@ package dev.linl33.adventofcode.year2019.test;
 
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
+import dev.linl33.adventofcode.testlib.Part2Source;
 import dev.linl33.adventofcode.year2019.Day7;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -36,12 +37,8 @@ class Day7Test implements AdventSolutionTest<Long, Long> {
   }
 
   @ParameterizedTest
-  @CsvSource({
-      "day7, 76211147",
-      "day7test4, 139629729",
-      "day7test5, 18216"
-  })
-  void part2SingleThread(String resource, long expected, Day7 day7) {
+  @Part2Source
+  void part2SingleThread(String resource, long expected, AdventSolution<Long, Long> day7) {
     assertEquals(
         expected,
         day7.run(Day7::part2SingleThread, resource)
