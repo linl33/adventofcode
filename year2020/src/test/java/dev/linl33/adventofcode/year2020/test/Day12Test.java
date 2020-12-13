@@ -6,8 +6,6 @@ import dev.linl33.adventofcode.year2020.Day12;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class Day12Test implements AdventSolutionTest<Integer, Integer> {
 
   @Override

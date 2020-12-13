@@ -117,13 +117,13 @@ public class Day13 extends AdventSolution2018<Point2D, Point2D> {
       case '/', '\\' -> {
         GridUtil.TurningDirection turningDirection;
         if (nextPosChar == '/') {
-          if (cart.getHeading() == 1 || cart.getHeading() == 3) {
+          if (cart.getHeading() == GridUtil.HEADING_EAST || cart.getHeading() == GridUtil.HEADING_WEST) {
             turningDirection = GridUtil.TurningDirection.LEFT_90;
           } else {
             turningDirection = GridUtil.TurningDirection.RIGHT_90;
           }
         } else {
-          if (cart.getHeading() == 1 || cart.getHeading() == 3) {
+          if (cart.getHeading() == GridUtil.HEADING_EAST || cart.getHeading() == GridUtil.HEADING_WEST) {
             turningDirection = GridUtil.TurningDirection.RIGHT_90;
           } else {
             turningDirection = GridUtil.TurningDirection.LEFT_90;
@@ -182,9 +182,13 @@ public class Day13 extends AdventSolution2018<Point2D, Point2D> {
   private static record Cart(
       String id,
       Point2D position,
-      int heading,
+      @GridUtil.GridHeading int heading,
       int intersectionState
   ) implements GridEntity, HasHeading {
+    @GridUtil.GridHeading
+    public int heading() {
+      return heading;
+    }
     @Override
     public String getId() {
       return id();
@@ -200,11 +204,11 @@ public class Day13 extends AdventSolution2018<Point2D, Point2D> {
       return heading();
     }
 
-    public Cart(Point2D position, int heading, int intersectionState) {
+    public Cart(Point2D position, @GridUtil.GridHeading int heading, int intersectionState) {
       this(position.toString(), position, heading, intersectionState);
     }
 
-    public Cart(Cart other, Point2D position, int heading) {
+    public Cart(Cart other, Point2D position, @GridUtil.GridHeading int heading) {
       this(other.getId(), position, heading, other.intersectionState());
     }
 

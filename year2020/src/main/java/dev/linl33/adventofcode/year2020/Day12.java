@@ -17,7 +17,7 @@ public class Day12 extends AdventSolution2020<Integer, Integer> {
     return solve(reader, new WaypointNavInstrVisitor(new Point2D(1, 0)) {
       @Override
       public @NotNull Point2D visit(@NotNull Point2D ferry, @NotNull DirNavInstr instr) {
-        return movePointTowardsDir(ferry, instr);
+        return GridUtil.move(ferry, instr.heading(), instr.value, false, false);
       }
     });
   }
@@ -27,7 +27,7 @@ public class Day12 extends AdventSolution2020<Integer, Integer> {
     return solve(reader, new WaypointNavInstrVisitor(new Point2D(10, 1)) {
       @Override
       public @NotNull Point2D visit(@NotNull Point2D ferry, @NotNull DirNavInstr instr) {
-        setWaypoint(movePointTowardsDir(getWaypoint(), instr));
+        setWaypoint(GridUtil.move(getWaypoint(), instr.heading(), instr.value, false, false));
 
         return ferry;
       }
@@ -44,22 +44,6 @@ public class Day12 extends AdventSolution2020<Integer, Integer> {
             (first, second) -> first
         )
         .manhattanDistance(Point.ORIGIN_2D);
-  }
-
-  public static Point2D movePointTowardsDir(Point2D pt, DirNavInstr vector) {
-    return GridUtil.move(
-        pt,
-        switch (vector.action) {
-          case NORTH -> GridUtil.HEADING_NORTH;
-          case SOUTH -> GridUtil.HEADING_SOUTH;
-          case EAST -> GridUtil.HEADING_EAST;
-          case WEST -> GridUtil.HEADING_WEST;
-          default -> throw new IllegalArgumentException();
-        },
-        vector.value,
-        false,
-        false
-    );
   }
 
   private enum NavAction {
@@ -109,6 +93,17 @@ public class Day12 extends AdventSolution2020<Integer, Integer> {
     @Override
     public @NotNull Point2D accept(@NotNull Point2D ferry, @NotNull NavInstrVisitor visitor) {
       return visitor.visit(ferry, this);
+    }
+
+    @GridUtil.GridHeading
+    public int heading() {
+      return switch (action) {
+        case NORTH -> GridUtil.HEADING_NORTH;
+        case SOUTH -> GridUtil.HEADING_SOUTH;
+        case EAST -> GridUtil.HEADING_EAST;
+        case WEST -> GridUtil.HEADING_WEST;
+        default -> throw new IllegalArgumentException();
+      };
     }
   }
 

@@ -5,6 +5,7 @@ import dev.linl33.adventofcode.lib.HasHeading;
 import dev.linl33.adventofcode.lib.grid.Grid;
 import dev.linl33.adventofcode.lib.grid.GridVisitResult;
 import dev.linl33.adventofcode.lib.point.Point2D;
+import org.intellij.lang.annotations.MagicConstant;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,13 +17,17 @@ public class GridUtil {
     RIGHT_90, LEFT_90, RIGHT_270, LEFT_270, INVERT, NULL
   }
 
+  @MagicConstant(intValues = {HEADING_NORTH, HEADING_EAST, HEADING_SOUTH, HEADING_WEST})
+  public @interface GridHeading {}
+
   public static final int HEADING_NORTH = 0;
   public static final int HEADING_EAST = 1;
   public static final int HEADING_SOUTH = 2;
   public static final int HEADING_WEST = 3;
   public static final int[] HEADINGS = new int[]{HEADING_NORTH, HEADING_EAST, HEADING_SOUTH, HEADING_WEST};
 
-  public static int turn(TurningDirection direction, int heading) {
+  @GridHeading
+  public static int turn(TurningDirection direction, @GridHeading int heading) {
     return switch (direction) {
       case RIGHT_90, LEFT_270 -> HEADINGS[(heading + 1) % 4];
       case LEFT_90, RIGHT_270 -> HEADINGS[Math.floorMod(heading - 1, 4)];
@@ -31,11 +36,11 @@ public class GridUtil {
     };
   }
 
-  public static Point2D move(Point2D curr, int heading) {
+  public static Point2D move(Point2D curr, @GridHeading int heading) {
     return move(curr, heading, false, false);
   }
 
-  public static Point2D move(Point2D curr, int heading, boolean invertX, boolean invertY) {
+  public static Point2D move(Point2D curr, @GridHeading int heading, boolean invertX, boolean invertY) {
     return move(curr, heading, 1, invertX, invertY);
   }
 
@@ -43,12 +48,12 @@ public class GridUtil {
     return move(entity.getPosition(), entity.getHeading(), invertX, invertY);
   }
 
-  public static Point2D move(Point2D curr, int heading, int units, boolean invertX, boolean invertY) {
-    if (invertX && (heading == 1 || heading == 3)) {
+  public static Point2D move(Point2D curr, @GridHeading int heading, int units, boolean invertX, boolean invertY) {
+    if (invertX && (heading == HEADING_EAST || heading == HEADING_WEST)) {
       heading = turn(TurningDirection.INVERT, heading);
     }
 
-    if (invertY && (heading == 0 || heading == 2)) {
+    if (invertY && (heading == HEADING_NORTH || heading == HEADING_SOUTH)) {
       heading = turn(TurningDirection.INVERT, heading);
     }
 
@@ -61,6 +66,7 @@ public class GridUtil {
     };
   }
 
+  @GridHeading
   public static int parseHeading(char headingChar) {
     return switch (headingChar) {
       case '^' -> HEADING_NORTH;
@@ -71,7 +77,7 @@ public class GridUtil {
     };
   }
   
-  public static char headingToChar(int heading) {
+  public static char headingToChar(@GridHeading int heading) {
     return switch (heading) {
       case HEADING_NORTH -> '^';
       case HEADING_EAST -> '>';

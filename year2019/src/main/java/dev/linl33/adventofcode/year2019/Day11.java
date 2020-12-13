@@ -37,7 +37,7 @@ public class Day11 extends AdventSolution2019<Integer, Long[][]> {
     var vmOutput = vm.getOutput();
 
     var color = new HashMap<Point2D, Long>();
-    var heading = 0;
+    var heading = GridUtil.HEADING_NORTH;
     var pos = new Point2D(0, 0);
 
     while (!vm.hasHalted()) {

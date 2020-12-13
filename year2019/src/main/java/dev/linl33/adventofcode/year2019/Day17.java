@@ -55,6 +55,7 @@ public class Day17 extends AdventSolution2019<Integer, Long> {
         .findAny()
         .orElseThrow(IllegalArgumentException::new);
 
+    @GridUtil.GridHeading
     var heading = GridUtil.parseHeading(robot.getValue());
     var position = robot.getKey();
     var path = new StringJoiner(",");
