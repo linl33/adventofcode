@@ -2,12 +2,15 @@ package dev.linl33.adventofcode.year2020;
 
 import java.io.BufferedReader;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.ToLongFunction;
 
 public class Day14 extends AdventSolution2020<Long, Long> {
+  private static final int MAX_FLOATING_BITS = 9;
+
   public static void main(String[] args) {
     new Day14().runAndPrintAll();
   }
@@ -39,25 +42,24 @@ public class Day14 extends AdventSolution2020<Long, Long> {
   public Long part2(BufferedReader reader) {
     var memory = new HashMap<Long, Integer>();
     var oneMask = new AtomicLong(0);
-    var maskCache = new AtomicReference<long[]>(null);
+    var floatingMaskCache = new long[1 << MAX_FLOATING_BITS];
+    var floatingMaskSize = new AtomicInteger(0);
 
     return solve(
         reader,
         maskInstr -> {
           oneMask.setPlain(maskInstr.oneMask());
-          maskCache.setPlain(applyMask(maskInstr.floatingMask()));
+          floatingMaskSize.setPlain(applyFloatingMask(maskInstr.floatingMask(), floatingMaskCache));
         },
         writeInstr -> {
           var value = writeInstr.value();
           var addrWithOrMask = writeInstr.addr() | oneMask.getPlain();
-          var masks = maskCache.getPlain();
           var delta = 0L;
 
-          for (var mask : masks) {
-            var addr = addrWithOrMask ^ mask;
-
-            delta += value - memory.getOrDefault(addr, 0);
-            memory.put(addr, value);
+          var length = floatingMaskSize.getPlain();
+          for (int i = 0; i < length; i++) {
+            var addr = addrWithOrMask ^ floatingMaskCache[i];
+            delta += value - Objects.requireNonNullElse(memory.put(addr, value), 0);
           }
 
           return delta;
@@ -89,24 +91,23 @@ public class Day14 extends AdventSolution2020<Long, Long> {
         );
   }
 
-  private static long[] applyMask(long floatingMask) {
-    var res = new long[1 << Long.bitCount(floatingMask)];
-    var counter = 1; // start from 1 to let res[0] be 0
+  private static int applyFloatingMask(long floatingMask, long[] maskOut) {
+    var counter = 1; // start from 1 to let maskOut[0] be 0
 
     var length = Long.SIZE - Long.numberOfLeadingZeros(floatingMask);
-    for (int i = 0; i < length; i++) {
+    for (int i = Long.numberOfTrailingZeros(floatingMask); i < length; i++) {
       if (((floatingMask >> i) & 1L) != 1L) {
         continue;
       }
 
       for (int j = 0; j < counter; j++) {
-        res[counter + j] = res[j] ^ (1L << i);
+        maskOut[counter + j] = maskOut[j] | (1L << i);
       }
 
       counter <<= 1;
     }
 
-    return res;
+    return 1 << Long.bitCount(floatingMask);
   }
 
   private sealed interface InitInstr {
