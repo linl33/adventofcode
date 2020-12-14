@@ -60,7 +60,6 @@
                         <release>${java.version}</release>
                         <compilerArgs>
                             <arg>--enable-preview</arg>
-<!--                            <arg>&#45;&#45;add-modules=jdk.incubator.vector</arg>-->
                         </compilerArgs>
                     </configuration>
                 </plugin>
@@ -127,7 +126,6 @@
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <argLine>--enable-preview</argLine>
-<!--                        <argLine>&#45;&#45;add-modules=jdk.incubator.vector</argLine>-->
                     </configuration>
                 </plugin>
             </plugins>
