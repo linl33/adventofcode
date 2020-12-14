@@ -24,6 +24,11 @@ public interface AdventSolution<T1, T2> {
 
   int getDay();
 
+  default AdventSolution<T1, T2> getThis() {
+    // use by AdventSolutionTest to swap out a proxy
+    return this;
+  }
+
   default void runAndPrintAll() {
     getLogger().info(
         LoggingUtil.SOLUTION_MARKER,
@@ -40,7 +45,7 @@ public interface AdventSolution<T1, T2> {
 
   default <U, V extends AdventSolution<T1, T2>> U run(ThrowingBiFunction<V, BufferedReader, U> customPart,
                                                       String resource) {
-    return SolutionUtil.adaptPartToRunGeneric((V) this, customPart, resource);
+    return SolutionUtil.adaptPartToRunGeneric((V) getThis(), customPart, resource);
   }
 
   default Object run(SolutionPart solutionPart, String resource) {
@@ -54,7 +59,7 @@ public interface AdventSolution<T1, T2> {
   default <U, V extends AdventSolution<T1, T2>> void print(ThrowingBiFunction<V, BufferedReader, U> customPart,
                                                            ThrowingBiFunction<V, U, ?> printMapping,
                                                            String resource) {
-    SolutionUtil.adaptPartToPrintGeneric((V) this, customPart, printMapping, resource);
+    SolutionUtil.adaptPartToPrintGeneric((V) getThis(), customPart, printMapping, resource);
   }
 
   default void print(SolutionPart solutionPart, String resource) {

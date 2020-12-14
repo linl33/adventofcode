@@ -1,6 +1,8 @@
 package dev.linl33.adventofcode.testlib;
 
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
+import dev.linl33.adventofcode.lib.solution.SolutionUtil;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -83,7 +85,7 @@ public interface AdventSolutionTest<T1, T2> {
         ));
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private AdventSolution<T1, T2> buildSolutionProxy(AdventSolution<T1, T2> delegateTo) {
     // TODO: avoid this proxy
 
@@ -93,6 +95,22 @@ public interface AdventSolutionTest<T1, T2> {
         (proxy, method, args) -> {
           if (method.getName().equals("resourceSupplier") && args[0] instanceof String resource && resource.startsWith("string:")) {
             return new BufferedReader(new StringReader(resource.replaceFirst("string:", "")));
+          } else if (method.getName().equals("getThis")) {
+            return delegateTo;
+          } else if (method.getName().equals("run") && args[0] instanceof ThrowingBiFunction customPart) {
+            return SolutionUtil.adaptPartToRunGeneric(
+                (AdventSolution<T1, T2>) proxy,
+                customPart,
+                (String) args[1]
+            );
+          } else if (method.getName().equals("print") && args[0] instanceof ThrowingBiFunction customPart) {
+            SolutionUtil.adaptPartToPrintGeneric(
+                (AdventSolution<T1, T2>) proxy,
+                customPart,
+                (ThrowingBiFunction) args[1],
+                (String) args[2]
+            );
+            return null;
           } else {
             try {
               return method.invoke(delegateTo, args);
