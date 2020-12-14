@@ -3,6 +3,8 @@ package dev.linl33.adventofcode.lib.util;
 import dev.linl33.adventofcode.lib.point.Point2D;
 import org.jetbrains.annotations.Range;
 
+import java.math.BigInteger;
+
 public final class MathUtil {
   public static int gcd(int a, int b) {
     if (a == b) {
@@ -131,5 +133,35 @@ public final class MathUtil {
     }
 
     return choose(n - 1, r - 1) + choose(n - 1, r);
+  }
+
+  public static long crt(int[] modulo, int[] remainder, boolean primeOnly) {
+    var prod = 1L;
+    for (int i : modulo) {
+      prod *= i;
+    }
+
+    var partialProd = new long[modulo.length];
+    for (int i = 0; i < modulo.length; i++) {
+      partialProd[i] = prod / modulo[i];
+    }
+
+    var sum = 0L;
+    for (int i = 0; i < modulo.length; i++) {
+      var moduloBig = BigInteger.valueOf(modulo[i]);
+      var partialProdBig = BigInteger.valueOf(partialProd[i]);
+
+      long modInverse;
+      if (primeOnly) {
+        // by Euler's theorem
+        modInverse = partialProdBig.modPow(moduloBig.subtract(BigInteger.valueOf(2)), moduloBig).longValue();
+      } else {
+        modInverse = partialProdBig.modInverse(moduloBig).longValue();
+      }
+
+      sum += modInverse * partialProd[i] * remainder[i];
+    }
+
+    return sum % prod;
   }
 }
