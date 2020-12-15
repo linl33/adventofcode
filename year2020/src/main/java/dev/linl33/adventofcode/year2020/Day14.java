@@ -1,5 +1,8 @@
 package dev.linl33.adventofcode.year2020;
 
+import org.apache.logging.log4j.LogManager;
+import sun.misc.Unsafe;
+
 import java.io.BufferedReader;
 import java.util.HashMap;
 import java.util.Objects;
@@ -10,6 +13,28 @@ import java.util.function.ToLongFunction;
 
 public class Day14 extends AdventSolution2020<Long, Long> {
   private static final int MAX_FLOATING_BITS = 9;
+  private static final int ADDR_BITS = 36;
+  private static final Unsafe UNSAFE;
+  private static final long baseAddr;
+
+  static {
+    try {
+      var f = Unsafe.class.getDeclaredField("theUnsafe");
+      f.setAccessible(true);
+      UNSAFE = (Unsafe) f.get(null);
+    } catch (NoSuchFieldException | IllegalAccessException e) {
+      throw new RuntimeException(e);
+    }
+
+    var tmpBaseAddr = -1L;
+    try {
+      tmpBaseAddr = UNSAFE.allocateMemory((1L << ADDR_BITS) * Integer.BYTES);
+    } catch (OutOfMemoryError outOfMemoryError) {
+      LogManager.getLogger(Day14.class).warn("Unable to allocate memory", outOfMemoryError);
+    }
+
+    baseAddr = tmpBaseAddr;
+  }
 
   public static void main(String[] args) {
     new Day14().runAndPrintAll();
@@ -40,6 +65,50 @@ public class Day14 extends AdventSolution2020<Long, Long> {
 
   @Override
   public Long part2(BufferedReader reader) {
+    // pick an implementation
+
+    return solveByHashMap(reader);
+//    return solveByUnsafeAllocateMemory(reader);
+  }
+
+  private static long solveByUnsafeAllocateMemory(BufferedReader reader) {
+    // this method takes advantage of vm overcommit to write memory values
+    // directly into the virtual memory
+    // tested on Linux
+    // may have to set /proc/sys/vm/overcommit_memory to 1
+
+    if (baseAddr < 0L) {
+      throw new IllegalStateException("Memory allocation failed");
+    }
+
+    var oneMask = new AtomicLong(0);
+    var floatingMaskCache = new long[1 << MAX_FLOATING_BITS];
+    var floatingMaskSize = new AtomicInteger(0);
+
+    return solve(
+        reader,
+        maskInstr -> {
+          oneMask.setPlain(maskInstr.oneMask());
+          floatingMaskSize.setPlain(applyFloatingMask(maskInstr.floatingMask(), floatingMaskCache));
+        },
+        writeInstr -> {
+          var value = writeInstr.value();
+          var addrWithOrMask = writeInstr.addr() | oneMask.getPlain();
+          var delta = 0L;
+
+          var length = floatingMaskSize.getPlain();
+          for (int i = 0; i < length; i++) {
+            var addr = addrWithOrMask ^ floatingMaskCache[i];
+            delta += value - UNSAFE.getInt(baseAddr + addr * Integer.BYTES);
+            UNSAFE.putInt(baseAddr + addr * Integer.BYTES, value);
+          }
+
+          return delta;
+        }
+    );
+  }
+
+  private static long solveByHashMap(BufferedReader reader) {
     var memory = new HashMap<Long, Integer>();
     var oneMask = new AtomicLong(0);
     var floatingMaskCache = new long[1 << MAX_FLOATING_BITS];
