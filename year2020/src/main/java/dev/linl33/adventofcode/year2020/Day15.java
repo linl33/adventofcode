@@ -11,15 +11,15 @@ public class Day15 extends AdventSolution2020<Integer, Integer> {
 
   @Override
   public Integer part1(BufferedReader reader) throws IOException {
-    return solveForNth(reader, 2020);
+    return solveForNthSingleHistory(reader, 2020);
   }
 
   @Override
   public Integer part2(BufferedReader reader) throws IOException {
-    return solveForNth(reader, 30_000_000);
+    return solveForNthSingleHistory(reader, 30_000_000);
   }
 
-  private static int solveForNth(BufferedReader reader, int n) throws IOException {
+  public static int solveForNth(BufferedReader reader, int n) throws IOException {
     var input = Arrays
         .stream(reader.readLine().split(","))
         .mapToInt(Integer::parseInt)
@@ -39,12 +39,38 @@ public class Day15 extends AdventSolution2020<Integer, Integer> {
 
       // if the highest 32 bits are not set then this number has only been seen once
       // if the number has been seen twice, subtract the highest 32 bits from the lowest 32 bits
-      number = (numberHistory >> Integer.SIZE) == 0L ? 0 :
+      number = numberHistory < (1L << Integer.SIZE) ? 0 :
           (int) ((numberHistory & ~0) - (numberHistory >> Integer.SIZE));
 
       // shift the lowest 32 bits into the highest 32 bits
       // then put i into the lowest 32 bits
       history[number] = (history[number] << Integer.SIZE) | i;
+    }
+
+    return number;
+  }
+
+  private static int solveForNthSingleHistory(BufferedReader reader, int n) throws IOException {
+    var input = Arrays
+        .stream(reader.readLine().split(","))
+        .mapToInt(Integer::parseInt)
+        .toArray();
+
+    // tracking 1 history is enough
+    // the new number is always (n - 1) - (prior history)
+    var history = new int[n];
+
+    for (int i = 0; i < input.length; i++) {
+      history[input[i]] = i + 1;
+    }
+
+    var number = input[input.length - 1];
+
+    for (int i = input.length; i < n; i++) {
+      var numberHistory = history[number];
+      history[number] = i;
+
+      number = numberHistory == 0 ? 0 : (i - numberHistory);
     }
 
     return number;
