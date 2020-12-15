@@ -28,7 +28,7 @@ public class Day15 extends AdventSolution2020<Integer, Integer> {
     var history = new long[n];
 
     for (int i = 0; i < input.length; i++) {
-      // put i into the lowest 32 bits
+      // put i + 1 into the lowest 32 bits
       history[input[i]] = i + 1L;
     }
 
@@ -40,7 +40,7 @@ public class Day15 extends AdventSolution2020<Integer, Integer> {
       // if the highest 32 bits are not set then this number has only been seen once
       // if the number has been seen twice, subtract the highest 32 bits from the lowest 32 bits
       number = (numberHistory >> Integer.SIZE) == 0L ? 0 :
-          (int) ((numberHistory & Integer.MAX_VALUE) - (numberHistory >> Integer.SIZE));
+          (int) ((numberHistory & ~0) - (numberHistory >> Integer.SIZE));
 
       // shift the lowest 32 bits into the highest 32 bits
       // then put i into the lowest 32 bits
