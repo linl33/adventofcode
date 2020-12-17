@@ -112,7 +112,7 @@ public class Day16 extends AdventSolution2020<Integer, Long> {
 
       var nearbyTickets = input.next()
           .skip(1)
-          .map(TrainNotes::ticketToIntArr)
+          .map(t -> ticketToIntArr(t, myTicket.length))
           .filter(t -> !filterInvalid || Arrays.stream(t).allMatch(anyMatch))
           .flatMapToInt(Arrays::stream)
           .toArray();
@@ -152,6 +152,31 @@ public class Day16 extends AdventSolution2020<Integer, Long> {
           .stream(ticket.split(","))
           .mapToInt(Integer::parseInt)
           .toArray();
+    }
+
+    private static int[] ticketToIntArr(String ticket, int ticketSize) {
+      // split the ticket into an int array manually
+      // String.split is slow
+
+      var result = new int[ticketSize];
+      var fieldVal = 0;
+      var valMultiplier = 1;
+      var counter = ticketSize - 1;
+
+      for (int i = ticket.length() - 1; i >= 0; i--) {
+        var c = ticket.charAt(i);
+        if (c == ',') {
+          result[counter--] = fieldVal;
+          fieldVal = 0;
+          valMultiplier = 1;
+        } else {
+          fieldVal += valMultiplier * (c - '0');
+          valMultiplier *= 10;
+        }
+      }
+      result[counter] = fieldVal;
+
+      return result;
     }
   }
 }
