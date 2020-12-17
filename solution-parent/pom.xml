@@ -35,6 +35,10 @@
         </dependency>
         <dependency>
             <groupId>dev.linl33.adventofcode</groupId>
+            <artifactId>benchmark-jmh</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.linl33.adventofcode</groupId>
             <artifactId>testlib</artifactId>
             <scope>test</scope>
         </dependency>
