@@ -13,6 +13,7 @@
 
         <module>lib</module>
         <module>testlib</module>
+        <module>benchmark-jmh</module>
 
         <module>year2018</module>
         <module>year2019</module>
@@ -144,6 +145,11 @@
             <dependency>
                 <groupId>dev.linl33.adventofcode</groupId>
                 <artifactId>lib</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.linl33.adventofcode</groupId>
+                <artifactId>benchmark-jmh</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

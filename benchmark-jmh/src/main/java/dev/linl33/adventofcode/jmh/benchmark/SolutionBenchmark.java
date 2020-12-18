@@ -1,4 +1,4 @@
-package dev.linl33.adventofcode.lib.solution.benchmark;
+package dev.linl33.adventofcode.jmh.benchmark;
 
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.lib.solution.SolutionPart;
