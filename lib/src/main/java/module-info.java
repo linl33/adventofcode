@@ -2,10 +2,6 @@ module dev.linl33.adventofcode.lib {
   requires static org.jetbrains.annotations;
   requires org.apache.logging.log4j;
 
-//  requires jmh.core;
-//  requires static jmh.generator.annprocess;
-//  requires jdk.unsupported; // used by jmh
-
   exports dev.linl33.adventofcode.lib;
   exports dev.linl33.adventofcode.lib.benchmark;
   exports dev.linl33.adventofcode.lib.function;
@@ -16,6 +12,4 @@ module dev.linl33.adventofcode.lib {
   exports dev.linl33.adventofcode.lib.point;
   exports dev.linl33.adventofcode.lib.solution;
   exports dev.linl33.adventofcode.lib.util;
-
-//  opens dev.linl33.adventofcode.lib.solution.benchmark.jmh_generated to jmh.core;
 }
