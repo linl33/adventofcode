@@ -44,13 +44,14 @@ public interface Grid {
 
       @Override
       public GridVisitResult visit(int x, int y, int value) {
-        sb.append((char) value);
+        sb.append((char) value == '#' ? PrintUtil.FULL_BLOCK : ' ');
         return GridVisitResult.CONTINUE;
       }
 
       @Override
       public GridVisitResult postVisitLine(int x, int y, int[] line) {
-        PrintUtil.enhancedPrint(sb.toString());
+//        PrintUtil.enhancedPrint(sb.toString());
+        System.out.println(sb.toString());
         return GridVisitResult.CONTINUE;
       }
     });
