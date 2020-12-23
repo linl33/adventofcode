@@ -196,7 +196,7 @@ public class Day19 extends AdventSolution2020<Integer, Integer> {
       }
 
       // if exactly one of them is 0
-      if ((first == 0) != (second == 0)) {
+      if (first == 0 || second == 0) {
         return resolveRule.apply(first | second);
       }
 
