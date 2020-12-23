@@ -54,7 +54,7 @@ public class Day22 extends AdventSolution2020<Integer, Integer> {
     char[] gameArrRec = null;
 
     while (!game.ended()) {
-      if (recursive && (!hist1.add(game.serialize(Player.P1)) || !hist2.add(game.serialize(Player.P2)))) {
+      if (recursive && (!hist1.add(game.serialize(Player.P1)) && !hist2.add(game.serialize(Player.P2)))) {
         return Player.P1;
       }
 
@@ -63,24 +63,30 @@ public class Day22 extends AdventSolution2020<Integer, Integer> {
 
       var roundWinner = c1 > c2 ? Player.P1 : Player.P2;
       if (recursive && game.canRecurse()) {
-        // reuse the history set for independent recursive games
-        // also reuse the backing array for DoubleDeck
-        if (hist1Rec == null) {
-          hist1Rec = new HashSet<>(1000);
-        } else {
-          hist1Rec.clear();
-        }
-        if (hist2Rec == null) {
-          hist2Rec = new HashSet<>(1000);
-        } else {
-          hist2Rec.clear();
-        }
-
         if (gameArrRec == null) {
           gameArrRec = new char[game.cards.length];
         }
 
-        roundWinner = playCombat(game.copy(gameArrRec), true, hist1Rec, hist2Rec);
+        var copy = game.copy(gameArrRec);
+        if (copy.p1HasHighest()) {
+          // if P1 holds the highest card of this round, P1 will eventually win this round
+          roundWinner = Player.P1;
+        } else {
+          // reuse the history set for independent recursive games
+          // also reuse the backing array for DoubleDeck
+          if (hist1Rec == null) {
+            hist1Rec = new HashSet<>(1000);
+          } else {
+            hist1Rec.clear();
+          }
+          if (hist2Rec == null) {
+            hist2Rec = new HashSet<>(1000);
+          } else {
+            hist2Rec.clear();
+          }
+
+          roundWinner = playCombat(copy, true, hist1Rec, hist2Rec);
+        }
       }
 
       game.moveCards(roundWinner);
@@ -220,6 +226,20 @@ public class Day22 extends AdventSolution2020<Integer, Integer> {
           p2TopIdx - (p2Length - p2CopyLength),
           p2CopyLength
       );
+    }
+
+    public boolean p1HasHighest() {
+      var max = -1;
+      var idx = 0;
+
+      for (int start = p1TopIdx; start < p2TopIdx + 1; start++) {
+        if (cards[start] > max) {
+          max = cards[start];
+          idx = start;
+        }
+      }
+
+      return idx < (p1TopIdx + p1Length);
     }
 
     public int tallyScore() {
