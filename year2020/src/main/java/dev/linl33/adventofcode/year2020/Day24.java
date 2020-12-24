@@ -12,6 +12,8 @@ public class Day24 extends AdventSolution2020<Integer, Integer> {
 
   private static final int GRID_WIDTH = 300;
   private static final int GRID_HEIGHT = GRID_WIDTH / 2;
+  private static final int BLACK_TILE = ~0;
+  private static final int WHITE_TILE = 0;
 
   public static void main(String[] args) {
     new Day24().runAndPrintAll();
@@ -21,14 +23,17 @@ public class Day24 extends AdventSolution2020<Integer, Integer> {
   public Integer part1(BufferedReader reader) throws Exception {
     return (int) Arrays
         .stream(initFloor(reader).array())
-        .filter(i -> i == ~0)
+        .filter(i -> i == BLACK_TILE)
         .count();
   }
 
   @Override
   public Integer part2(BufferedReader reader) throws Exception {
     var tiles = initFloor(reader);
-    var copy = new RowArrayGrid(tiles.height(), tiles.width());
+    var copy = new RowArrayGrid(GRID_HEIGHT, GRID_WIDTH);
+
+    var tilesArr = tiles.array();
+    var copyArr = copy.array();
 
     var blackTileCount = 0;
 
@@ -36,58 +41,85 @@ public class Day24 extends AdventSolution2020<Integer, Integer> {
     var maxX = -1;
     var minY = Integer.MAX_VALUE;
     var maxY = -1;
-    for (int y = 0; y < tiles.height(); y++) {
-      for (int x = (y % 2 == 0 ? 1 : 0); x < tiles.width(); x += 2) {
-        if (tiles.get(x, y) == 0) {
+    for (int y = 0; y < GRID_HEIGHT; y++) {
+      for (int x = (y % 2 == 0 ? 1 : 0); x < GRID_WIDTH; x += 2) {
+        if (tiles.get(x, y) == WHITE_TILE) {
           continue;
         }
 
         blackTileCount++;
 
-        minX = Math.min(minX, x);
-        maxX = Math.max(maxX, x);
-        minY = Math.min(minY, y);
-        maxY = Math.max(maxY, y);
+        if (x < minX) {
+          minX = x;
+        } else if (x > maxX) {
+          maxX = x;
+        }
+
+        if (y < minY) {
+          minY = y;
+        } else if (y > maxY) {
+          maxY = y;
+        }
       }
     }
 
-    for (int i = 0; i < 100; i++) {
-      var newMinY = minY;
-      var newMaxY = maxY;
-      var newMinX = minX;
-      var newMaxX = maxX;
+    var newMinY = minY;
+    var newMaxY = maxY;
+    var newMinX = minX;
+    var newMaxX = maxX;
+
+    for (int n = 0; n < 100; n++) {
+      // bulk set copy to tiles
+      // only arraycopy the region that matters
+      System.arraycopy(
+          tilesArr,
+          (minY - 1) * GRID_WIDTH + (minX - 1),
+          copyArr,
+          (minY - 1) * GRID_WIDTH + (minX - 1),
+          ((maxY + 1) * GRID_WIDTH + (maxX + 1)) - ((minY - 1) * GRID_WIDTH + (minX - 1)) + 1
+      );
 
       for (int y = minY - 1; y <= maxY + 1; y++) {
         // because of how the hexagonal grid is projected onto the orthogonal grid
         // if the parity of y == parity of x (i.e. y % 2 == x % 2), that position has to be equal to 0
         // adjust x here and iterate every other x
-        for (int x = (y % 2 == (minX - 1) % 2) ? minX : minX - 1; x <= maxX + 1; x += 2) {
-          int count = countNeighbors(tiles, y, x);
 
-          if (tiles.get(x, y) == ~0) {
+        var setY = false;
+        for (int x = (y % 2 == (minX - 1) % 2) ? minX : minX - 1; x <= maxX + 1; x += 2) {
+          var count = countNeighbors(tiles, y, x);
+
+          if (tiles.get(x, y) == BLACK_TILE) {
             if (count == 0 || count > 2) {
-              copy.set(x, y, 0);
+              copy.set(x, y, WHITE_TILE);
               blackTileCount--;
-            } else {
-              copy.set(x, y, ~0);
             }
 
-            newMinY = Math.min(newMinY, y);
-            newMinX = Math.min(newMinX, x);
-            newMaxY = Math.max(newMaxY, y);
-            newMaxX = Math.max(newMaxX, x);
+            setY = true;
+            if (x < minX) {
+              newMinX = x;
+            } else if (x > maxX) {
+              newMaxX = x;
+            }
           } else {
             if (count == 2) {
-              copy.set(x, y, ~0);
+              copy.set(x, y, BLACK_TILE);
               blackTileCount++;
 
-              newMinY = Math.min(newMinY, y);
-              newMinX = Math.min(newMinX, x);
-              newMaxY = Math.max(newMaxY, y);
-              newMaxX = Math.max(newMaxX, x);
-            } else {
-              copy.set(x, y, 0);
+              setY = true;
+              if (x < minX) {
+                newMinX = x;
+              } else if (x > maxX) {
+                newMaxX = x;
+              }
             }
+          }
+        }
+
+        if (setY) {
+          if (y < minY) {
+            newMinY = y;
+          } else if (y > maxY) {
+            newMaxY = y;
           }
         }
       }
@@ -100,38 +132,22 @@ public class Day24 extends AdventSolution2020<Integer, Integer> {
       var tmp = tiles;
       tiles = copy;
       copy = tmp;
+
+      var tmpArr = tilesArr;
+      tilesArr = copyArr;
+      copyArr = tmpArr;
     }
 
     return blackTileCount;
   }
 
   private static int countNeighbors(RowArrayGrid tiles, int y, int x) {
-    var count = 0;
-
-    if (tiles.get(x - 1, y + 1) == ~0) {
-      count++;
-    }
-
-    if (tiles.get(x + 1, y - 1) == ~0) {
-      count++;
-    }
-
-    if (tiles.get(x - 1, y - 1) == ~0) {
-      count++;
-    }
-
-    if (tiles.get(x + 1, y + 1) == ~0) {
-      count++;
-    }
-
-    if (tiles.get(x + 2, y) == ~0) {
-      count++;
-    }
-
-    if (tiles.get(x - 2, y) == ~0) {
-      count++;
-    }
-    return count;
+    return (tiles.get(x - 1, y - 1) & 1) +
+        (tiles.get(x - 1, y + 1) & 1) +
+        (tiles.get(x + 1, y - 1) & 1) +
+        (tiles.get(x + 1, y + 1) & 1) +
+        (tiles.get(x - 2, y) & 1) +
+        (tiles.get(x + 2, y) & 1);
   }
 
   private static RowArrayGrid initFloor(BufferedReader reader) {
