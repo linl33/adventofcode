@@ -5,6 +5,10 @@ import java.util.Arrays;
 public interface ArrayGrid extends Grid {
   int[] array();
 
+  default void toggle(int x, int y) {
+    array()[y * width() + x] ^= ~0;
+  }
+
   default void invertX() {
     for (int y = 0; y < height(); y++) {
       for (int x = 0; x < (width()) / 2; x++) {
