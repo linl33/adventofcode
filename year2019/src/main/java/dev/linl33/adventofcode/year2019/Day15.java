@@ -1,9 +1,12 @@
 package dev.linl33.adventofcode.year2019;
 
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
+import dev.linl33.adventofcode.lib.function.ThrowingFunction;
 import dev.linl33.adventofcode.lib.graph.GraphPath;
 import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import dev.linl33.adventofcode.lib.point.Point;
 import dev.linl33.adventofcode.lib.point.Point2D;
+import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.lib.util.*;
 import dev.linl33.adventofcode.year2019.intcodevm.IntcodeVM;
 
@@ -22,7 +25,7 @@ public class Day15 extends AdventSolution2019<Integer, Integer> {
     var day15 = new Day15();
 
     day15.runAndPrintAll();
-    day15.print(Day15::part2ByPathFinding, Day15::part2PrintMapping, day15.getPart2Resource());
+    day15.print((ThrowingBiFunction<Day15, BufferedReader, ? extends Object>) Day15::part2ByPathFinding, (__, integer) -> integer, day15.getPart2Resource());
   }
 
   @Override

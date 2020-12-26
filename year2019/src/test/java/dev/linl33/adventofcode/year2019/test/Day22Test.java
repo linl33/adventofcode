@@ -1,6 +1,9 @@
 package dev.linl33.adventofcode.year2019.test;
 
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
+import dev.linl33.adventofcode.lib.solution.ClasspathResourceIdentifier;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
 import dev.linl33.adventofcode.year2019.Day22;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,12 +22,12 @@ class Day22Test implements AdventSolutionTest<Integer, Long> {
   }
 
   @Override
-  public Map<String, Integer> getPart1Cases() {
+  public Map<Object, Integer> getPart1Cases() {
     return Map.of(newSolutionInstance().getPart1Resource(), 6061);
   }
 
   @Override
-  public Map<String, Long> getPart2Cases() {
+  public Map<Object, Long> getPart2Cases() {
     return Map.of(newSolutionInstance().getPart2Resource(), 79490866971571L);
   }
 
@@ -35,13 +38,15 @@ class Day22Test implements AdventSolutionTest<Integer, Long> {
       "day22test3, 6 3 0 7 4 1 8 5 2 9",
       "day22test4, 9 2 5 8 1 4 7 0 3 6"
   })
-  void testShuffleWholeDeck(String resource, String expected, AdventSolution<Integer, Long> day22) {
+  void testShuffleWholeDeck(String resourceName, String expected, Day22 day22) {
+    var resource = new ClasspathResourceIdentifier(resourceName);
+
     assertArrayEquals(
         Arrays
             .stream(expected.split(" "))
             .mapToInt(Integer::parseInt)
             .toArray(),
-        day22.run(Day22Test::shuffleWholeDeck, resource)
+        day22.run((ThrowingBiFunction<Day22, BufferedReader, int[]>) Day22Test::shuffleWholeDeck, resource)
     );
   }
 

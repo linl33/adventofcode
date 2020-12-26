@@ -1,19 +1,14 @@
 package dev.linl33.adventofcode.testlib;
 
-import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
-import dev.linl33.adventofcode.lib.solution.AdventSolution;
-import dev.linl33.adventofcode.lib.solution.SolutionUtil;
+import dev.linl33.adventofcode.lib.solution.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,11 +19,26 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 public interface AdventSolutionTest<T1, T2> {
   AdventSolution<T1, T2> newSolutionInstance();
 
-  Map<String, T1> getPart1Cases();
+  Map<Object, T1> getPart1Cases();
 
-  Map<String, T2> getPart2Cases();
+  Map<Object, T2> getPart2Cases();
 
-  default Map<TestPart, Map<String, String>> getDisabledTests() {
+  default Map<ResourceIdentifier, T1> getPart1Resources() {
+    return adaptCaseMap(getPart1Cases());
+  }
+
+  default Map<ResourceIdentifier, T2> getPart2Resources() {
+    return adaptCaseMap(getPart2Cases());
+  }
+
+  default AdventSolution<T1, T2> getSolutionInstance() {
+    var instance = (AdventSolution<T1, T2> & ClasspathResourceService & ResourceServiceHolder) newSolutionInstance();
+    instance.setResourceService(new CompositeResourceService(instance, new StringResourceService()));
+
+    return instance;
+  }
+
+  default Map<TestPart, Map<ResourceIdentifier, String>> getDisabledTests() {
     return Collections.emptyMap();
   }
 
@@ -36,14 +46,10 @@ public interface AdventSolutionTest<T1, T2> {
     return instance.getDay() != 25 ? TestPart.values() : new TestPart[] {TestPart.PART_1};
   }
 
-  default AdventSolution<T1, T2> getSolutionInstanceProxy() {
-    return buildSolutionProxy(newSolutionInstance());
-  }
-
   @TestFactory
   @DisplayName("allParts")
   default Stream<DynamicContainer> allParts(AdventSolution<T1, T2> instance,
-                                            EnumMap<TestPart, String> defaultResources) {
+                                            EnumMap<TestPart, ResourceIdentifier> defaultResources) {
     return Arrays
         .stream(getTestParts(instance))
         .map(testPart -> dynamicContainer(
@@ -54,7 +60,7 @@ public interface AdventSolutionTest<T1, T2> {
   }
 
   default Stream<DynamicTest> buildDynamicTestsForPart(TestPart testPart,
-                                                       EnumMap<TestPart, String> defaultResources) {
+                                                       EnumMap<TestPart, ResourceIdentifier> defaultResources) {
     var cases = testPart.cases.apply(this);
     var defaultResource = defaultResources.get(testPart);
     assertTrue(
@@ -69,7 +75,7 @@ public interface AdventSolutionTest<T1, T2> {
         .entrySet()
         .stream()
         .map(kv -> dynamicTest(
-            kv.getKey(),
+            kv.getKey().toString(),
             testUri,
             () -> {
               Assumptions.assumeFalse(
@@ -79,47 +85,10 @@ public interface AdventSolutionTest<T1, T2> {
 
               buildAssertion(
                   kv.getValue(),
-                  testPart.part.apply(getSolutionInstanceProxy(), kv.getKey())
+                  testPart.part.apply(getSolutionInstance(), kv.getKey())
               );
             }
         ));
-  }
-
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  private AdventSolution<T1, T2> buildSolutionProxy(AdventSolution<T1, T2> delegateTo) {
-    // TODO: avoid this proxy
-
-    return (AdventSolution<T1, T2>) Proxy.newProxyInstance(
-        getClass().getClassLoader(),
-        new Class[] {AdventSolution.class},
-        (proxy, method, args) -> {
-          if (method.getName().equals("resourceSupplier") && args[0] instanceof String resource && resource.startsWith("string:")) {
-            return new BufferedReader(new StringReader(resource.replaceFirst("string:", "")));
-          } else if (method.getName().equals("getThis")) {
-            return delegateTo;
-          } else if (method.getName().equals("run") && args[0] instanceof ThrowingBiFunction customPart) {
-            return SolutionUtil.adaptPartToRunGeneric(
-                (AdventSolution<T1, T2>) proxy,
-                customPart,
-                (String) args[1]
-            );
-          } else if (method.getName().equals("print") && args[0] instanceof ThrowingBiFunction customPart) {
-            SolutionUtil.adaptPartToPrintGeneric(
-                (AdventSolution<T1, T2>) proxy,
-                customPart,
-                (ThrowingBiFunction) args[1],
-                (String) args[2]
-            );
-            return null;
-          } else {
-            try {
-              return method.invoke(delegateTo, args);
-            } catch (InvocationTargetException e) {
-              throw e.getTargetException();
-            }
-          }
-        }
-    );
   }
 
   private static void buildAssertion(Object expected, Object actual) {
@@ -127,6 +96,28 @@ public interface AdventSolutionTest<T1, T2> {
       assertArrayEquals(expectedArr, actualArr);
     } else {
       assertEquals(expected, actual);
+    }
+  }
+
+  private static <T> Map<ResourceIdentifier, T> adaptCaseMap(Map<Object, T> caseMap) {
+    return caseMap
+        .entrySet()
+        .stream()
+        .collect(Collectors.toMap(
+            kv -> resolveIdentifier(kv.getKey()),
+            Map.Entry::getValue
+        ));
+  }
+
+  private static ResourceIdentifier resolveIdentifier(Object obj) {
+    if (obj instanceof String strKey) {
+      return strKey.startsWith("string:") ?
+          new StringResourceIdentifier(strKey) :
+          new ClasspathResourceIdentifier(strKey);
+    } else if (obj instanceof ResourceIdentifier resId) {
+      return resId;
+    } else {
+      throw new IllegalArgumentException();
     }
   }
 }

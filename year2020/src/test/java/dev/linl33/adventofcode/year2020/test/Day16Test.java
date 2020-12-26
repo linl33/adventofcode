@@ -6,8 +6,6 @@ import dev.linl33.adventofcode.year2020.Day16;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class Day16Test implements AdventSolutionTest<Integer, Long> {
   @Override
   public AdventSolution<Integer, Long> newSolutionInstance() {
@@ -15,7 +13,7 @@ class Day16Test implements AdventSolutionTest<Integer, Long> {
   }
 
   @Override
-  public Map<String, Integer> getPart1Cases() {
+  public Map<Object, Integer> getPart1Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), 23009,
         "day16test1", 71
@@ -23,7 +21,7 @@ class Day16Test implements AdventSolutionTest<Integer, Long> {
   }
 
   @Override
-  public Map<String, Long> getPart2Cases() {
+  public Map<Object, Long> getPart2Cases() {
     return Map.of(newSolutionInstance().getPart2Resource(), 10458887314153L);
   }
 }

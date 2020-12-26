@@ -30,12 +30,12 @@ class Day9Test implements AdventSolutionTest<Long, Long> {
   }
 
   @Override
-  public Map<String, Long> getPart1Cases() {
+  public Map<Object, Long> getPart1Cases() {
     return Map.of(newSolutionInstance().getPart1Resource(), 370210L);
   }
 
   @Override
-  public Map<String, Long> getPart2Cases() {
+  public Map<Object, Long> getPart2Cases() {
     return Map.of(newSolutionInstance().getPart2Resource(), 3101176548L);
   }
 }

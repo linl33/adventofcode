@@ -1,6 +1,8 @@
 package dev.linl33.adventofcode.year2019.test;
 
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
+import dev.linl33.adventofcode.lib.solution.ClasspathResourceIdentifier;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
 import dev.linl33.adventofcode.year2019.Day24;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,7 @@ class Day24Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @Override
-  public Map<String, Integer> getPart1Cases() {
+  public Map<Object, Integer> getPart1Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), 18350099,
         "day24test1", 2129920
@@ -25,12 +27,12 @@ class Day24Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @Override
-  public Map<String, Integer> getPart2Cases() {
+  public Map<Object, Integer> getPart2Cases() {
     return Map.of(newSolutionInstance().getPart2Resource(), 2037);
   }
 
   @Test
-  void testPart2Example(AdventSolution<Integer, Integer> day24) {
-    assertEquals(99, day24.run((Day24 instance, BufferedReader reader) -> instance.part2Internal(reader, 10), "day24test1"));
+  void testPart2Example(Day24 day24) {
+    assertEquals(99, day24.run((Day24 instance, BufferedReader reader) -> instance.part2Internal(reader, 10), new ClasspathResourceIdentifier("day24test1")));
   }
 }

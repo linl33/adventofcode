@@ -13,7 +13,7 @@ class Day10Test implements AdventSolutionTest<Character[][], Integer> {
   }
 
   @Override
-  public Map<String, Character[][]> getPart1Cases() {
+  public Map<Object, Character[][]> getPart1Cases() {
     var expected = new Character[][] {
         {'█', '█', '█', '█', '█', '█', ' ', ' ', ' ', ' ', ' ', '█', '█', '█', ' ', ' ', '█', ' ', ' ', ' ', ' ', '█', ' ', ' ', '█', ' ', ' ', ' ', ' ', '█', ' ', ' ', ' ', '█', '█', '█', '█', ' ', ' ', ' ', ' ', '█', '█', '█', '█', ' ', ' ', ' ', '█', ' ', ' ', ' ', ' ', '█', ' ', ' ', '█', ' ', ' ', ' ', ' ', '█'},
         {'█', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '█', ' ', ' ', ' ', '█', ' ', ' ', ' ', ' ', '█', ' ', ' ', '█', '█', ' ', ' ', ' ', '█', ' ', ' ', '█', ' ', ' ', ' ', ' ', '█', ' ', ' ', '█', ' ', ' ', ' ', ' ', '█', ' ', ' ', '█', '█', ' ', ' ', ' ', '█', ' ', ' ', '█', ' ', ' ', ' ', ' ', '█'},
@@ -31,7 +31,7 @@ class Day10Test implements AdventSolutionTest<Character[][], Integer> {
   }
 
   @Override
-  public Map<String, Integer> getPart2Cases() {
+  public Map<Object, Integer> getPart2Cases() {
     return Map.of(newSolutionInstance().getPart2Resource(), 10612);
   }
 }

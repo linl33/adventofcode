@@ -1,16 +1,16 @@
 package dev.linl33.adventofcode.lib.solution;
 
 import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
+import dev.linl33.adventofcode.lib.function.ThrowingFunction;
 import dev.linl33.adventofcode.lib.util.PrintUtil;
-
-import java.io.BufferedReader;
+import org.jetbrains.annotations.NotNull;
 
 public class SolutionUtil {
-  static Object adaptPartToRun(AdventSolution<?, ?> solution,
-                               ThrowingBiFunction<AdventSolution<?, ?>, BufferedReader, ?> solutionMethod,
-                               String inputResource) {
-    try (var reader = solution.resourceSupplier(inputResource)) {
-      return solutionMethod.apply(solution.getThis(), reader);
+  static <A> Object adaptPartToRun(A solution,
+                                   ThrowingBiFunction<A, ResourceIdentifier, ?> solutionMethod,
+                                   ResourceIdentifier inputResource) {
+    try {
+      return solutionMethod.apply(solution, inputResource);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -18,14 +18,14 @@ public class SolutionUtil {
     }
   }
 
-  static void adaptPartToPrint(AdventSolution<?, ?> solution,
-                               ThrowingBiFunction<AdventSolution<?, ?>, BufferedReader, ?> solutionMethod,
-                               ThrowingBiFunction<AdventSolution<?, ?>, Object, ?> printMapping,
-                               String inputResource) {
+  static <A> void adaptPartToPrint(A solution,
+                                   ThrowingBiFunction<A, ResourceIdentifier, ?> solutionMethod,
+                                   ThrowingBiFunction<A, Object, ?> printMapping,
+                                   ResourceIdentifier inputResource) {
     try {
       printMapping
           .andThenConsume(PrintUtil::enhancedPrint)
-          .accept(solution.getThis(), adaptPartToRun(solution, solutionMethod, inputResource));
+          .accept(solution, adaptPartToRun(solution, solutionMethod, inputResource));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -33,27 +33,20 @@ public class SolutionUtil {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public static <T1, T2, T extends AdventSolution<T1, T2>, TOut> TOut adaptPartToRunGeneric(T solution,
-                                                                                            ThrowingBiFunction<T, BufferedReader, TOut> solutionMethod,
-                                                                                            String inputResource) {
-    return (TOut) adaptPartToRun(
-        solution,
-        (ThrowingBiFunction<AdventSolution<?, ?>, BufferedReader, ?>) solutionMethod,
-        inputResource
-    );
+  static <T, R extends AutoCloseable> T runWithResource(@NotNull ResourceIdentifier identifier,
+                                                               @NotNull ThrowingFunction<ResourceIdentifier, R> resourceFunc,
+                                                               @NotNull ThrowingFunction<R, T> partFunc) throws Exception {
+    try (var res = resourceFunc.apply(identifier)) {
+      return partFunc.apply(res);
+    }
   }
 
-  @SuppressWarnings("unchecked")
-  public static <T1, T2, T extends AdventSolution<T1, T2>, TOut> void adaptPartToPrintGeneric(T solution,
-                                                                                              ThrowingBiFunction<T, BufferedReader, TOut> solutionMethod,
-                                                                                              ThrowingBiFunction<T, TOut, ?> printMapping,
-                                                                                              String inputResource) {
-    adaptPartToPrint(
-        solution,
-        (ThrowingBiFunction<AdventSolution<?, ?>, BufferedReader, ?>) solutionMethod,
-        (ThrowingBiFunction<AdventSolution<?, ?>, Object, ?>) printMapping,
-        inputResource
-    );
+  static <T, R extends AutoCloseable, A> T runWithResource(@NotNull A instance,
+                                                                  @NotNull ResourceIdentifier identifier,
+                                                                  @NotNull ThrowingBiFunction<A, ResourceIdentifier, R> resourceFunc,
+                                                                  @NotNull ThrowingBiFunction<A, R, T> partFunc) throws Exception {
+    try (var res = resourceFunc.apply(instance, identifier)) {
+      return partFunc.apply(instance, res);
+    }
   }
 }

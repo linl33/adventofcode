@@ -2,6 +2,7 @@ package dev.linl33.adventofcode.year2020.test;
 
 import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
 import dev.linl33.adventofcode.testlib.TestCaseSource;
 import dev.linl33.adventofcode.testlib.TestPart;
@@ -21,7 +22,7 @@ class Day1Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @Override
-  public Map<String, Integer> getPart1Cases() {
+  public Map<Object, Integer> getPart1Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), 902451,
         "day1test1", 514579
@@ -29,7 +30,7 @@ class Day1Test implements AdventSolutionTest<Integer, Integer> {
   }
 
   @Override
-  public Map<String, Integer> getPart2Cases() {
+  public Map<Object, Integer> getPart2Cases() {
     return Map.of(
         newSolutionInstance().getPart2Resource(), 85555470,
         "day1test1", 241861950
@@ -38,11 +39,11 @@ class Day1Test implements AdventSolutionTest<Integer, Integer> {
 
   @ParameterizedTest
   @TestCaseSource(value = {TestPart.PART_1, TestPart.PART_2}, extraArgs = @ValueSource(ints = {2, 2, 3, 3}))
-  void testSolveByIntStream(String resource, int expected, int numbers, AdventSolution<Integer, Integer> instance) {
+  void testSolveByIntStream(ResourceIdentifier resource, int expected, int numbers, Day1 instance) throws Exception {
     assertEquals(expected, instance.run(adaptSolveByIntStream(numbers), resource));
   }
 
   private static ThrowingBiFunction<Day1, BufferedReader, Integer> adaptSolveByIntStream(int numbers) {
-    return (Day1 sInstance, BufferedReader reader) -> sInstance.solveByIntStream(reader, numbers);
+    return (Day1 day1, BufferedReader reader) -> day1.solveByIntStream(reader, numbers);
   }
 }

@@ -13,12 +13,12 @@ class Day12Test implements AdventSolutionTest<Integer, Long> {
   }
 
   @Override
-  public Map<String, Integer> getPart1Cases() {
+  public Map<Object, Integer> getPart1Cases() {
     return Map.of(newSolutionInstance().getPart1Resource(), 13399);
   }
 
   @Override
-  public Map<String, Long> getPart2Cases() {
+  public Map<Object, Long> getPart2Cases() {
     return Map.of(
         newSolutionInstance().getPart2Resource(), 312992287193064L,
         "day12test1", 2772L,

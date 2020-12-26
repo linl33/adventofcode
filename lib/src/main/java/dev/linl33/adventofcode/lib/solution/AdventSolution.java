@@ -2,28 +2,21 @@ package dev.linl33.adventofcode.lib.solution;
 
 import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.util.internal.LoggingUtil;
-import dev.linl33.adventofcode.lib.util.internal.ResourceUtil;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
 import java.util.Arrays;
 import java.util.Locale;
 
 public interface AdventSolution<T1, T2> {
-  T1 part1(BufferedReader reader) throws Exception;
+  T1 part1(ResourceIdentifier identifier) throws Exception;
 
-  T2 part2(BufferedReader reader) throws Exception;
+  T2 part2(ResourceIdentifier identifier) throws Exception;
 
   Logger getLogger();
 
   int getYear();
 
   int getDay();
-
-  default AdventSolution<T1, T2> getThis() {
-    // use by AdventSolutionTest to swap out a proxy
-    return this;
-  }
 
   default void runAndPrintAll() {
     getLogger().info(
@@ -39,12 +32,13 @@ public interface AdventSolution<T1, T2> {
         .forEachOrdered(this::print);
   }
 
-  default <U, V extends AdventSolution<T1, T2>> U run(ThrowingBiFunction<V, BufferedReader, U> customPart,
-                                                      String resource) {
-    return SolutionUtil.adaptPartToRunGeneric((V) getThis(), customPart, resource);
-  }
+  <U, A extends AdventSolution<T1, T2>> U run(ThrowingBiFunction<A, ?, U> customPart, ResourceIdentifier resource);
 
-  default Object run(SolutionPart solutionPart, String resource) {
+  <U, A extends AdventSolution<T1, T2>> void print(ThrowingBiFunction<A, ?, U> customPart,
+                                                   ThrowingBiFunction<A, U, ?> printMapping,
+                                                   ResourceIdentifier resource);
+
+  default Object run(SolutionPart solutionPart, ResourceIdentifier resource) {
     return solutionPart.part.apply(this, resource);
   }
 
@@ -52,13 +46,7 @@ public interface AdventSolution<T1, T2> {
     return solutionPart.part.apply(this, solutionPart.defaultResource.apply(this));
   }
 
-  default <U, V extends AdventSolution<T1, T2>> void print(ThrowingBiFunction<V, BufferedReader, U> customPart,
-                                                           ThrowingBiFunction<V, U, ?> printMapping,
-                                                           String resource) {
-    SolutionUtil.adaptPartToPrintGeneric((V) getThis(), customPart, printMapping, resource);
-  }
-
-  default void print(SolutionPart solutionPart, String resource) {
+  default void print(SolutionPart solutionPart, ResourceIdentifier resource) {
     solutionPart.printer.accept(this, resource);
   }
 
@@ -84,23 +72,19 @@ public interface AdventSolution<T1, T2> {
     return part2PrintMapping((T2) part2Result);
   }
 
-  default String getDefaultResource() {
-    return getClass().getSimpleName().toLowerCase(Locale.ROOT);
+  default ResourceIdentifier getDefaultResource() {
+    return new ClasspathResourceIdentifier(getClass().getSimpleName().toLowerCase(Locale.ROOT));
   }
 
-  default String getPart1Resource() {
+  default ResourceIdentifier getPart1Resource() {
     return getDefaultResource();
   }
 
-  default String getPart2Resource() {
+  default ResourceIdentifier getPart2Resource() {
     return getDefaultResource();
   }
 
   default SolutionPart[] getSolutionParts() {
     return getDay() != 25 ? SolutionPart.values() : new SolutionPart[] {SolutionPart.PART_1};
-  }
-
-  default BufferedReader resourceSupplier(String resource) {
-    return ResourceUtil.readResource(getClass(), resource);
   }
 }

@@ -1,6 +1,7 @@
 package dev.linl33.adventofcode.testlib;
 
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -35,7 +36,7 @@ class AdventSolutionExtension implements ParameterResolver {
 
     return actualTypeArguments.length == 2 &&
         actualTypeArguments[0].equals(TestPart.class) &&
-        actualTypeArguments[1].equals(String.class);
+        actualTypeArguments[1].equals(ResourceIdentifier.class);
   }
 
   @Override
@@ -55,11 +56,11 @@ class AdventSolutionExtension implements ParameterResolver {
   private static AdventSolution<?, ?> resolveAdventSolutionInstance(ParameterContext parameterContext) {
     return parameterContext
         .getTarget()
-        .map(o -> o instanceof AdventSolutionTest<?, ?> t ? t.getSolutionInstanceProxy() : null)
+        .map(o -> o instanceof AdventSolutionTest<?, ?> t ? t.getSolutionInstance() : null)
         .orElseThrow(() -> new ParameterResolutionException("Cannot cast to AdventSolutionTest<?, ?>"));
   }
 
-  private static EnumMap<TestPart, String> resolveDefaultResourceMap(ExtensionContext extensionContext) {
+  private static EnumMap<TestPart, ResourceIdentifier> resolveDefaultResourceMap(ExtensionContext extensionContext) {
     var resourceRetrievalInstance = (AdventSolutionTest<?, ?>) extensionContext
         .getStore(NAMESPACE)
         .getOrComputeIfAbsent(extensionContext.getRequiredTestClass());
@@ -67,7 +68,7 @@ class AdventSolutionExtension implements ParameterResolver {
     return getDefaultTestResources(resourceRetrievalInstance);
   }
 
-  private static <T1, T2> EnumMap<TestPart, String> getDefaultTestResources(AdventSolutionTest<T1, T2> testInstance) {
+  private static <T1, T2> EnumMap<TestPart, ResourceIdentifier> getDefaultTestResources(AdventSolutionTest<T1, T2> testInstance) {
     var instance = testInstance.newSolutionInstance();
 
     return Arrays

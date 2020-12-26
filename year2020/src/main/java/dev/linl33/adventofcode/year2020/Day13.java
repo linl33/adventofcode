@@ -16,8 +16,7 @@ public class Day13 extends AdventSolution2020<Integer, Long> {
   private static final String NO_BUS = "x";
 
   public static void main(String[] args) {
-//    new Day13().runAndPrintAll();
-    new Day13().print(SolutionPart.PART_2, "day13");
+    new Day13().runAndPrintAll();
   }
 
   @Override

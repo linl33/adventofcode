@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.year2019;
 
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.util.GeomUtil;
 import dev.linl33.adventofcode.lib.util.GridUtil;
 import dev.linl33.adventofcode.lib.point.Point2D;
@@ -14,7 +15,7 @@ public class Day11 extends AdventSolution2019<Integer, Long[][]> {
     var day11 = new Day11();
 
     day11.runAndPrintAll();
-    day11.print(Day11::part1a, Day11::part2PrintMapping, day11.getPart1Resource());
+    day11.print((ThrowingBiFunction<Day11, BufferedReader, Long[][]>) Day11::part1a, Day11::part2PrintMapping, day11.getPart1Resource());
   }
 
   @Override

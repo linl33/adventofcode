@@ -1,6 +1,8 @@
 package dev.linl33.adventofcode.year2020.test;
 
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
 import dev.linl33.adventofcode.testlib.Part2Source;
 import dev.linl33.adventofcode.year2020.Day13;
@@ -19,7 +21,7 @@ class Day13Test implements AdventSolutionTest<Integer, Long> {
   }
 
   @Override
-  public Map<String, Integer> getPart1Cases() {
+  public Map<Object, Integer> getPart1Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), 3464,
         "day13test1", 295
@@ -27,7 +29,7 @@ class Day13Test implements AdventSolutionTest<Integer, Long> {
   }
 
   @Override
-  public Map<String, Long> getPart2Cases() {
+  public Map<Object, Long> getPart2Cases() {
     return Map.of(
         newSolutionInstance().getPart2Resource(), 760171380521445L,
         "day13test1", 1068781L,
@@ -41,7 +43,7 @@ class Day13Test implements AdventSolutionTest<Integer, Long> {
 
   @ParameterizedTest
   @Part2Source
-  void testPart2WithoutPrimeAssumption(String resource, long expected, AdventSolution<Integer, Long> day13) {
+  void testPart2WithoutPrimeAssumption(ResourceIdentifier resource, long expected, Day13 day13) {
     assertEquals(
         expected,
         day13.run(
@@ -54,14 +56,14 @@ class Day13Test implements AdventSolutionTest<Integer, Long> {
   @ParameterizedTest
   @Part2Source
   @Disabled
-  void testPart2Iterative(String resource, long expected, AdventSolution<Integer, Long> day13) {
-    assertEquals(expected, day13.run(Day13::part2Iterative, resource));
+  void testPart2Iterative(ResourceIdentifier resource, long expected, Day13 day13) {
+    assertEquals(expected, day13.run((ThrowingBiFunction<Day13, BufferedReader, Long>) Day13::part2Iterative, resource));
   }
 
   @ParameterizedTest
   @Part2Source
   @Disabled
-  void testPart2LinearSystem(String resource, long expected, AdventSolution<Integer, Long> day13) {
-    assertEquals(expected, day13.run(Day13::part2ByLinearSystem, resource));
+  void testPart2LinearSystem(ResourceIdentifier resource, long expected, Day13 day13) {
+    assertEquals(expected, day13.run((ThrowingBiFunction<Day13, BufferedReader, Long>) Day13::part2ByLinearSystem, resource));
   }
 }

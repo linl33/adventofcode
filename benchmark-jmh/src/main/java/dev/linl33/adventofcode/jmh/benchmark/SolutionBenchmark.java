@@ -1,6 +1,7 @@
 package dev.linl33.adventofcode.jmh.benchmark;
 
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import dev.linl33.adventofcode.lib.solution.SolutionPart;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
@@ -11,8 +12,8 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Thread)
 public class SolutionBenchmark {
   private AdventSolution<?, ?> solution;
-  private String part1Resource;
-  private String part2Resource;
+  private ResourceIdentifier part1Resource;
+  private ResourceIdentifier part2Resource;
 
   @Param("")
   String solutionClass;

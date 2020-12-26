@@ -13,7 +13,7 @@ class Day14Test implements AdventSolutionTest<String, Integer> {
   }
 
   @Override
-  public Map<String, String> getPart1Cases() {
+  public Map<Object, String> getPart1Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), "5101271252",
         "string:9", "5158916779",
@@ -24,7 +24,7 @@ class Day14Test implements AdventSolutionTest<String, Integer> {
   }
 
   @Override
-  public Map<String, Integer> getPart2Cases() {
+  public Map<Object, Integer> getPart2Cases() {
     return Map.of(
         newSolutionInstance().getPart2Resource(), 20287556,
         "string:51589", 9,

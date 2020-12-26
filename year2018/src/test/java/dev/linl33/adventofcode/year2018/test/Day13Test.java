@@ -14,7 +14,7 @@ class Day13Test implements AdventSolutionTest<Point2D, Point2D> {
   }
 
   @Override
-  public Map<String, Point2D> getPart1Cases() {
+  public Map<Object, Point2D> getPart1Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), new Point2D(118, 112),
         "day13test1", new Point2D(7, 3)
@@ -22,7 +22,7 @@ class Day13Test implements AdventSolutionTest<Point2D, Point2D> {
   }
 
   @Override
-  public Map<String, Point2D> getPart2Cases() {
+  public Map<Object, Point2D> getPart2Cases() {
     return Map.of(
         newSolutionInstance().getPart2Resource(), new Point2D(50, 21),
         "day13test2", new Point2D(6, 4),

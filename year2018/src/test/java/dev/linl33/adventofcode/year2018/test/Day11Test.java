@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,12 +37,12 @@ class Day11Test implements AdventSolutionTest<String, String> {
   }
 
   @Override
-  public Map<String, String> getPart1Cases() {
+  public Map<Object, String> getPart1Cases() {
     return Map.of(newSolutionInstance().getPart1Resource(), "20,54");
   }
 
   @Override
-  public Map<String, String> getPart2Cases() {
+  public Map<Object, String> getPart2Cases() {
     return Map.of(newSolutionInstance().getPart2Resource(), "233,93,13");
   }
 }
