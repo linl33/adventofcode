@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.lib.solution;
 
+import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.util.internal.ResourceUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 
-public abstract class AbsAdventSolution<T1, T2> implements BufferedReaderAdventSolution<T1, T2>, ClasspathResourceService, ResourceServiceHolder {
+public abstract class AbsAdventSolution<T1, T2> implements
+    BufferedReaderAdventSolution<T1, T2>, ClasspathResourceService, ResourceServiceHolder {
   private final Logger logger;
   private final ClasspathResourceIdentifier defaultResourceIdentifier;
   private final Path defaultResourcePath;
@@ -41,6 +43,29 @@ public abstract class AbsAdventSolution<T1, T2> implements BufferedReaderAdventS
     defaultResourceIdentifier = new ClasspathResourceIdentifier(getClass().getSimpleName().toLowerCase(Locale.ROOT));
     defaultResourcePath = ResourceUtil.getResourcePath(getClass(), defaultResourceIdentifier.name());
     resourceService = this;
+  }
+
+  @Override
+  public T1 part1(ResourceIdentifier identifier) throws Exception {
+    return BufferedReaderAdventSolution.super.part1(identifier);
+  }
+
+  @Override
+  public T2 part2(ResourceIdentifier identifier) throws Exception {
+    return BufferedReaderAdventSolution.super.part2(identifier);
+  }
+
+  @Override
+  public <U, A extends AdventSolution<T1, T2>> U run(ThrowingBiFunction<A, ?, U> customPart,
+                                                     ResourceIdentifier resource) {
+    return BufferedReaderAdventSolution.super.run(customPart, resource);
+  }
+
+  @Override
+  public <U, A extends AdventSolution<T1, T2>> void print(ThrowingBiFunction<A, ?, U> customPart,
+                                                          ThrowingBiFunction<A, U, ?> printMapping,
+                                                          ResourceIdentifier resource) {
+    BufferedReaderAdventSolution.super.print(customPart, printMapping, resource);
   }
 
   @Override

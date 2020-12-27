@@ -40,9 +40,13 @@ public interface ByteBufferAdventSolution<T1, T2> extends AdventSolution<T1, T2>
     );
   }
 
-  T1 part1(ByteBuffer byteBuffer) throws Exception;
+  default T1 part1(ByteBuffer byteBuffer) throws Exception {
+    return null;
+  }
 
-  T2 part2(ByteBuffer byteBuffer) throws Exception;
+  default T2 part2(ByteBuffer byteBuffer) throws Exception {
+    return null;
+  }
 
   private static <T> ThrowingFunction<FileChannel, T> adaptFileChannel(ThrowingFunction<ByteBuffer, T> byteBufferFunc) {
     return byteBufferFunc.compose(ByteBufferAdventSolution::mapWholeFileRO);

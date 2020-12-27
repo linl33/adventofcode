@@ -34,17 +34,17 @@ public class SolutionUtil {
   }
 
   static <T, R extends AutoCloseable> T runWithResource(@NotNull ResourceIdentifier identifier,
-                                                               @NotNull ThrowingFunction<ResourceIdentifier, R> resourceFunc,
-                                                               @NotNull ThrowingFunction<R, T> partFunc) throws Exception {
+                                                        @NotNull ThrowingFunction<ResourceIdentifier, R> resourceFunc,
+                                                        @NotNull ThrowingFunction<R, T> partFunc) throws Exception {
     try (var res = resourceFunc.apply(identifier)) {
       return partFunc.apply(res);
     }
   }
 
   static <T, R extends AutoCloseable, A> T runWithResource(@NotNull A instance,
-                                                                  @NotNull ResourceIdentifier identifier,
-                                                                  @NotNull ThrowingBiFunction<A, ResourceIdentifier, R> resourceFunc,
-                                                                  @NotNull ThrowingBiFunction<A, R, T> partFunc) throws Exception {
+                                                           @NotNull ResourceIdentifier identifier,
+                                                           @NotNull ThrowingBiFunction<A, ResourceIdentifier, R> resourceFunc,
+                                                           @NotNull ThrowingBiFunction<A, R, T> partFunc) throws Exception {
     try (var res = resourceFunc.apply(instance, identifier)) {
       return partFunc.apply(instance, res);
     }
