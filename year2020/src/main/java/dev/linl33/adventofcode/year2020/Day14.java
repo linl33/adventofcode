@@ -1,17 +1,22 @@
 package dev.linl33.adventofcode.year2020;
 
+import dev.linl33.adventofcode.lib.solution.ByteBufferAdventSolution;
+import dev.linl33.adventofcode.lib.solution.NullBufferedReaderSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import org.apache.logging.log4j.LogManager;
 import sun.misc.Unsafe;
 
-import java.io.BufferedReader;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.ToLongFunction;
+import java.util.stream.Stream;
 
-public class Day14 extends AdventSolution2020<Long, Long> {
+public class Day14 extends AdventSolution2020<Long, Long> implements
+    ByteBufferAdventSolution<Long, Long>, NullBufferedReaderSolution<Long, Long> {
   private static final int MAX_FLOATING_BITS = 9;
   private static final int ADDR_BITS = 36;
   private static final Unsafe UNSAFE;
@@ -41,13 +46,23 @@ public class Day14 extends AdventSolution2020<Long, Long> {
   }
 
   @Override
-  public Long part1(BufferedReader reader) {
+  public Long part1(ResourceIdentifier identifier) throws Exception {
+    return ByteBufferAdventSolution.super.part1(identifier);
+  }
+
+    @Override
+  public Long part2(ResourceIdentifier identifier) throws Exception {
+    return ByteBufferAdventSolution.super.part2(identifier);
+  }
+
+  @Override
+  public Long part1(ByteBuffer byteBuffer) throws Exception {
     var memory = new long[100000];
     var oneMask = new AtomicLong(0);
     var zeroMask = new AtomicLong(0);
 
     return solve(
-        reader,
+        byteBuffer,
         maskInstr -> {
           oneMask.setPlain(maskInstr.oneMask());
           zeroMask.setPlain(maskInstr.zeroMask());
@@ -64,14 +79,14 @@ public class Day14 extends AdventSolution2020<Long, Long> {
   }
 
   @Override
-  public Long part2(BufferedReader reader) {
+  public Long part2(ByteBuffer byteBuffer) throws Exception {
     // pick an implementation
 
-    return solveByHashMap(reader);
-//    return solveByUnsafeAllocateMemory(reader);
+    return solveByHashMap(byteBuffer);
+//    return solveByUnsafeAllocateMemory(byteBuffer);
   }
 
-  private static long solveByUnsafeAllocateMemory(BufferedReader reader) {
+  private static long solveByUnsafeAllocateMemory(ByteBuffer buffer) {
     // this method takes advantage of vm overcommit to write memory values
     // directly into the virtual memory
     // tested on Linux
@@ -86,7 +101,7 @@ public class Day14 extends AdventSolution2020<Long, Long> {
     var floatingMaskSize = new AtomicInteger(0);
 
     return solve(
-        reader,
+        buffer,
         maskInstr -> {
           oneMask.setPlain(maskInstr.oneMask());
           floatingMaskSize.setPlain(applyFloatingMask(maskInstr.floatingMask(), floatingMaskCache));
@@ -98,9 +113,8 @@ public class Day14 extends AdventSolution2020<Long, Long> {
 
           var length = floatingMaskSize.getPlain();
           for (int i = 0; i < length; i++) {
-            var addr = addrWithOrMask ^ floatingMaskCache[i];
-            delta += value - UNSAFE.getInt(baseAddr + addr * Integer.BYTES);
-            UNSAFE.putInt(baseAddr + addr * Integer.BYTES, value);
+            delta += value - UNSAFE.getInt(baseAddr + (addrWithOrMask ^ floatingMaskCache[i]) * Integer.BYTES);
+            UNSAFE.putInt(baseAddr + (addrWithOrMask ^ floatingMaskCache[i]) * Integer.BYTES, value);
           }
 
           return delta;
@@ -108,14 +122,14 @@ public class Day14 extends AdventSolution2020<Long, Long> {
     );
   }
 
-  private static long solveByHashMap(BufferedReader reader) {
+  private static long solveByHashMap(ByteBuffer buffer) {
     var memory = new HashMap<Long, Integer>();
     var oneMask = new AtomicLong(0);
     var floatingMaskCache = new long[1 << MAX_FLOATING_BITS];
     var floatingMaskSize = new AtomicInteger(0);
 
     return solve(
-        reader,
+        buffer,
         maskInstr -> {
           oneMask.setPlain(maskInstr.oneMask());
           floatingMaskSize.setPlain(applyFloatingMask(maskInstr.floatingMask(), floatingMaskCache));
@@ -136,28 +150,53 @@ public class Day14 extends AdventSolution2020<Long, Long> {
     );
   }
 
-  private static long solve(BufferedReader reader,
+  private static long solve(ByteBuffer byteBuffer,
                             Consumer<SetMaskInstr> onSetMask,
                             ToLongFunction<WriteInstr> onWrite) {
-    return reader
-        .lines()
-        .map(InitInstr::parse)
-        .reduce(
-            0L,
-            (sum, instr) -> {
-              if (instr instanceof SetMaskInstr maskInstr) {
-                onSetMask.accept(maskInstr);
-                return sum;
-              }
+    var sBuilder = Stream.<InitInstr>builder();
+    while (byteBuffer.hasRemaining()) {
+      // skip first byte -- always 'm'
+      byteBuffer.position(byteBuffer.position() + 1);
 
-              if (instr instanceof WriteInstr writeInstr) {
-                return sum + onWrite.applyAsLong(writeInstr);
-              }
+      if (byteBuffer.get() == 'a') {
+        sBuilder.add(new SetMaskInstr(byteBuffer.slice(byteBuffer.position() + 5, ADDR_BITS)));
+        // skip to the next line
+        byteBuffer.position(byteBuffer.position() + 5 + ADDR_BITS + 1);
+      } else {
+        byteBuffer.position(byteBuffer.position() + 2);
 
-              throw new IllegalStateException();
-            },
-            Long::sum
-        );
+        byte b;
+        var addr = 0;
+        while ((b = byteBuffer.get()) != ']') {
+          addr = (addr * 10) + (b - '0');
+        }
+
+        byteBuffer.position(byteBuffer.position() + 3);
+        var val = 0;
+        while ((b = byteBuffer.get()) != '\n') {
+          val = (val * 10) + (b - '0');
+        }
+
+        sBuilder.add(new WriteInstr(addr, val));
+      }
+    }
+
+    return sBuilder.build().reduce(
+        0L,
+        (sum, instr) -> {
+          if (instr instanceof SetMaskInstr maskInstr) {
+            onSetMask.accept(maskInstr);
+            return sum;
+          }
+
+          if (instr instanceof WriteInstr writeInstr) {
+            return sum + onWrite.applyAsLong(writeInstr);
+          }
+
+          throw new IllegalStateException();
+        },
+        Long::sum
+    );
   }
 
   private static int applyFloatingMask(long floatingMask, long[] maskOut) {
@@ -165,52 +204,33 @@ public class Day14 extends AdventSolution2020<Long, Long> {
 
     var length = Long.SIZE - Long.numberOfLeadingZeros(floatingMask);
     for (int i = Long.numberOfTrailingZeros(floatingMask); i < length; i++) {
-      if (((floatingMask >> i) & 1L) != 1L) {
-        continue;
-      }
-
-      for (int j = 0; j < counter; j++) {
+      for (int j = 0; j < counter * (floatingMask >> i & 1); j++) {
         maskOut[counter + j] = maskOut[j] | (1L << i);
       }
 
-      counter <<= 1;
+      counter <<= (floatingMask >> i) & 1;
     }
 
     return 1 << Long.bitCount(floatingMask);
   }
 
-  private sealed interface InitInstr {
-    static InitInstr parse(String instr) {
-      var parts = instr.split(" = ");
+  private sealed interface InitInstr {}
 
-      if (parts[0].equals("mask")) {
-        return new SetMaskInstr(parts[1]);
-      }
-
-      return new WriteInstr(
-          Integer.parseInt(parts[0], 4, parts[0].length() - 1, 10),
-          Integer.parseInt(parts[1])
-      );
-    }
-  }
-
-  private static record SetMaskInstr(String mask,
-                                     long oneMask,
+  private static record SetMaskInstr(long oneMask,
                                      long zeroMask,
                                      long floatingMask) implements InitInstr {
-    public SetMaskInstr(String mask) {
-      this(mask, makeMask(mask, '1', 0L), makeMask(mask, '0', ~0L), makeMask(mask, 'X', 0L));
+    public SetMaskInstr(ByteBuffer mask) {
+      this(makeMask(mask, '1', 0L), makeMask(mask, '0', ~0L), makeMask(mask, 'X', 0L));
     }
 
-    private static long makeMask(String mask, char bit, long identity) {
+    private static long makeMask(ByteBuffer byteBuffer, char bit, long identity) {
       var res = identity;
 
-      var maskSize = mask.length();
-      for (int i = 0; i < maskSize; i++) {
-        if (mask.charAt(i) == bit) {
-          res ^= 1L << (maskSize - i - 1);
-        }
+      for (int i = 0; i < ADDR_BITS; i++) {
+        res ^= (byteBuffer.get() != bit) ? 0 : (1L << (ADDR_BITS - i - 1));
       }
+
+      byteBuffer.rewind();
 
       return res;
     }
