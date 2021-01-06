@@ -2,12 +2,13 @@ package dev.linl33.adventofcode.lib.util.internal;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 public class ResourceUtil {
@@ -40,7 +41,7 @@ public class ResourceUtil {
     }
 
     try {
-      return Paths.get(resourceUrl.toURI());
+      return Path.of(resourceUrl.toURI());
     } catch (URISyntaxException e) {
       throw new RuntimeException(e);
     }

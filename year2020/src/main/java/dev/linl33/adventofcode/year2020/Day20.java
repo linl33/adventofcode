@@ -4,7 +4,6 @@ import dev.linl33.adventofcode.lib.grid.ArrayGrid;
 import dev.linl33.adventofcode.lib.grid.RowArrayGrid;
 import dev.linl33.adventofcode.lib.solution.SolutionPart;
 import dev.linl33.adventofcode.lib.util.AdventUtil;
-import dev.linl33.adventofcode.lib.util.PrintUtil;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -13,9 +12,16 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 public class Day20 extends AdventSolution2020<Long, Integer> {
+  private static final char[][] SEA_MONSTER = new char[][] {
+      {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' '},
+      {'#', ' ', ' ', ' ', ' ', '#', '#', ' ', ' ', ' ', ' ', '#', '#', ' ', ' ', ' ', ' ', '#', '#', '#'},
+      {' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', ' '}
+  };
+  private static final int SEA_MONSTER_HEIGHT = SEA_MONSTER.length;
+  private static final int SEA_MONSTER_WIDTH = SEA_MONSTER[0].length;
+
   public static void main(String[] args) {
 //    new Day20().runAndPrintAll();
     new Day20().print(SolutionPart.PART_2);
@@ -69,7 +75,7 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
         Function.identity()
     ));
 
-    int sideLength = (int) Math.sqrt(tiles.size());
+    var sideLength = (int) Math.sqrt(tiles.size());
 
     var tilesByConnectedEdges = edgeMap
         .entrySet()
@@ -93,25 +99,22 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
     var cornerSides = new HashMap<>(side);
     cornerSides.putAll(corner);
 
-    var start = cArr[0];
-    var edge = edgeMap.get(start)[0];
+    var curr = cArr[0];
+    var edge = edgeMap.get(curr)[0];
     exclusion.add(cArr[0]);
-    newImage[outerEdge[count++]] = start;
+    newImage[outerEdge[count++]] = curr;
     while (exclusion.size() < cornerSides.size()) {
-      var next = findFirstMatch(edge, cornerSides, start, exclusion);
+      var next = findFirstMatch(edge, cornerSides, curr, exclusion);
       for (int i = 0; i < 4; i++) {
-        var a = findAllMatches(edgeMap.get(next)[i], cornerSides, next, exclusion, new ArrayList<>());
-        if (a > 0) {
+        if (findAllMatches(edgeMap.get(next)[i], cornerSides, next, exclusion, new ArrayList<>()) > 0) {
           edge = edgeMap.get(next)[i];
           break;
         }
       }
       exclusion.add(next);
       newImage[outerEdge[count++]] = next;
-      start = next;
+      curr = next;
     }
-
-    PrintUtil.enhancedPrint(newImage);
 
     var remaining = new HashMap<>(edgeMap);
     remaining.keySet().removeAll(exclusion);
@@ -126,19 +129,15 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
 
         var output = new ArrayList<Integer>();
         for (int i = 0; i < 4; i++) {
-          var a = findAllMatches(edgeMap.get(up)[i], remaining, up, exclusion, output);
-        }
-
-        if (output.size() != 1) {
-          throw new IllegalStateException();
+          if (findAllMatches(edgeMap.get(up)[i], remaining, up, exclusion, output) > 0) {
+            break;
+          }
         }
 
         newImage[y * sideLength + x] = output.get(0);
         exclusion.add(output.get(0));
       }
     }
-
-    PrintUtil.enhancedPrint(newImage);
 
     var transformation = new int[][]{
         {3, 2},
@@ -310,23 +309,20 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
       }
     }
 
-    var whole = new String[96];
-    var counter = 0;
+    var whole = new String[(10 - 2) * sideLength];
+    var wholeRow = 0;
 
-    var ylimit = 12;
-    for (int y = 0; y < ylimit; y++) {
+    for (int tileY = 0; tileY < sideLength; tileY++) {
       for (int row = 0; row < 10; row++) {
         var sb = new StringBuilder();
         var sb2 = new StringBuilder();
 
-        for (int col = 0; col < 12; col++) {
-//          System.out.println(row);
-          sb.append(new String(print(tileMap.get(newImage[y * 12 + col]).grid.row(row))));
-
-          var otherStr = new String(print(tileMap.get(newImage[y * 12 + col]).grid.row(row)));
-          otherStr = otherStr.substring(1, otherStr.length() - 1);
-          sb2.append(otherStr);
+        for (int tileX = 0; tileX < sideLength; tileX++) {
+          var print = print(tileMap.get(newImage[tileY * sideLength + tileX]).grid.row(row));
+          sb.append(String.valueOf(print));
           sb.append("|");
+
+          sb2.append(String.valueOf(print, 1, print.length - 2));
         }
 
         var out = sb.toString();
@@ -339,64 +335,62 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
         }
 
         if (row != 0 && row != 9) {
-          whole[counter++] = sb2.toString();
+          whole[wholeRow++] = sb2.toString();
         }
       }
 
       System.out.println("-".repeat(120 + 12));
     }
 
-    var ops = (Consumer<ArrayGrid>[][]) new Consumer[][]{
-//        {},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertX},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertY},
-//        {(Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
-//        {(Consumer<ArrayGrid>) ArrayGrid::rotateClockwise, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise}, // GOOD
-//        {(Consumer<ArrayGrid>) ArrayGrid::rotateCounterClockwise},
-        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::invertY}, // GOOD
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::rotateCounterClockwise},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateCounterClockwise},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
-//        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateCounterClockwise},
-    };
+    var blockCount = Arrays
+        .stream(whole)
+        .mapToInt(row -> row
+            .replace(".", "")
+            .length()
+        )
+        .sum();
 
-    var seaMonster = new char[][]{
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' '},
-        {'#', ' ', ' ', ' ', ' ', '#', '#', ' ', ' ', ' ', ' ', '#', '#', ' ', ' ', ' ', ' ', '#', '#', '#'},
-        {' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', ' '}
-    };
+    return Arrays
+        .stream((Consumer<ArrayGrid>[][]) new Consumer[][]{
+            {},
+            {(Consumer<ArrayGrid>) ArrayGrid::invertX},
+            {(Consumer<ArrayGrid>) ArrayGrid::invertY},
+            {(Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
+    //        {(Consumer<ArrayGrid>) ArrayGrid::rotateClockwise, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise}, // GOOD
+            {(Consumer<ArrayGrid>) ArrayGrid::rotateCounterClockwise},
+            {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::invertY}, // GOOD
+    //        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
+    //        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
+    //        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::rotateCounterClockwise},
+    //        {(Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
+    //        {(Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
+    //        {(Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateCounterClockwise},
+    //        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
+    //        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise, (Consumer<ArrayGrid>) ArrayGrid::rotateClockwise},
+    //        {(Consumer<ArrayGrid>) ArrayGrid::invertX, (Consumer<ArrayGrid>) ArrayGrid::invertY, (Consumer<ArrayGrid>) ArrayGrid::rotateCounterClockwise},
+        })
+        .map(t -> transform(whole, t))
+        .mapToInt(image -> {
+          var seaMonsterCount = 0;
 
-    var seaMonsterHeight = seaMonster.length;
-    var seaMonsterWidth = seaMonster[0].length;
-
-    for (int i = 0; i < ops.length; i++) {
-      System.out.println("---");
-      var s2 = transform(whole, ops[i]);
-
-      var seaMonsterCount = 0;
-
-      for (int y = 0; y < s2.length - seaMonsterHeight; y++) {
-        for (int x = 0; x < s2.length - seaMonsterWidth; x++) {
-          if (hasSeaMonster(s2, x, y)) {
-            seaMonsterCount++;
-            x += (seaMonsterWidth - 1);
+          for (int y = 0; y < image.length - SEA_MONSTER_HEIGHT; y++) {
+            for (int x = 0; x < image.length - SEA_MONSTER_WIDTH; x++) {
+              if (hasSeaMonster(image, x, y)) {
+                seaMonsterCount++;
+                x += SEA_MONSTER_WIDTH - 1;
+              }
+            }
           }
-        }
-      }
 
-      return 2444 - (seaMonsterCount * 15);
-    }
-
-    return -1;
+          return seaMonsterCount;
+        })
+        .filter(i -> i > 0)
+        .map(i -> blockCount - (i * 15))
+        .findAny()
+        .orElseThrow();
   }
 
-  private static record Tile(int id, ArrayGrid grid) {
-  }
+  private static record Tile(int id, ArrayGrid grid) {}
 
   private static int[] makeEdges(Tile t) {
     var top = t.grid.row(0);
@@ -441,8 +435,7 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
         continue;
       }
 
-      var m = Arrays.stream(edges).anyMatch(e -> arrCont(entry.getValue(), e));
-      if (m) {
+      if (Arrays.stream(edges).anyMatch(e -> Arrays.stream(entry.getValue()).anyMatch(i -> i == e))) {
         count++;
       }
     }
@@ -460,10 +453,7 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
         continue;
       }
 
-      var m = Arrays.stream(entry.getValue()).anyMatch(i -> i == edges);
-
-//      var m = Arrays.stream(edges).anyMatch(e -> arrCont(entry.getValue(), e));
-      if (m) {
+      if (Arrays.stream(entry.getValue()).anyMatch(i -> i == edges)) {
         return entry.getKey();
       }
     }
@@ -471,9 +461,8 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
     throw new NoSuchElementException();
   }
 
-  private static int findAllMatches(int edges, Map<Integer, int[]> tiles, int id, Set<Integer> exclude, ArrayList<Integer> output) {
+  private static int findAllMatches(int edge, Map<Integer, int[]> tiles, int id, Set<Integer> exclude, ArrayList<Integer> output) {
     var count = 0;
-//    var outut = new ArrayList<Integer>();
 
     for (var entry : tiles.entrySet()) {
       if (entry.getKey().equals(id)) {
@@ -484,8 +473,7 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
         continue;
       }
 
-      var m = Arrays.stream(entry.getValue()).anyMatch(i -> i == edges);
-      if (m) {
+      if (Arrays.stream(entry.getValue()).anyMatch(i -> i == edge)) {
         count = entry.getKey();
         output.add(entry.getKey());
       }
@@ -496,8 +484,8 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
 
   private static int convertTo(int[] edge) {
     var output = 0;
-    for (int i = 0; i < edge.length; i++) {
-      if (edge[i] == '#') {
+    for (int i : edge) {
+      if (i == '#') {
         output <<= 1;
         output |= 1;
       } else {
@@ -506,16 +494,6 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
     }
 
     return output;
-  }
-
-  private static boolean arrCont(int[] arr, int target) {
-    for (int i = 0; i < arr.length; i++) {
-      if (arr[i] == target) {
-        return true;
-      }
-    }
-
-    return false;
   }
 
   private static char[] print(int[] a) {
@@ -535,7 +513,7 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
     var chars = Arrays.stream(arr).flatMapToInt(String::chars).toArray();
     var g = new RowArrayGrid(chars, arr.length, arr.length);
 
-    for (Consumer<ArrayGrid> t : transformation) {
+    for (var t : transformation) {
       t.accept(g);
     }
 
@@ -584,15 +562,9 @@ public class Day20 extends AdventSolution2020<Long, Integer> {
   }
 
   private static boolean hasSeaMonster(String[] image, int x, int y) {
-    var seaMonster = new char[][]{
-        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', '#', ' '},
-        {'#', ' ', ' ', ' ', ' ', '#', '#', ' ', ' ', ' ', ' ', '#', '#', ' ', ' ', ' ', ' ', '#', '#', '#'},
-        {' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', '#', ' ', ' ', ' '}
-    };
-
-    for (int seaMonsterY = 0; seaMonsterY < seaMonster.length; seaMonsterY++) {
-      for (int seaMonsterX = 0; seaMonsterX < seaMonster[seaMonsterY].length; seaMonsterX++) {
-        var d = seaMonster[seaMonsterY][seaMonsterX];
+    for (int seaMonsterY = 0; seaMonsterY < SEA_MONSTER_HEIGHT; seaMonsterY++) {
+      for (int seaMonsterX = 0; seaMonsterX < SEA_MONSTER_WIDTH; seaMonsterX++) {
+        var d = SEA_MONSTER[seaMonsterY][seaMonsterX];
         if (d == ' ') {
           continue;
         }

@@ -8,12 +8,10 @@ import org.apache.logging.log4j.Logger;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.net.URISyntaxException;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Locale;
 
 public abstract class AbsAdventSolution<T1, T2> implements
@@ -97,19 +95,17 @@ public abstract class AbsAdventSolution<T1, T2> implements
 
   @Override
   public FileChannel asFileChannel(ResourceIdentifier identifier) {
+    Path resPath;
+
     if (identifier == defaultResourceIdentifier) {
-      return pathToFileChannel(defaultResourcePath);
+      resPath = defaultResourcePath;
+    } else if (identifier instanceof ClasspathResourceIdentifier classpathRes) {
+      resPath = ResourceUtil.getResourcePath(getClass(), classpathRes.name());
+    } else {
+      throw new IllegalArgumentException("Unable to resolve identifier " + identifier);
     }
 
-    if (identifier instanceof ClasspathResourceIdentifier classpathRes) {
-      try {
-        return pathToFileChannel(Paths.get(getClass().getResource(classpathRes.name()).toURI()));
-      } catch (URISyntaxException e) {
-        throw new IllegalArgumentException(e);
-      }
-    }
-
-    throw new IllegalArgumentException("Unable to resolve identifier " + identifier);
+    return pathToFileChannel(resPath);
   }
 
   private static FileChannel pathToFileChannel(Path path) {
