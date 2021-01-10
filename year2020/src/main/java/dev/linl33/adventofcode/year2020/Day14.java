@@ -86,7 +86,7 @@ public class Day14 extends AdventSolution2020<Long, Long> implements
 //    return solveByUnsafeAllocateMemory(byteBuffer);
   }
 
-  private static long solveByUnsafeAllocateMemory(ByteBuffer buffer) {
+  private static Long solveByUnsafeAllocateMemory(ByteBuffer buffer) {
     // this method takes advantage of vm overcommit to write memory values
     // directly into the virtual memory
     // tested on Linux
@@ -122,7 +122,7 @@ public class Day14 extends AdventSolution2020<Long, Long> implements
     );
   }
 
-  private static long solveByHashMap(ByteBuffer buffer) {
+  private static Long solveByHashMap(ByteBuffer buffer) {
     var memory = new HashMap<Long, Integer>();
     var oneMask = new AtomicLong(0);
     var floatingMaskCache = new long[1 << MAX_FLOATING_BITS];
@@ -150,7 +150,7 @@ public class Day14 extends AdventSolution2020<Long, Long> implements
     );
   }
 
-  private static long solve(ByteBuffer byteBuffer,
+  private static Long solve(ByteBuffer byteBuffer,
                             Consumer<SetMaskInstr> onSetMask,
                             ToLongFunction<WriteInstr> onWrite) {
     var sBuilder = Stream.<InitInstr>builder();
@@ -159,7 +159,7 @@ public class Day14 extends AdventSolution2020<Long, Long> implements
       byteBuffer.position(byteBuffer.position() + 1);
 
       if (byteBuffer.get() == 'a') {
-        sBuilder.add(new SetMaskInstr(byteBuffer.slice(byteBuffer.position() + 5, ADDR_BITS)));
+        sBuilder.add(SetMaskInstr.parse(byteBuffer.slice(byteBuffer.position() + 5, ADDR_BITS)));
         // skip to the next line
         byteBuffer.position(byteBuffer.position() + 5 + ADDR_BITS + 1);
       } else {
@@ -181,22 +181,16 @@ public class Day14 extends AdventSolution2020<Long, Long> implements
       }
     }
 
-    return sBuilder.build().reduce(
-        0L,
-        (sum, instr) -> {
+    return sBuilder
+        .build()
+        .mapMultiToLong((instr, accu) -> {
           if (instr instanceof SetMaskInstr maskInstr) {
             onSetMask.accept(maskInstr);
-            return sum;
+          } else if (instr instanceof WriteInstr writeInstr) {
+            accu.accept(onWrite.applyAsLong(writeInstr));
           }
-
-          if (instr instanceof WriteInstr writeInstr) {
-            return sum + onWrite.applyAsLong(writeInstr);
-          }
-
-          throw new IllegalStateException();
-        },
-        Long::sum
-    );
+        })
+        .sum();
   }
 
   private static int applyFloatingMask(long floatingMask, long[] maskOut) {
@@ -219,20 +213,20 @@ public class Day14 extends AdventSolution2020<Long, Long> implements
   private static record SetMaskInstr(long oneMask,
                                      long zeroMask,
                                      long floatingMask) implements InitInstr {
-    public SetMaskInstr(ByteBuffer mask) {
-      this(makeMask(mask, '1', 0L), makeMask(mask, '0', ~0L), makeMask(mask, 'X', 0L));
-    }
+    private static SetMaskInstr parse(ByteBuffer mask) {
+      var one = 0L;
+      var zero = 0L;
+      var floating = 0L;
 
-    private static long makeMask(ByteBuffer byteBuffer, char bit, long identity) {
-      var res = identity;
-
-      for (int i = 0; i < ADDR_BITS; i++) {
-        res ^= (byteBuffer.get() != bit) ? 0 : (1L << (ADDR_BITS - i - 1));
+      for (int i = ADDR_BITS - 1; i >= 0; i--) {
+        switch (mask.get()) {
+          case '1' -> one |= 1L << i;
+          case '0' -> zero |= 1L << i;
+          case 'X' -> floating |= 1L << i;
+        }
       }
 
-      byteBuffer.rewind();
-
-      return res;
+      return new SetMaskInstr(one, ~zero, floating);
     }
   }
 
