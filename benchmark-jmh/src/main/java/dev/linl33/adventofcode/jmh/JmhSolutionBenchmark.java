@@ -9,6 +9,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public interface JmhSolutionBenchmark<T1, T2> extends AdventSolutionBenchmark<T1, T2> {
   @Override
@@ -20,14 +21,18 @@ public interface JmhSolutionBenchmark<T1, T2> extends AdventSolutionBenchmark<T1
 
     var opt = Arrays
         .stream(options)
-        .map(o -> o instanceof JmhBenchmarkOption jmhOpt ? jmhOpt : null)
-        .filter(Objects::nonNull)
+        .mapMulti((Object o, Consumer<JmhBenchmarkOption> accu) -> {
+          if (o instanceof JmhBenchmarkOption jmhOpt) {
+            accu.accept(jmhOpt);
+          }
+        })
         .reduce(
             (ChainedOptionsBuilder) new OptionsBuilder(),
             (builder, jmhOpt) -> jmhOpt.applyOption(builder),
             (left, right) -> left
         )
         .param("solutionClass", getClass().getName())
+        .jvmArgsPrepend("-XX:+UseParallelGC")
         .forks(1)
         .build();
 
