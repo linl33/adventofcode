@@ -857,7 +857,7 @@ public class Day18 extends AdventSolution2019<Integer, Integer> {
             v -> GraphUtil.aStar(kEntrance, kPos, pt -> listNeighbors(pt, v))
         );
 
-        if (pathToKey != null) {
+        if (pathToKey.isPresent()) {
           continue;
         }
 
