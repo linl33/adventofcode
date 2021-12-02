@@ -5,10 +5,7 @@ import dev.linl33.adventofcode.lib.graph.GraphPath;
 import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -122,9 +119,7 @@ public class IntGraph<TData, TNode extends IntGraphNode<TNode>> implements Graph
 
   @NotNull
   public Optional<TNode> getNode(int nodeId) {
-    return nodeId >= 0 && nodeId < getNodes().length ?
-        Optional.ofNullable(getNodes()[nodeId]) :
-        Optional.empty();
+    return Optional.ofNullable(nodes[Objects.checkIndex(nodeId, nodes.length)]);
   }
 
   @NotNull
