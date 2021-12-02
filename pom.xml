@@ -47,12 +47,12 @@
         <org.codehaus.mojo.flatten-plugin.version>1.2.5</org.codehaus.mojo.flatten-plugin.version>
 
         <!-- Other Dependencies -->
-        <org.apache.logging.log4j.version>2.14.0</org.apache.logging.log4j.version>
-        <org.openjdk.jmh.version>1.27</org.openjdk.jmh.version>
-        <org.jetbrains.annotations.version>20.1.0</org.jetbrains.annotations.version>
+        <org.apache.logging.log4j.version>2.14.1</org.apache.logging.log4j.version>
+        <org.openjdk.jmh.version>1.33</org.openjdk.jmh.version>
+        <org.jetbrains.annotations.version>23.0.0</org.jetbrains.annotations.version>
 
         <!-- Testing -->
-        <org.junit.jupiter.version>5.7.0</org.junit.jupiter.version>
+        <org.junit.jupiter.version>5.8.2</org.junit.jupiter.version>
     </properties>
 
     <build>
