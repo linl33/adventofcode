@@ -18,7 +18,8 @@ class AdventSolutionExtension implements ParameterResolver {
   public static final Namespace NAMESPACE = Namespace.create(AdventSolutionExtension.class);
 
   @Override
-  public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
+  public boolean supportsParameter(ParameterContext parameterContext,
+                                   ExtensionContext extensionContext) throws ParameterResolutionException {
     if (!parameterContext.getTarget().map(AdventSolutionTest.class::isInstance).orElse(false)) {
       return false;
     }

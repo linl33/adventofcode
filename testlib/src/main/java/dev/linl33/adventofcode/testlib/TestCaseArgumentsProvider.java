@@ -60,8 +60,7 @@ class TestCaseArgumentsProvider implements ArgumentsProvider, AnnotationConsumer
 
     return Arrays
         .stream(testParts)
-        .map(t -> t.cases)
-        .map(s -> s.apply(instance))
+        .map(t -> t.cases.apply(instance))
         .map(Map::entrySet)
         .flatMap(Collection::stream)
         .map(entry -> Stream

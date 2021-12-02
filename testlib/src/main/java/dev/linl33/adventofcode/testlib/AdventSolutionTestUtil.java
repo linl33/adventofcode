@@ -2,7 +2,6 @@ package dev.linl33.adventofcode.testlib;
 
 import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,7 +12,7 @@ public class AdventSolutionTestUtil {
   public static Map<TestPart, Map<ResourceIdentifier, String>> disableSlowTest(Map<TestPart, Map<ResourceIdentifier, String>> currDisabledTests,
                                                                                TestPart toDisable,
                                                                                ResourceIdentifier testCaseResource) {
-    if (currDisabledTests.getOrDefault(toDisable, Collections.emptyMap()).containsKey(testCaseResource)) {
+    if (currDisabledTests.getOrDefault(toDisable, Map.of()).containsKey(testCaseResource)) {
       return currDisabledTests;
     }
 
@@ -21,7 +20,7 @@ public class AdventSolutionTestUtil {
       return Map.of(toDisable, Map.of(testCaseResource, DISABLE_REASON_SLOW));
     }
 
-    var relevantPart = currDisabledTests.getOrDefault(toDisable, Collections.emptyMap());
+    var relevantPart = currDisabledTests.getOrDefault(toDisable, Map.of());
     @SuppressWarnings("unchecked")
     var newEntries = (Map.Entry<ResourceIdentifier, String>[]) new Map.Entry[relevantPart.size() + 1];
     relevantPart.entrySet().toArray(newEntries);
@@ -42,7 +41,7 @@ public class AdventSolutionTestUtil {
   public static Map<TestPart, Map<ResourceIdentifier, String>> disableSlowDefaultTest(TestPart toDisable,
                                                                                       AdventSolutionTest<?, ?> test) {
     return disableSlowTest(
-        Collections.emptyMap(),
+        Map.of(),
         toDisable,
         toDisable.defaultResource.apply(test.newSolutionInstance())
     );

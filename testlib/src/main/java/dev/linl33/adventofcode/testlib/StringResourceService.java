@@ -8,6 +8,10 @@ import java.io.StringReader;
 import java.nio.channels.FileChannel;
 
 public class StringResourceService implements ResourceService {
+  public static final StringResourceService INSTANCE = new StringResourceService();
+
+  private StringResourceService() {}
+
   @Override
   public BufferedReader asBufferedReader(ResourceIdentifier identifier) {
     if (identifier instanceof StringResourceIdentifier sRes) {

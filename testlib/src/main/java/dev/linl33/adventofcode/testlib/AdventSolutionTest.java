@@ -5,7 +5,6 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -32,14 +31,17 @@ public interface AdventSolutionTest<T1, T2> {
   }
 
   default AdventSolution<T1, T2> getSolutionInstance() {
-    var instance = (AdventSolution<T1, T2> & ClasspathResourceService & ResourceServiceHolder) newSolutionInstance();
-    instance.setResourceService(new CompositeResourceService(instance, new StringResourceService()));
+    var instance = newSolutionInstance();
+
+    if (instance instanceof ResourceServiceHolder holder && holder instanceof ClasspathResourceService resourceService) {
+      holder.setResourceService(new CompositeResourceService(resourceService, StringResourceService.INSTANCE));
+    }
 
     return instance;
   }
 
   default Map<TestPart, Map<ResourceIdentifier, String>> getDisabledTests() {
-    return Collections.emptyMap();
+    return Map.of();
   }
 
   default TestPart[] getTestParts(AdventSolution<T1, T2> instance) {
@@ -69,7 +71,7 @@ public interface AdventSolutionTest<T1, T2> {
     );
 
     var testUri = testPart.testSourceUri.apply(this);
-    var disabledTests = getDisabledTests().getOrDefault(testPart, Collections.emptyMap());
+    var disabledTests = getDisabledTests().getOrDefault(testPart, Map.of());
 
     return cases
         .entrySet()
