@@ -229,23 +229,20 @@ public class Day25 extends AdventSolution2019<Integer, Integer> {
     }
   }
 
-  private static record Room(@NotNull String name,
-                             @NotNull String description,
-                             @NotNull List<String> doors,
-                             @NotNull List<String> items) {
+  private record Room(@NotNull String name,
+                      @NotNull String description,
+                      @NotNull List<String> doors,
+                      @NotNull List<String> items) {
     @Override
     public boolean equals(Object o) {
       if (this == o) return true;
-      if (o == null || getClass() != o.getClass()) return false;
 
-      Room room = (Room) o;
-
-      return name.equals(room.name);
+      return o instanceof Room room && name.equals(room.name);
     }
 
     @Override
     public int hashCode() {
-      return name.hashCode();
+      return Objects.hashCode(name);
     }
   }
 }
