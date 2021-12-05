@@ -3,9 +3,13 @@ package dev.linl33.adventofcode.year2021;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
-import java.util.Arrays;
+import java.util.regex.Pattern;
 
 public class Day5 extends AdventSolution2021<Integer, Integer> {
+  private static final int GRID_WIDTH = 1000;
+  private static final int GRID_HEIGHT = 1000;
+  private static final Pattern SPLIT_PATTERN = Pattern.compile(",| -> ");
+
   public static void main(String[] args) {
     new Day5().runAndPrintAll();
   }
@@ -14,98 +18,44 @@ public class Day5 extends AdventSolution2021<Integer, Integer> {
   public Integer part1(@NotNull BufferedReader reader) {
     var lines = reader.lines().toArray(String[]::new);
 
-    var grid = new int[1000][1000];
-
-    for (var line : lines) {
-      var pairs = line.split(" -> ");
-      var left = Arrays.stream(pairs[0].split(",")).mapToInt(Integer::parseInt).toArray();
-      var right = Arrays.stream(pairs[1].split(",")).mapToInt(Integer::parseInt).toArray();
-
-      if (left[0] == right[0]) {
-        var x = left[0];
-
-        var start = Math.min(left[1], right[1]);
-        var end = Math.max(left[1], right[1]);
-
-        for (int i = start; i <= end; i++) {
-          grid[i][x]++;
-        }
-      } else if (left[1] == right[1]) {
-        var y = left[1];
-
-        var start = Math.min(left[0], right[0]);
-        var end = Math.max(left[0], right[0]);
-
-        for (int i = start; i <= end; i++) {
-          grid[y][i]++;
-        }
-      }
-    }
-
-    return sumGrid(grid);
+    return countOverlappingVents(lines, false);
   }
 
   @Override
   public Integer part2(@NotNull BufferedReader reader) {
     var lines = reader.lines().toArray(String[]::new);
 
-    var grid = new int[1000][1000];
-
-    for (var line : lines) {
-      var pairs = line.split(" -> ");
-      var left = Arrays.stream(pairs[0].split(",")).mapToInt(Integer::parseInt).toArray();
-      var right = Arrays.stream(pairs[1].split(",")).mapToInt(Integer::parseInt).toArray();
-
-      if (left[0] == right[0]) {
-        var x = left[0];
-
-        var start = Math.min(left[1], right[1]);
-        var end = Math.max(left[1], right[1]);
-
-        for (int i = start; i <= end; i++) {
-          grid[i][x]++;
-        }
-      } else if (left[1] == right[1]) {
-        var y = left[1];
-
-        var start = Math.min(left[0], right[0]);
-        var end = Math.max(left[0], right[0]);
-
-        for (int i = start; i <= end; i++) {
-          grid[y][i]++;
-        }
-      } else {
-        if (right[0] > left[0] && right[1] > left[1]) {
-          for (int i = 0; i < (right[0] - left[0] + 1); i++) {
-            grid[left[1] + i][left[0] + i]++;
-          }
-        } else if (right[0] < left[0] && right[1] < left[1]) {
-          for (int i = 0; i < (left[0] - right[0] + 1); i++) {
-            grid[right[1] + i][right[0] + i]++;
-          }
-        } else if (right[0] > left[0] && right[1] < left[1]) {
-          for (int i = 0; i < (right[0] - left[0] + 1); i++) {
-            grid[left[1] - i][left[0] + i]++;
-          }
-        } else if (right[0] < left[0] && right[1] > left[1]) {
-          for (int i = 0; i < (left[0] - right[0] + 1); i++) {
-            grid[left[1] + i][left[0] - i]++;
-          }
-        }
-      }
-    }
-
-    return sumGrid(grid);
+    return countOverlappingVents(lines, true);
   }
 
-  private static int sumGrid(@NotNull int[][] grid) {
-    var sum = 0;
-    for (var row : grid) {
-      for (var i : row) {
-        sum += i >= 2 ? 1 : 0;
+  private static int countOverlappingVents(@NotNull String[] lines, boolean includeDiagonals) {
+    var grid = new int[GRID_WIDTH * GRID_HEIGHT];
+    var gridCount = 0;
+
+    for (var line : lines) {
+      var nums = SPLIT_PATTERN.split(line, 4);
+
+      var x1 = Integer.parseInt(nums[0]);
+      var y1 = Integer.parseInt(nums[1]);
+      var x2 = Integer.parseInt(nums[2]);
+      var y2 = Integer.parseInt(nums[3]);
+
+      var deltaX = x2 - x1;
+      var deltaY = y2 - y1;
+
+      if (!includeDiagonals && deltaX != 0 && deltaY != 0) {
+        continue;
+      }
+
+      var magnitude = deltaX == 0 ? Math.abs(deltaY) : Math.abs(deltaX);
+      deltaX = Integer.signum(deltaX);
+      deltaY = Integer.signum(deltaY);
+
+      for (int i = 0; i <= magnitude; i++) {
+        gridCount += grid[(y1 + deltaY * i) * GRID_WIDTH + (x1 + deltaX * i)]++ == 1 ? 1 : 0;
       }
     }
 
-    return sum;
+    return gridCount;
   }
 }
