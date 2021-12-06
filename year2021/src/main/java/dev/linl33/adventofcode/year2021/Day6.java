@@ -20,19 +20,12 @@ public class Day6 extends AdventSolution2021<Long, Long> {
   }
 
   private static long solve(@NotNull String initialState, int days) {
-    var initialStateTally = new int[9];
-    for (int i = 0; i < initialState.length(); i++) {
-      var c = initialState.charAt(i);
-      if (c != ',') {
-        initialStateTally[c - '0']++;
-      }
-    }
-
     var simulation = simulate(days);
-
     var sum = 0L;
-    for (int i = 0; i < initialStateTally.length; i++) {
-      sum += initialStateTally[i] * simulation[i];
+
+    for (int i = 0; i < initialState.length(); i++) {
+      var c = initialState.codePointAt(i);
+      sum += c != ',' ? simulation[c - '0'] : 0;
     }
 
     return sum;
@@ -49,13 +42,12 @@ public class Day6 extends AdventSolution2021<Long, Long> {
     var population = 2L;
     var finalPopulations = new long[9];
 
-    for (int i = 0; i < days; i++) {
+    for (int i = 6; i < days; i++) {
       var n = generations[i % 9];
 
       generations[(i + 7) % 9] += n;
-
       population += n;
-      finalPopulations[(days - i) % 9] = population;
+      finalPopulations[(days - i) % 9] = (days - i) < 9 ? population : 0;
     }
 
     return finalPopulations;
