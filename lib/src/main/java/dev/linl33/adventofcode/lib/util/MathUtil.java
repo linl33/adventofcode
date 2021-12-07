@@ -1,9 +1,11 @@
 package dev.linl33.adventofcode.lib.util;
 
 import dev.linl33.adventofcode.lib.point.Point2D;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 
 public final class MathUtil {
   public static int gcd(int a, int b) {
@@ -163,5 +165,44 @@ public final class MathUtil {
     }
 
     return sum % prod;
+  }
+
+  public static int median(@NotNull int[] numbers, boolean isSorted) {
+    var n = numbers.length;
+    if (n == 0) {
+      return 0;
+    }
+
+    if (n == 1) {
+      return numbers[0];
+    }
+
+    if (n == 2) {
+      return (numbers[0] + numbers[1]) / 2;
+    }
+
+    var sorted = isSorted ? numbers : Arrays.copyOf(numbers, n);
+    if (!isSorted) {
+      Arrays.sort(sorted);
+    }
+
+    if (n % 2 == 0) {
+      return (sorted[n / 2 - 1] + sorted[n / 2]) / 2;
+    }
+
+    return sorted[n / 2];
+  }
+
+  public static int median(@NotNull int[] numbers) {
+    return median(numbers, false);
+  }
+
+  public static int mean(@NotNull int[] numbers) {
+    var sum = 0;
+    for (var n : numbers) {
+      sum += n;
+    }
+
+    return sum / numbers.length;
   }
 }
