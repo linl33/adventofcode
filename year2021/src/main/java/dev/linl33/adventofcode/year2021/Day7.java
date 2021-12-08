@@ -1,15 +1,15 @@
 package dev.linl33.adventofcode.year2021;
 
+import dev.linl33.adventofcode.lib.util.AdventUtil;
 import dev.linl33.adventofcode.lib.util.MathUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
-import java.util.Arrays;
 import java.util.function.IntUnaryOperator;
 
 
 public class Day7 extends AdventSolution2021<Integer, Integer> {
-  private static final String INPUT_DELIMITER = ",";
+  private static final char INPUT_DELIMITER = ',';
 
   public static void main(String[] args) {
     new Day7().runAndPrintAll();
@@ -17,10 +17,7 @@ public class Day7 extends AdventSolution2021<Integer, Integer> {
 
   @Override
   public Integer part1(@NotNull BufferedReader reader) throws Exception {
-    var input = Arrays
-        .stream(reader.readLine().split(INPUT_DELIMITER))
-        .mapToInt(Integer::parseInt)
-        .toArray();
+    var input = AdventUtil.readDelimiterSeperatedInts(reader.readLine(), INPUT_DELIMITER, 1000);
     var median = MathUtil.median(input);
 
     return solve(
@@ -32,10 +29,7 @@ public class Day7 extends AdventSolution2021<Integer, Integer> {
 
   @Override
   public Integer part2(@NotNull BufferedReader reader) throws Exception {
-    var input = Arrays
-        .stream(reader.readLine().split(INPUT_DELIMITER))
-        .mapToInt(Integer::parseInt)
-        .toArray();
+    var input = AdventUtil.readDelimiterSeperatedInts(reader.readLine(), INPUT_DELIMITER, 1000);
     var mean = MathUtil.mean(input);
 
     return solve(
