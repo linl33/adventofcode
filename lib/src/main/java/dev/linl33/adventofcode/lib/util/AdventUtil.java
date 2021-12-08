@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public final class AdventUtil {
@@ -236,5 +237,21 @@ public final class AdventUtil {
           return finisher.apply(accu);
         })
         .takeWhile(Objects::nonNull);
+  }
+
+  public static int[] readDelimiterSeperatedInts(@NotNull String input, char delimiter, int maxSize) {
+    var ints = new int[maxSize];
+    var start = 0;
+    var length = input.length();
+    var outputCounter = 0;
+    for (int i = 0; i < length; i++) {
+      if (input.charAt(i) == delimiter) {
+        ints[outputCounter++] = Integer.parseInt(input, start, i, 10);
+        start = i + 1;
+      }
+    }
+
+    ints[outputCounter++] = Integer.parseInt(input, start, length, 10);
+    return maxSize == outputCounter ? ints : Arrays.copyOf(ints, outputCounter);
   }
 }
