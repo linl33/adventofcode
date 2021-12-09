@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 public class Day8 extends AdventSolution2021<Integer, Integer>
     implements ByteBufferAdventSolution<Integer, Integer>, NullBufferedReaderSolution<Integer, Integer> {
   private static final int UNAMBIGUOUS_MASK = 0b100111000;
-  private static final int[] LENGTH_XOR_LOOKUP = new int[] { 0, 0, 0, 1, 7, 4, 0, 0, 8, 0, 0, 0, 3, 9, 5, 0, 2, 6 };
+  private static final int[] LENGTH_XOR_LOOKUP = new int[] { 4, 0, 1, 0, 0, 7, 9, 3, 0, 8, 0, 5, 0, 0, 6, 2 };
 
   public static void main(String[] args) {
     new Day8().runAndPrintAll();
@@ -62,10 +62,10 @@ public class Day8 extends AdventSolution2021<Integer, Integer>
 
     while (byteBuffer.hasRemaining()) {
       var digitStart = byteBuffer.position();
-      var lineStart = byteBuffer.position();
-      // 5 xor 1 xor 4 = 0
+      var lineStart = byteBuffer.position() + 61;
+      // 6 xor 3 xor 5 = 0
       // 1 and 4 are all we need to figure out the rest of the digits
-      var decoderDone = 5;
+      var decoderDone = 6;
       var oneEncoded = 0;
       var fourEncoded = 0;
       do {
@@ -81,22 +81,18 @@ public class Day8 extends AdventSolution2021<Integer, Integer>
             encoded |= 1 << (byteBuffer.get(i) - 'a');
           }
 
-          if (digitLength == 3) {
-            oneEncoded = encoded;
-            decoderDone ^= 1;
-          } else {
-            fourEncoded = encoded;
-            decoderDone ^= 4;
-          }
+          decoderDone ^= digitLength;
+          oneEncoded ^= encoded;
+          fourEncoded = encoded;
         }
 
         digitStart = byteBuffer.position();
       } while (decoderDone != 0);
+      oneEncoded ^= fourEncoded;
 
-      byteBuffer.position(lineStart + 61);
+      byteBuffer.position(lineStart);
       var encodedDigit = 0;
       var lineTotal = 0;
-      digitStart = lineStart + 61;
       byte next;
       while ((next = byteBuffer.get()) != '\n') {
         var wire = next - 'a';
@@ -105,19 +101,17 @@ public class Day8 extends AdventSolution2021<Integer, Integer>
           continue;
         }
 
-        lineTotal = 10 * lineTotal + decode(encodedDigit, byteBuffer.position() - digitStart, oneEncoded, fourEncoded);
+        lineTotal = 10 * lineTotal + decode(encodedDigit, oneEncoded, fourEncoded);
         encodedDigit = 0;
-        digitStart = byteBuffer.position();
       }
 
-      total += 10 * lineTotal + decode(encodedDigit, byteBuffer.position() - digitStart, oneEncoded, fourEncoded);
+      total += 10 * lineTotal + decode(encodedDigit, oneEncoded, fourEncoded);
     }
 
     return total;
   }
 
-  private static int decode(int encodedDigit, int segmentLength, int oneEncoded, int fourEncoded) {
-    var lookupResult = LENGTH_XOR_LOOKUP[segmentLength];
-    return lookupResult != 0 ? lookupResult : LENGTH_XOR_LOOKUP[segmentLength + Integer.bitCount(oneEncoded ^ encodedDigit) + Integer.bitCount(fourEncoded ^ encodedDigit)];
+  private static int decode(int encodedDigit, int oneEncoded, int fourEncoded) {
+    return LENGTH_XOR_LOOKUP[2 * Integer.bitCount(oneEncoded ^ encodedDigit) + 2 * Integer.bitCount(fourEncoded ^ encodedDigit) - Integer.bitCount(encodedDigit)];
   }
 }
