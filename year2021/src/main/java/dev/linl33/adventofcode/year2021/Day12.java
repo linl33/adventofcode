@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
@@ -63,50 +63,33 @@ public class Day12 extends AdventSolution2021<Integer, Integer> {
   }
 
   private static int countPaths(@NotNull MutableGraph graph,
-                                @NotNull BiPredicate<MutableGraphNode, ArrayList<MutableGraphNode>> shouldRemove) {
+                                @NotNull BiPredicate<MutableGraphNode, List<MutableGraphNode>> shouldRemove) {
     var start = graph.getNode("start").orElseThrow();
     var end = graph.getNode("end").orElseThrow();
-    var paths = new HashSet<String>();
+    var pathCounter = 0;
 
     var queue = new ArrayDeque<ArrayList<MutableGraphNode>>();
     queue.add(new ArrayList<>());
     queue.getFirst().add(start);
     while (!queue.isEmpty()) {
-      var nextPath = queue.remove();
+      var nextPath = queue.pop();
       var next = nextPath.get(nextPath.size() - 1);
 
-      var neighbors = new ArrayList<>(next.outNodes());
-      neighbors.removeIf(node -> {
-        var label = node.getLabel();
-
-        if (node.equals(start)) {
-          return true;
+      for (var neighbor : next.outNodes()) {
+        if ((!neighbor.equals(end) && !Character.isUpperCase(neighbor.getLabel().charAt(0))) && (neighbor.equals(start) || shouldRemove.test(neighbor, nextPath))) {
+          continue;
         }
-
-        if (node.equals(end)) {
-          return false;
-        }
-
-        if (Character.isUpperCase(label.charAt(0))) {
-          return false;
-        }
-
-        return shouldRemove.test(node, nextPath);
-      });
-
-      for (var neighbor : neighbors) {
-        var pathCopy = new ArrayList<>(nextPath);
-        pathCopy.add(neighbor);
 
         if (neighbor.equals(end)) {
-          var p = pathCopy.stream().map(MutableGraphNode::getLabel).collect(Collectors.joining(","));
-          paths.add(p);
+          pathCounter++;
         } else {
-          queue.add(pathCopy);
+          var pathCopy = new ArrayList<>(nextPath);
+          pathCopy.add(neighbor);
+          queue.push(pathCopy);
         }
       }
     }
 
-    return paths.size();
+    return pathCounter;
   }
 }
