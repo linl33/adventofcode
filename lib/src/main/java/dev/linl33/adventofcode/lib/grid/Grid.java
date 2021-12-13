@@ -3,6 +3,8 @@ package dev.linl33.adventofcode.lib.grid;
 import dev.linl33.adventofcode.lib.point.Point2D;
 import dev.linl33.adventofcode.lib.util.PrintUtil;
 
+import java.util.function.Consumer;
+
 public interface Grid {
   int get(int x, int y);
 
@@ -33,6 +35,10 @@ public interface Grid {
   }
 
   default void print() {
+    print(PrintUtil::enhancedPrint);
+  }
+
+  default void print(Consumer<String> printTo) {
     visit(new GridVisitor() {
       StringBuilder sb;
 
@@ -50,8 +56,7 @@ public interface Grid {
 
       @Override
       public GridVisitResult postVisitLine(int x, int y, int[] line) {
-//        PrintUtil.enhancedPrint(sb.toString());
-        System.out.println(sb.toString());
+        printTo.accept(sb.toString());
         return GridVisitResult.CONTINUE;
       }
     });

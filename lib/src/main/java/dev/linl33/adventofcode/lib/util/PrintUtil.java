@@ -41,6 +41,10 @@ public class PrintUtil {
           logResult(toPrint);
         }
       }
+    } else if (toPrint instanceof Iterable<?> iterableToPrint) {
+      for (var printItem : iterableToPrint) {
+        enhancedPrint(printItem);
+      }
     } else {
       logResult(toPrint);
     }
