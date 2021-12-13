@@ -2,6 +2,7 @@ package dev.linl33.adventofcode.lib.grid;
 
 import java.io.BufferedReader;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class ColumnArrayGrid implements ArrayGrid {
   private final int[] gridArray;
@@ -58,5 +59,20 @@ public class ColumnArrayGrid implements ArrayGrid {
   @Override
   public int[] column(int x) {
     return Arrays.copyOfRange(gridArray, x * height, x * height + height);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    ColumnArrayGrid that = (ColumnArrayGrid) o;
+    return width == that.width && height == that.height && Arrays.equals(gridArray, that.gridArray);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hash(width, height);
+    result = 31 * result + Arrays.hashCode(gridArray);
+    return result;
   }
 }

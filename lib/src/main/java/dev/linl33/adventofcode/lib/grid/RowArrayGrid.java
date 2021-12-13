@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 public class RowArrayGrid implements ArrayGrid {
@@ -83,5 +84,20 @@ public class RowArrayGrid implements ArrayGrid {
   @Override
   public int[] column(int x) {
     return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    RowArrayGrid that = (RowArrayGrid) o;
+    return width == that.width && height == that.height && Arrays.equals(gridArray, that.gridArray);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hash(width, height);
+    result = 31 * result + Arrays.hashCode(gridArray);
+    return result;
   }
 }
