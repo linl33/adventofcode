@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Day14 extends AdventSolution2021<Long, Long> {
+  private static final int HASH_MAP_DEFAULT_CAP = 100;
+
   public static void main(String[] args) {
     new Day14().runAndPrintAll();
   }
@@ -29,50 +31,53 @@ public class Day14 extends AdventSolution2021<Long, Long> {
     // skip empty line
     reader.skip(1);
 
-    var insertionRules = new HashMap<String, String>();
+    var insertionRules = new HashMap<String, String[]>(HASH_MAP_DEFAULT_CAP, 1);
     reader
         .lines()
-        .forEach(rule -> insertionRules.put(rule.substring(0, 2), rule.substring(6, 7)));
+        .forEach(rule -> insertionRules.put(
+            rule.substring(0, 2),
+            new String[]{
+                rule.charAt(0) + rule.substring(6, 7),
+                rule.substring(6, 7) + rule.charAt(1),
+            }
+        ));
 
     var pairs = IntStream
         .range(0, polymerTemplate.length() - 1)
         .mapToObj(i -> polymerTemplate.substring(i, i + 2))
-        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-
-    for (int step = 0; step < steps; step++) {
-      var pairsNext = new HashMap<String, Long>();
-
-      for (var kv : pairs.entrySet()) {
-        if (!insertionRules.containsKey(kv.getKey())) {
-          pairsNext.put(kv.getKey(), kv.getValue());
-          continue;
-        }
-
-        var toInsert = insertionRules.get(kv.getKey());
-        var left = kv.getKey().charAt(0) + toInsert;
-        var right = toInsert + kv.getKey().charAt(1);
-
-        pairsNext.compute(left, (k, v) -> v == null ? kv.getValue() : v + kv.getValue());
-        pairsNext.compute(right, (k, v) -> v == null ? kv.getValue() : v + kv.getValue());
-      }
-
-      pairs = pairsNext;
-    }
+        .collect(Collectors.groupingBy(Function.identity(), () -> new HashMap<>(HASH_MAP_DEFAULT_CAP), Collectors.counting()));
+    var pairsNext = new HashMap<String, Long>(HASH_MAP_DEFAULT_CAP);
 
     var freq = new long[26];
-    for (var entry : pairs.entrySet()) {
-      entry
-          .getKey()
-          .chars()
-          .forEach(c -> freq[c - 'A'] += entry.getValue());
+    for (char c : polymerTemplate.toCharArray()) {
+      freq[c - 'A']++;
     }
 
-    freq[polymerTemplate.charAt(0) - 'A']++;
-    freq[polymerTemplate.charAt(polymerTemplate.length() - 1) - 'A']++;
+    for (int step = 0; step < steps; step++) {
+      pairsNext.clear();
+      var finalPairsNext = pairsNext;
+      pairs.forEach((pair, count) -> {
+        // note that every pair should have a rule
+        // so insertionRules.containsKey(pair) check is not needed
+        var toInsert = insertionRules.get(pair);
+
+        var left = toInsert[0];
+        var right = toInsert[1];
+
+        finalPairsNext.compute(left, (__, v) -> v == null ? count : v + count);
+        finalPairsNext.compute(right, (__, v) -> v == null ? count : v + count);
+
+        freq[right.charAt(0) - 'A'] += count;
+      });
+
+      var tmp = pairs;
+      pairs = pairsNext;
+      pairsNext = tmp;
+    }
 
     var max = 0L;
     var min = Long.MAX_VALUE;
-    for (long v : freq) {
+    for (var v : freq) {
       if (v == 0) {
         continue;
       }
@@ -81,6 +86,6 @@ public class Day14 extends AdventSolution2021<Long, Long> {
       min = Math.min(min, v);
     }
 
-    return (max - min) >> 1;
+    return max - min;
   }
 }
