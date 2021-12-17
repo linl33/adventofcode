@@ -3,7 +3,8 @@ package dev.linl33.adventofcode.year2021;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
-import java.util.ArrayList;
+import java.io.IOException;
+import java.util.stream.LongStream;
 
 public class Day16 extends AdventSolution2021<Long, Long> {
   public static void main(String[] args) {
@@ -11,33 +12,28 @@ public class Day16 extends AdventSolution2021<Long, Long> {
   }
 
   @Override
-  public Long part1(@NotNull BufferedReader reader) throws Exception {
-    var line = reader.readLine();
-    var sb = new StringBuilder();
-    for (int i = 0; i < line.length(); i++) {
-      var hexChar = line.charAt(i);
-      toHex(hexChar, sb);
-    }
-
-    var buffer = new long[2];
-    sumVersions(sb, 0, buffer);
-
-    return buffer[0];
+  public Long part1(@NotNull BufferedReader reader) throws IOException {
+    return solve(reader, 0);
   }
 
   @Override
-  public Long part2(@NotNull BufferedReader reader) throws Exception {
+  public Long part2(@NotNull BufferedReader reader) throws IOException {
+    return solve(reader, 1);
+  }
+
+  private static long solve(@NotNull BufferedReader reader, int bufferIdx) throws IOException {
     var line = reader.readLine();
+
+    // TODO: try bitset instead of StringBuilder
     var sb = new StringBuilder();
     for (int i = 0; i < line.length(); i++) {
-      var hexChar = line.charAt(i);
-      toHex(hexChar, sb);
+      toHex(line.charAt(i), sb);
     }
 
     var buffer = new long[2];
     sumVersions(sb, 0, buffer);
 
-    return buffer[1];
+    return buffer[bufferIdx];
   }
 
   private static void toHex(char c, @NotNull StringBuilder sb) {
@@ -46,56 +42,56 @@ public class Day16 extends AdventSolution2021<Long, Long> {
     sb.append(output);
   }
 
-  private static int sumVersions(CharSequence bin, int pos, long[] buffer) {
-    var version = Integer.parseInt(bin, pos, pos + 3, 2);
-    buffer[0] += version;
-    pos += 3;
-    var packetType = Integer.parseInt(bin, pos, pos + 3, 2);
-    pos += 3;
+  private static int sumVersions(@NotNull CharSequence bin, int pos, @NotNull long[] buffer) {
+    // TODO: try a visitor solution, might be cleaner
+
+    var version = Integer.parseInt(bin, pos, pos += 3, 2);
+    var packetType = Integer.parseInt(bin, pos, pos += 3, 2);
+
+    var accumulator = LongStream.builder();
 
     if (packetType == 4) {
       boolean lastLiteral;
-      var literalSb = new StringBuilder();
       do {
         lastLiteral = bin.charAt(pos) == '0';
-        literalSb.append(bin, pos + 1, pos + 5);
+        for (int i = 1; i < 5; i++) {
+          accumulator.accept(bin.charAt(pos + i));
+        }
         pos += 5;
       } while (!lastLiteral);
-      buffer[1] = Long.parseLong(literalSb.toString(), 2);
     } else {
-      var lengthTypeId = bin.charAt(pos);
-      pos += 1;
-
-      var accumulator = new ArrayList<Long>();
+      var lengthTypeId = bin.charAt(pos++);
 
       if (lengthTypeId == '0') {
-        var totalSubPackLength = Integer.parseInt(bin, pos, pos + 15, 2);
-        pos += 15;
-        var stop = pos + totalSubPackLength;
+        var totalSubPacketLength = Integer.parseInt(bin, pos, pos += 15, 2);
+        var stop = pos + totalSubPacketLength;
         do {
           pos = sumVersions(bin, pos, buffer);
-          accumulator.add(buffer[1]);
+          accumulator.accept(buffer[1]);
         } while (pos < stop);
       } else {
-        var subPacketCount = Integer.parseInt(bin, pos, pos + 11, 2);
-        pos += 11;
+        var subPacketCount = Integer.parseInt(bin, pos, pos += 11, 2);
         for (int i = 0; i < subPacketCount; i++) {
           pos = sumVersions(bin, pos, buffer);
-          accumulator.add(buffer[1]);
+          accumulator.accept(buffer[1]);
         }
       }
-
-      buffer[1] = switch (packetType) {
-        case 0 -> accumulator.stream().mapToLong(Long::longValue).sum();
-        case 1 -> accumulator.stream().mapToLong(Long::longValue).reduce((a, b) -> a * b).orElseThrow();
-        case 2 -> accumulator.stream().mapToLong(Long::longValue).min().orElseThrow();
-        case 3 -> accumulator.stream().mapToLong(Long::longValue).max().orElseThrow();
-        case 5 -> accumulator.get(0) > accumulator.get(1) ? 1 : 0;
-        case 6 -> accumulator.get(0) < accumulator.get(1) ? 1 : 0;
-        case 7 -> accumulator.get(0).equals(accumulator.get(1)) ? 1 : 0;
-        default -> throw new IllegalStateException();
-      };
     }
+
+    buffer[0] += version;
+
+    var stream = accumulator.build();
+    buffer[1] = switch (packetType) {
+      case 4 -> stream.reduce(0, (result, next) -> (result << 1) | (next - '0'));
+      case 0 -> stream.sum();
+      case 1 -> stream.reduce((a, b) -> a * b).orElseThrow();
+      case 2 -> stream.min().orElseThrow();
+      case 3 -> stream.max().orElseThrow();
+      case 5 -> stream.reduce((a, b) -> a > b ? 1 : 0).orElseThrow();
+      case 6 -> stream.reduce((a, b) -> a < b ? 1 : 0).orElseThrow();
+      case 7 -> stream.reduce((a, b) -> a == b ? 1 : 0).orElseThrow();
+      default -> throw new IllegalStateException();
+    };
 
     return pos;
   }
