@@ -19,6 +19,7 @@
         <module>year2019</module>
         <module>year2020</module>
         <module>year2021</module>
+        <module>year2022</module>
     </modules>
 
     <properties>
