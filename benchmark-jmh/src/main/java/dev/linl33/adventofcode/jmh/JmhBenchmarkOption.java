@@ -37,7 +37,7 @@ public enum JmhBenchmarkOption implements BenchmarkOption {
     @Override
     public ChainedOptionsBuilder applyOption(ChainedOptionsBuilder builder) {
       return builder
-          .addProfiler(LinuxPerfAsmProfiler.class)
+          .addProfiler(LinuxPerfAsmProfiler.class, "skipInterpreter=true;saveLog=true;saveLogTo=logs;intelSyntax=true")
           .addProfiler(LinuxPerfNormProfiler.class);
     }
   };

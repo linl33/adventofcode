@@ -206,24 +206,22 @@ public class IntcodeVM {
     var relativeOffset = new RegisterAccessor(registers, Register.RELATIVE_OFFSET);
     while (pc.get() > -1) {
       var mainMemoryAccessor = new MainMemoryAccessor(memory, pc.get());
-      var decoded = new DecodedInstruction(mainMemoryAccessor);
-      var accessors = decodeModes(mainMemoryAccessor, decoded, registers);
+      var decodedInstr = DecodedInstruction.decode(mainMemoryAccessor);
+      var accessors = decodeModes(mainMemoryAccessor, decodedInstr, registers);
 
       // TODO: consider instanceof pattern matching for the switch
       //       it should allow me to specialize the accessors
       //       and avoid addressing the accessors by index
 
-      var op = ((Long) decoded.getOp()).intValue();
-      var width = decoded.getWidth();
-      switch (op) {
+      switch (decodedInstr.op) {
         case Instruction.ADD -> {
           accessors.get(2).set(accessors.get(0).get() + accessors.get(1).get());
-          pc.add(width);
+          pc.add(decodedInstr.width());
         }
 
         case Instruction.MUL -> {
           accessors.get(2).set(accessors.get(0).get() * accessors.get(1).get());
-          pc.add(width);
+          pc.add(decodedInstr.width());
         }
 
         // TODO: generalize input/output handling with input/output callback
@@ -237,7 +235,7 @@ public class IntcodeVM {
               pc.set(-2);
             } else {
               accessors.get(0).set(inputVal);
-              pc.add(width);
+              pc.add(decodedInstr.width());
             }
           } else {
             try {
@@ -247,7 +245,7 @@ public class IntcodeVM {
               }
 
               accessors.get(0).set(inputNext);
-              pc.add(width);
+              pc.add(decodedInstr.width());
             } catch (InterruptedException e) {
               throw new RuntimeException(e);
             }
@@ -258,7 +256,7 @@ public class IntcodeVM {
           if (nonBlocking) {
             var added = getOutput().offerLast(accessors.get(0).get());
             if (added) {
-              pc.add(width);
+              pc.add(decodedInstr.width());
             } else {
               pcResume.set(pc);
               pc.set(-2);
@@ -270,7 +268,7 @@ public class IntcodeVM {
                 System.out.println("WARNING: OUTPUT WAIT TIMEOUT");
               }
 
-              pc.add(width);
+              pc.add(decodedInstr.width());
             } catch (InterruptedException e) {
               throw new RuntimeException(e);
             }
@@ -281,7 +279,7 @@ public class IntcodeVM {
           if (accessors.get(0).get() != 0L) {
             pc.set(accessors.get(1).get().intValue());
           } else {
-            pc.add(width);
+            pc.add(decodedInstr.width());
           }
         }
 
@@ -289,28 +287,28 @@ public class IntcodeVM {
           if (accessors.get(0).get() == 0L) {
             pc.set(accessors.get(1).get().intValue());
           } else {
-            pc.add(width);
+            pc.add(decodedInstr.width());
           }
         }
 
         case Instruction.LT -> {
           accessors.get(2).set(accessors.get(0).get() < accessors.get(1).get() ? 1L : 0L);
-          pc.add(width);
+          pc.add(decodedInstr.width());
         }
 
         case Instruction.EQ -> {
           accessors.get(2).set(accessors.get(0).get().equals(accessors.get(1).get()) ? 1L : 0L);
-          pc.add(width);
+          pc.add(decodedInstr.width());
         }
 
         case Instruction.SRO -> {
           relativeOffset.add(accessors.get(0).get().intValue());
-          pc.add(width);
+          pc.add(decodedInstr.width());
         }
 
         case Instruction.HALT -> pc.set(-1);
 
-        default -> throw new IllegalInstructionException(op, pc.get());
+        default -> throw new IllegalInstructionException(decodedInstr.op, pc.get());
       }
     }
 
@@ -326,11 +324,11 @@ public class IntcodeVM {
   private static List<? extends MemoryAccessor<Long>> decodeModes(MainMemoryAccessor memoryAccessor,
                                                                   DecodedInstruction instruction,
                                                                   Map<Register, Integer> registers) {
-    if (instruction.getWidth() < 2) {
-      return Collections.emptyList();
+    if (instruction.width() < 2) {
+      return List.of();
     }
 
-    var remainingParams = instruction.getWidth() - 1;
+    var remainingParams = instruction.width() - 1;
     var modes = memoryAccessor.get() / 100;
     var addr = memoryAccessor.getAddr();
     var paramsArr = new MainMemoryAccessor[remainingParams];
@@ -351,26 +349,9 @@ public class IntcodeVM {
     return List.of(paramsArr);
   }
 
-  private static class DecodedInstruction {
-    private final int op;
-    private final int width;
-    private final int addr;
-
-    public long getOp() {
-      return op;
-    }
-
-    public int getWidth() {
-      return width;
-    }
-
-    public int getAddr() {
-      return addr;
-    }
-
-    public DecodedInstruction(MainMemoryAccessor memoryAccessor) {
-      this.addr = memoryAccessor.getAddr();
-      this.op = (int) (memoryAccessor.get() % 100);
+  private static record DecodedInstruction(int op, int width) {
+    public static DecodedInstruction decode(MainMemoryAccessor memoryAccessor) {
+      var op = (int) (memoryAccessor.get() % 100);
 
       var width = 1;
       if (op >= 1 && op <= 9) {
@@ -385,7 +366,7 @@ public class IntcodeVM {
         }
       }
 
-      this.width = width;
+      return new DecodedInstruction(op, width);
     }
   }
 }

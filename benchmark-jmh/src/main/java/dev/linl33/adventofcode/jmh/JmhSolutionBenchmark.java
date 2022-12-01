@@ -9,6 +9,7 @@ import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public interface JmhSolutionBenchmark<T1, T2> extends AdventSolutionBenchmark<T1, T2> {
@@ -32,7 +33,9 @@ public interface JmhSolutionBenchmark<T1, T2> extends AdventSolutionBenchmark<T1
             (left, right) -> left
         )
         .param("solutionClass", getClass().getName())
-        .jvmArgsPrepend("-XX:+UseParallelGC")
+//        .jvmArgsPrepend("-XX:+UseParallelGC")
+//        .warmupIterations(2)
+//        .measurementIterations(2)
         .forks(1)
         .build();
 

@@ -52,7 +52,7 @@ public final class GraphUtil {
     var openSet = new PriorityQueue<T>(Comparator.comparing(fScore::get));
     openSet.add(start);
 
-    var visitCounter = 0;
+//    var visitCounter = 0;
 
     while (!openSet.isEmpty()) {
       var current = openSet.remove();
@@ -71,7 +71,7 @@ public final class GraphUtil {
         return Optional.of(new GraphPath<>(path, start, end, gScore.get(end)));
       }
 
-      visitCounter++;
+//      visitCounter++;
       var neighbors = neighborCache.computeIfAbsent(current, neighborsFunc);
       for (var neighbor : neighbors) {
         var tentativeGScore = gScore.get(current) + cost.applyAsInt(current, neighbor);
@@ -164,7 +164,7 @@ public final class GraphUtil {
 
     var openSetCounter = 1;
 
-    var visitCounter = 0;
+//    var visitCounter = 0;
 
     var minFScore = openSetFScore[start];
     var minNode = start;
@@ -190,7 +190,7 @@ public final class GraphUtil {
         return onPathFound.apply(gScore);
       }
 
-      visitCounter++;
+//      visitCounter++;
 
       var current = minNode;
       var neighbors = neighborsFunc.apply(current);

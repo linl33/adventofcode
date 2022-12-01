@@ -2,6 +2,7 @@ package dev.linl33.adventofcode.lib.solution;
 
 import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.function.ThrowingFunction;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -40,11 +41,11 @@ public interface ByteBufferAdventSolution<T1, T2> extends AdventSolution<T1, T2>
     );
   }
 
-  default T1 part1(ByteBuffer byteBuffer) throws Exception {
+  default T1 part1(@NotNull ByteBuffer byteBuffer) throws Exception {
     return null;
   }
 
-  default T2 part2(ByteBuffer byteBuffer) throws Exception {
+  default T2 part2(@NotNull ByteBuffer byteBuffer) throws Exception {
     return null;
   }
 

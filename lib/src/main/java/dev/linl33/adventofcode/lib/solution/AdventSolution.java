@@ -3,6 +3,7 @@ package dev.linl33.adventofcode.lib.solution;
 import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.util.internal.LoggingUtil;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -72,14 +73,17 @@ public interface AdventSolution<T1, T2> {
     return part2PrintMapping((T2) part2Result);
   }
 
+  @NotNull
   default ResourceIdentifier getDefaultResource() {
     return new ClasspathResourceIdentifier(getClass().getSimpleName().toLowerCase(Locale.ROOT));
   }
 
+  @NotNull
   default ResourceIdentifier getPart1Resource() {
     return getDefaultResource();
   }
 
+  @NotNull
   default ResourceIdentifier getPart2Resource() {
     return getDefaultResource();
   }

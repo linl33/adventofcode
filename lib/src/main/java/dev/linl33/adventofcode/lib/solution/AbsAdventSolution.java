@@ -4,6 +4,7 @@ import dev.linl33.adventofcode.lib.function.ThrowingBiFunction;
 import dev.linl33.adventofcode.lib.util.internal.ResourceUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,12 +45,12 @@ public abstract class AbsAdventSolution<T1, T2> implements
   }
 
   @Override
-  public T1 part1(ResourceIdentifier identifier) throws Exception {
+  public T1 part1(@NotNull ResourceIdentifier identifier) throws Exception {
     return BufferedReaderAdventSolution.super.part1(identifier);
   }
 
   @Override
-  public T2 part2(ResourceIdentifier identifier) throws Exception {
+  public T2 part2(@NotNull ResourceIdentifier identifier) throws Exception {
     return BufferedReaderAdventSolution.super.part2(identifier);
   }
 
@@ -72,6 +73,7 @@ public abstract class AbsAdventSolution<T1, T2> implements
   }
 
   @Override
+  @NotNull
   public ResourceIdentifier getDefaultResource() {
     return defaultResourceIdentifier;
   }
