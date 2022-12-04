@@ -6,6 +6,8 @@ import java.io.BufferedReader;
 
 public class Day3 extends AdventSolution2022<Integer, Integer> {
   public static final int ALPHA_WIDTH = 'a' - 'A';
+  public static final int COMPARTMENTS = 2;
+  public static final int GROUP_SIZE = 3;
 
   public static void main(String[] args) {
     new Day3().runAndPrintAll();
@@ -13,44 +15,48 @@ public class Day3 extends AdventSolution2022<Integer, Integer> {
 
   @Override
   public Integer part1(@NotNull BufferedReader reader) {
-    var masks = new long[2];
-
-    return reader
+    var rucksackCompartments = reader
         .lines()
-        .mapToInt(line -> {
-          masks[0] = 0L;
-          masks[1] = 0L;
-
-          var rucksackSize = line.length();
-          var compartmentSize = rucksackSize / 2;
-          for (int mask = 0; mask < 2; mask++) {
-            var from = compartmentSize * mask;
-            for (int i = from; i < from + compartmentSize; i++) {
-              var item = line.charAt(i) - 'a';
-              masks[mask] |= 1L << item;
-            }
+        .<String>mapMulti((line, buffer) -> {
+          var compartmentSize = line.length() / COMPARTMENTS;
+          for (int i = 0; i < COMPARTMENTS; i++) {
+            var compartmentStart = i * compartmentSize;
+            buffer.accept(line.substring(compartmentStart, compartmentStart + compartmentSize));
           }
-
-          return calcPriority(masks[0] & masks[1]);
         })
-        .sum();
+        .mapToLong(Day3::stringToMask)
+        .toArray();
+
+    return reduceAndSumMasks(rucksackCompartments, COMPARTMENTS);
   }
 
   @Override
   public Integer part2(@NotNull BufferedReader reader) {
-    var inputInts = reader
+    var rucksacks = reader
         .lines()
-        .mapToLong(line -> line
-            .chars()
-            .mapToLong(c -> 1L << (c - 'a'))
-            .reduce((acc, next) -> acc | next)
-            .orElseThrow()
-        )
+        .mapToLong(Day3::stringToMask)
         .toArray();
 
+    return reduceAndSumMasks(rucksacks, GROUP_SIZE);
+  }
+
+  private static long stringToMask(String line) {
+    return line
+        .chars()
+        .mapToLong(c -> 1L << (c - 'a'))
+        .reduce((acc, next) -> acc | next)
+        .orElseThrow();
+  }
+
+  private static int reduceAndSumMasks(long[] masks, int chunkSize) {
     var sum = 0;
-    for (int i = 0; i < inputInts.length; i += 3) {
-      sum += calcPriority(inputInts[i] & inputInts[i + 1] & inputInts[i + 2]);
+    for (int i = 0; i < masks.length; i += chunkSize) {
+      var reducedMask = masks[i];
+      for (int j = 1; j < chunkSize; j++) {
+        reducedMask &= masks[i + j];
+      }
+
+      sum += calcPriority(reducedMask);
     }
 
     return sum;
