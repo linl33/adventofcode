@@ -32,15 +32,7 @@ public class Day4 extends AdventSolution2022<Integer, Integer> {
             return true;
           }
 
-          if (leftLo > rightLo) {
-            rightLo = leftLo;
-
-            leftHi ^= rightHi;
-            rightHi ^= leftHi;
-            leftHi ^= rightHi;
-          }
-
-          return rightLo <= leftHi && rightHi <= leftHi;
+          return leftLo > rightLo ? (leftLo <= rightHi && leftHi <= rightHi) : (rightLo <= leftHi && rightHi <= leftHi);
         })
         .count();
   }
@@ -68,12 +60,7 @@ public class Day4 extends AdventSolution2022<Integer, Integer> {
             return true;
           }
 
-          if (leftLo > rightLo) {
-            rightLo = leftLo;
-            leftHi = rightHi;
-          }
-
-          return rightLo <= leftHi;
+          return leftLo > rightLo ? (leftLo <= rightHi) : (rightLo <= leftHi);
         })
         .count();
   }
