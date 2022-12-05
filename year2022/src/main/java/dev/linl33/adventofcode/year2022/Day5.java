@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.year2022;
 
+import dev.linl33.adventofcode.jmh.JmhSolutionBenchmark;
 import dev.linl33.adventofcode.lib.util.AdventUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,9 +9,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class Day5 extends AdventSolution2022<String, String> {
+public class Day5 extends AdventSolution2022<String, String> implements JmhSolutionBenchmark<String, String> {
   public static void main(String[] args) {
-    new Day5().runAndPrintAll();
+//    new Day5().runAndPrintAll();
+    new Day5().benchmark();
   }
 
   @Override
@@ -31,7 +33,7 @@ public class Day5 extends AdventSolution2022<String, String> {
 
     var stackCount = countStacks(initState);
     var stacks = parseStacks(initState);
-    var tmpStack = new byte[Math.min(stacks.length - stackCount, maxChunkSize)];
+    var tmpStack = new byte[stacks.length - stackCount];
 
     for (String instruction : instructions) {
       var offset = instruction.length() % 2;
@@ -43,21 +45,24 @@ public class Day5 extends AdventSolution2022<String, String> {
       var right = left ^ from ^ to;
 
       var chunkSize = Math.min(maxChunkSize, cratesToMove);
-      var moveDir = Integer.signum(from - to) * chunkSize;
+      var moveDir = Integer.signum(from - to) * cratesToMove;
       var copyLengthOffset = Math.min(0, moveDir);
 
+      var srcPointer = stacks[from];
+      var dstPointer = stacks[to];
+      System.arraycopy(stacks, srcPointer - cratesToMove + 1, tmpStack, 0, cratesToMove);
+
+      var leftPointer = stacks[left];
+      System.arraycopy(stacks, leftPointer + 1, stacks, leftPointer + 1 + moveDir, Math.abs(srcPointer - dstPointer) - cratesToMove - copyLengthOffset);
+
       for (int i = 0; i < cratesToMove; i += chunkSize) {
-        var srcPointer = stacks[from];
-        var dstPointer = stacks[to];
-        System.arraycopy(stacks, srcPointer - chunkSize + 1, tmpStack, 0, chunkSize);
+        // TODO: does it work with chunkSize not 1 or cratesToMove?
+        var chunkOffset = (cratesToMove / chunkSize - i / chunkSize - 1) * chunkSize;
+        System.arraycopy(tmpStack, i, stacks, dstPointer + 1 + copyLengthOffset + chunkOffset, chunkSize);
+      }
 
-        var leftPointer = stacks[left];
-        System.arraycopy(stacks, leftPointer + 1, stacks, leftPointer + 1 + moveDir, Math.abs(srcPointer - dstPointer) - chunkSize - copyLengthOffset);
-        System.arraycopy(tmpStack, 0, stacks, dstPointer + 1 + copyLengthOffset, chunkSize);
-
-        for (int j = left; j < right; j++) {
-          stacks[j] += moveDir;
-        }
+      for (int j = left; j < right; j++) {
+        stacks[j] += moveDir;
       }
     }
 
