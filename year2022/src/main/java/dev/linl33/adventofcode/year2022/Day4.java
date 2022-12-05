@@ -15,8 +15,8 @@ public class Day4 extends AdventSolution2022<Integer, Integer> {
         .lines()
         .filter(line -> {
           var leftDashPos = line.indexOf('-');
-          var commaPos = line.indexOf(',', leftDashPos + 1);
-          var rightDashPos = line.indexOf('-', commaPos + 1);
+          var commaPos = line.indexOf(',', leftDashPos + 2);
+          var rightDashPos = line.indexOf('-', commaPos + 2);
 
           var leftLo = Integer.parseInt(line, 0, leftDashPos, 10);
           var rightLo = Integer.parseInt(line, commaPos + 1, rightDashPos, 10);
@@ -43,8 +43,8 @@ public class Day4 extends AdventSolution2022<Integer, Integer> {
         .lines()
         .filter(line -> {
           var leftDashPos = line.indexOf('-');
-          var commaPos = line.indexOf(',', leftDashPos + 1);
-          var rightDashPos = line.indexOf('-', commaPos + 1);
+          var commaPos = line.indexOf(',', leftDashPos + 2);
+          var rightDashPos = line.indexOf('-', commaPos + 2);
 
           var leftLo = Integer.parseInt(line, 0, leftDashPos, 10);
           var rightLo = Integer.parseInt(line, commaPos + 1, rightDashPos, 10);
