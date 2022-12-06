@@ -1,50 +1,76 @@
 package dev.linl33.adventofcode.year2022;
 
+import dev.linl33.adventofcode.lib.solution.ByteBufferAdventSolution;
+import dev.linl33.adventofcode.lib.solution.NullBufferedReaderSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import java.nio.ByteBuffer;
 
-public class Day6 extends AdventSolution2022<Integer, Integer> {
+public class Day6 extends AdventSolution2022<Integer, Integer>
+    implements ByteBufferAdventSolution<Integer, Integer>, NullBufferedReaderSolution<Integer, Integer> {
   public static void main(String[] args) {
     new Day6().runAndPrintAll();
   }
 
   @Override
-  public Integer part1(@NotNull BufferedReader reader) throws IOException {
-    return findMarker(reader, 4);
+  public Integer part1(@NotNull ResourceIdentifier identifier) throws Exception {
+    return ByteBufferAdventSolution.super.part1(identifier);
   }
 
   @Override
-  public Integer part2(@NotNull BufferedReader reader) throws IOException {
-    return findMarker(reader, 14);
+  public Integer part2(@NotNull ResourceIdentifier identifier) throws Exception {
+    return ByteBufferAdventSolution.super.part2(identifier);
   }
 
-  private static int findMarker(@NotNull BufferedReader reader, int nDistinct) throws IOException {
-    var line = reader.readLine();
+  @Override
+  public Integer part1(@NotNull ByteBuffer byteBuffer) {
+    return findMarker(byteBuffer, 4);
+  }
 
-    for (int i = nDistinct - 1; i < line.length(); i++) {
-      if (checkIndex(line, i, nDistinct)) {
+  @Override
+  public Integer part2(@NotNull ByteBuffer byteBuffer) {
+    return findMarker(byteBuffer, 14);
+  }
+
+  private static int findMarker(@NotNull ByteBuffer byteBuffer, int nDistinct) {
+    var line = new byte[byteBuffer.limit()];
+    byteBuffer.get(0, line, 0, line.length);
+
+    return findMarker(line, nDistinct);
+  }
+
+  private static int findMarker(byte[] line, int nDistinct) {
+    for (int i = nDistinct - 1; i < line.length - 1; i += 2) {
+      var baseMask = constructMask(line, i, nDistinct - 1);
+      if (baseMask == 0) {
+        continue;
+      }
+
+      if ((baseMask & (1 << line[i - (nDistinct - 1)])) == 0) {
         return i + 1;
+      }
+
+      // lookahead 1 position
+      if ((baseMask & (1 << line[i + 1])) == 0) {
+        return i + 2;
       }
     }
 
     throw new IllegalArgumentException();
   }
 
-  private static boolean checkIndex(String line, int fromIndex, int nDistinct) {
-    var characterMask = 0;
-
-    var i = 0;
-    for (; i < nDistinct; i++) {
-      var c = line.codePointAt(fromIndex - i);
-      if ((characterMask & (1 << c)) > 0) {
-        return false;
+  private static int constructMask(byte[] line, int fromIndex, int length) {
+    var mask = 0;
+    for (int i = 0; i < length; i++) {
+      var c = line[fromIndex - i];
+      if ((mask & (1 << c)) != 0) {
+        return 0;
       }
 
-      characterMask |= 1 << c;
+      mask |= 1 << c;
     }
 
-    return i == nDistinct;
+    return mask;
   }
 }
