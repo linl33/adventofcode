@@ -1,6 +1,5 @@
 package dev.linl33.adventofcode.year2022;
 
-import dev.linl33.adventofcode.jmh.JmhSolutionBenchmark;
 import dev.linl33.adventofcode.lib.util.AdventUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,10 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
-public class Day5 extends AdventSolution2022<String, String> implements JmhSolutionBenchmark<String, String> {
+public class Day5 extends AdventSolution2022<String, String> {
   public static void main(String[] args) {
-//    new Day5().runAndPrintAll();
-    new Day5().benchmark();
+    new Day5().runAndPrintAll();
   }
 
   @Override
