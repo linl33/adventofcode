@@ -70,7 +70,7 @@ public class Day7 extends AdventSolution2022<Long, Long> {
       var thirdChar = line.charAt(2);
 
       if (firstChar >= '0' && firstChar <= '9') {
-        var fileSize = Integer.parseInt(line, 0, line.indexOf(" "), 10);
+        var fileSize = Integer.parseInt(line, 0, line.indexOf(' '), 10);
         stack[stackPointer] += fileSize;
         onFileVisit.accept(fileSize);
       } else if (firstChar == '$' && thirdChar == 'c') {
