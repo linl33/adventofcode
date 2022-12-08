@@ -64,11 +64,7 @@ public class Day8 extends AdventSolution2022<Integer, Integer> {
         if (curr > max) {
           max = curr;
           maxY = y;
-
-          if (!visible[x + y * cols]) {
-            visible[x + y * cols] = true;
-            visibleTrees++;
-          }
+          visibleTrees += visible[x + y * cols] ? 0 : 1;
         }
       }
 
@@ -78,10 +74,7 @@ public class Day8 extends AdventSolution2022<Integer, Integer> {
         var curr = input[y].charAt(x);
         if (curr > max) {
           max = curr;
-          if (!visible[x + y * cols]) {
-            visible[x + y * cols] = true;
-            visibleTrees++;
-          }
+          visibleTrees += visible[x + y * cols] ? 0 : 1;
         }
       }
     }
@@ -129,7 +122,7 @@ public class Day8 extends AdventSolution2022<Integer, Integer> {
         // look left
         score *= treeX - backRef[treeX];
 
-        var maxPotential = (((rows - 1) / 2) * ((rows - 1) - (rows - 1) / 2)) * score;
+        var maxPotential = (treeY - colBackRef[colBackRefPointer]) * ((rows - 1) - treeY) * score;
         if (maxPotential <= max) {
           skippedColumns[treeY] = true;
           continue;
