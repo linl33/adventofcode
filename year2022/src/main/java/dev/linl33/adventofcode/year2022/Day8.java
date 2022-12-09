@@ -90,14 +90,14 @@ public class Day8 extends AdventSolution2022<Integer, Integer> {
     var rows = input.length;
     var max = -1;
     var colBackRef = new int[cols * rows];
-    var colBackRefPointer = cols - 1;
+    var colBackRefPointer = 0;
     var skippedColumns = new boolean[cols];
 
     for (int treeY = 1; treeY < rows - 1; treeY++) {
       colBackRefPointer = treeY * cols;
 
       var row = input[treeY];
-      var backRef = new int[cols];
+      var rowBackRef = new int[cols];
 
       for (int treeX = 1; treeX < cols - 1; treeX++) {
         colBackRefPointer++;
@@ -110,21 +110,21 @@ public class Day8 extends AdventSolution2022<Integer, Integer> {
           var t = row.codePointAt(x);
           if (t >= tree) {
             if (t == tree) {
-              backRef[x] = treeX;
+              rowBackRef[x] = treeX;
             }
             x++;
             break;
           }
 
-          backRef[x] = treeX;
+          rowBackRef[x] = treeX;
         }
         score *= (x - 1) - treeX;
         // look left
-        score *= treeX - backRef[treeX];
+        score *= treeX - rowBackRef[treeX];
 
         var maxPotential = (treeY - colBackRef[colBackRefPointer]) * ((rows - 1) - treeY) * score;
         if (maxPotential <= max) {
-          skippedColumns[treeY] = true;
+          skippedColumns[treeX] = true;
           continue;
         }
 
@@ -148,7 +148,7 @@ public class Day8 extends AdventSolution2022<Integer, Integer> {
         score *= (y - 1) - treeY;
 
         // look down
-        if (skippedColumns[treeY]) {
+        if (skippedColumns[treeX]) {
           // if this column had been skipped, colBackRef can only provide a lower bound not the exact index
           for (y = treeY - 1; y >= colBackRef[colBackRefPointer]; y--) {
             var t = input[y].codePointAt(treeX);
@@ -165,7 +165,7 @@ public class Day8 extends AdventSolution2022<Integer, Integer> {
         max = Math.max(max, score);
 
         // colBackRef is correct again, re-enable fast path
-        skippedColumns[treeY] = false;
+        skippedColumns[treeX] = false;
       }
     }
 
