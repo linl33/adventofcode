@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.ByteBuffer;
 
 public class Day9 extends AdventSolution2022<Integer, Integer> implements ByteBufferAdventSolution<Integer, Integer>, NullBufferedReaderSolution<Integer, Integer> {
-  private static final int HASH_TABLE_BUCKET_SIZE = 20;
-  private static final int HASH_TABLE_BUCKETS = 1024;
+  private static final int HASH_TABLE_BUCKET_SIZE = 10;
+  private static final int HASH_TABLE_BUCKETS = 2048;
 
   public static void main(String[] args) {
     new Day9().runAndPrintAll();
@@ -69,7 +69,7 @@ public class Day9 extends AdventSolution2022<Integer, Integer> implements ByteBu
       for (int i = 0; i < magnitude; i++) {
         var prevKnotX = positions[0];
         var prevKnotY = positions[knots];
-        for (int x = 1, y = knots + 1; x < knots; x++, y++) {
+        for (int x = 1, y = 1 + knots; x < knots; x++, y++) {
           var currKnotX = positions[x];
           var currKnotY = positions[y];
 
@@ -77,6 +77,11 @@ public class Day9 extends AdventSolution2022<Integer, Integer> implements ByteBu
             prevKnotX = (positions[x] += Integer.signum(prevKnotX - currKnotX));
             prevKnotY = (positions[y] += Integer.signum(prevKnotY - currKnotY));
           } else {
+            if (x == 1) {
+              // entire rope is valid now
+              break moveKnots;
+            }
+
             // all following knots will not move either
             continue moveKnots;
           }
