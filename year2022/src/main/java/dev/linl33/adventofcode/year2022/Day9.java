@@ -7,8 +7,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
-public class Day9 extends AdventSolution2022<Integer, Integer> implements ByteBufferAdventSolution<Integer, Integer>, NullBufferedReaderSolution<Integer, Integer> {
-  private static final int HASH_TABLE_BUCKET_SIZE = 10;
+public class Day9 extends AdventSolution2022<Integer, Integer>
+    implements ByteBufferAdventSolution<Integer, Integer>, NullBufferedReaderSolution<Integer, Integer> {
+  private static final int HASH_TABLE_BUCKET_SIZE = 100;
   private static final int HASH_TABLE_BUCKETS = 2048;
 
   public static void main(String[] args) {
