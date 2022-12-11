@@ -45,7 +45,7 @@ public interface AdventSolutionTest<T1, T2> {
   }
 
   default TestPart[] getTestParts(AdventSolution<T1, T2> instance) {
-    return instance.getDay() != 25 ? TestPart.values() : new TestPart[] {TestPart.PART_1};
+    return instance.getDay() != 25 ? TestPart.values() : new TestPart[] { TestPart.PART_1 };
   }
 
   @TestFactory
@@ -94,10 +94,77 @@ public interface AdventSolutionTest<T1, T2> {
   }
 
   private static void buildAssertion(Object expected, Object actual) {
+    if (expected == null) {
+      assertNull(actual);
+      return;
+    }
+
+    assertNotNull(actual);
+    assertEquals(expected.getClass().isArray(), actual.getClass().isArray());
+
+    if (expected.getClass().isArray()) {
+      buildArrayAssertion(expected, actual);
+      return;
+    }
+
     if (expected instanceof Object[] expectedArr && actual instanceof Object[] actualArr) {
       assertArrayEquals(expectedArr, actualArr);
     } else {
       assertEquals(expected, actual);
+    }
+  }
+
+  private static void buildArrayAssertion(Object expected, Object actual) {
+    if (expected instanceof boolean[] expectedArr) {
+      if (actual instanceof boolean[] actualArr) {
+        assertArrayEquals(expectedArr, actualArr);
+      } else {
+        fail();
+      }
+    } else if (expected instanceof byte[] expectedArr) {
+      if (actual instanceof byte[] actualArr) {
+        assertArrayEquals(expectedArr, actualArr);
+      } else {
+        fail();
+      }
+    } else if (expected instanceof char[] expectedArr) {
+      if (actual instanceof char[] actualArr) {
+        assertArrayEquals(expectedArr, actualArr);
+      } else {
+        fail();
+      }
+    } else if (expected instanceof double[] expectedArr) {
+      if (actual instanceof double[] actualArr) {
+        assertArrayEquals(expectedArr, actualArr);
+      } else {
+        fail();
+      }
+    } else if (expected instanceof float[] expectedArr) {
+      if (actual instanceof float[] actualArr) {
+        assertArrayEquals(expectedArr, actualArr);
+      } else {
+        fail();
+      }
+    } else if (expected instanceof int[] expectedArr) {
+      if (actual instanceof int[] actualArr) {
+        assertArrayEquals(expectedArr, actualArr);
+      } else {
+        fail();
+      }
+    } else if (expected instanceof long[] expectedArr) {
+      if (actual instanceof long[] actualArr) {
+        assertArrayEquals(expectedArr, actualArr);
+      } else {
+        fail();
+      }
+    } else if (expected instanceof Object[] expectedArr) {
+      if (actual instanceof Object[] actualArr) {
+        assertArrayEquals(expectedArr, actualArr);
+      } else {
+        fail();
+      }
+    } else {
+      fail("Unknown array type " + expected.getClass().getTypeName());
     }
   }
 
