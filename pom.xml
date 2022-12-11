@@ -51,7 +51,7 @@
         <!-- Other Dependencies -->
         <org.apache.logging.log4j.version>2.19.0</org.apache.logging.log4j.version>
         <org.openjdk.jmh.version>1.36</org.openjdk.jmh.version>
-        <org.jetbrains.annotations.version>23.0.0</org.jetbrains.annotations.version>
+        <org.jetbrains.annotations.version>23.1.0</org.jetbrains.annotations.version>
 
         <!-- Testing -->
         <org.junit.jupiter.version>5.9.1</org.junit.jupiter.version>
