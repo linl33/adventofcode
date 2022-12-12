@@ -2,6 +2,9 @@ package dev.linl33.adventofcode.lib.graph;
 
 import dev.linl33.adventofcode.lib.function.BiIntConsumer;
 import dev.linl33.adventofcode.lib.point.Point;
+import jdk.incubator.vector.IntVector;
+import jdk.incubator.vector.VectorOperators;
+import jdk.incubator.vector.VectorSpecies;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -10,6 +13,8 @@ import java.util.*;
 import java.util.function.*;
 
 public final class GraphUtil {
+  private static final VectorSpecies<Integer> SPECIES = IntVector.SPECIES_PREFERRED;
+
   private static final Logger LOGGER = LogManager.getLogger(GraphUtil.class);
 
   public static <T> Optional<GraphPath<T>> aStar(T start, T end, Function<T, ? extends Collection<T>> neighborsFunc) {
@@ -158,7 +163,8 @@ public final class GraphUtil {
     Arrays.fill(gScore, Integer.MAX_VALUE);
     gScore[start] = 0;
 
-    var openSetFScore = new int[size];
+    var alignedSize = Math.ceilDiv(size, SPECIES.length()) * SPECIES.length();
+    var openSetFScore = new int[alignedSize];
     Arrays.fill(openSetFScore, Integer.MAX_VALUE);
     openSetFScore[start] = heuristic.applyAsInt(start);
 
@@ -172,12 +178,22 @@ public final class GraphUtil {
 
     while (openSetCounter > 0) {
       if (!hasMin) {
-        minFScore = Integer.MAX_VALUE;
+        var minVector = (IntVector) SPECIES.fromArray(openSetFScore, 0);
+        for (int i = SPECIES.length(); i < alignedSize; i += SPECIES.length()) {
+          var next = SPECIES.fromArray(openSetFScore, i);
+          minVector = minVector.min(next);
+        }
 
-        for (int i = 0; i < openSetFScore.length; i++) {
-          if (openSetFScore[i] < minFScore) {
-            minFScore = openSetFScore[i];
-            minNode = i;
+        minFScore = minVector.reduceLanes(VectorOperators.MIN);
+        minVector = (IntVector) SPECIES.broadcast(minFScore);
+
+        for (int i = 0; i < alignedSize; i += SPECIES.length()) {
+          var next = SPECIES.fromArray(openSetFScore, i);
+          var eqMask = next.compare(VectorOperators.EQ, minVector);
+          var eqIdx = eqMask.firstTrue();
+          if (eqIdx != SPECIES.length()) {
+            minNode = i + eqIdx;
+            break;
           }
         }
       }

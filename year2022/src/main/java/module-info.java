@@ -6,6 +6,8 @@ module dev.linl33.adventofcode.year2022 {
   requires static org.apache.logging.log4j.core;
   requires static org.jetbrains.annotations;
 
+  requires jdk.incubator.vector;
+
   exports dev.linl33.adventofcode.year2022 to dev.linl33.adventofcode.year2022.test;
 
   opens dev.linl33.adventofcode.year2022 to dev.linl33.adventofcode.lib, dev.linl33.adventofcode.jmh;

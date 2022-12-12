@@ -2,6 +2,8 @@ module dev.linl33.adventofcode.lib {
   requires static org.jetbrains.annotations;
   requires org.apache.logging.log4j;
 
+  requires jdk.incubator.vector;
+
   exports dev.linl33.adventofcode.lib;
   exports dev.linl33.adventofcode.lib.benchmark;
   exports dev.linl33.adventofcode.lib.function;
