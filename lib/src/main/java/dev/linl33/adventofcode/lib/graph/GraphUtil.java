@@ -193,23 +193,24 @@ public final class GraphUtil {
 //      visitCounter++;
 
       var current = minNode;
+      var currentGScore = gScore[current];
       var neighbors = neighborsFunc.apply(current);
 
-      for (int neighbor : neighbors) {
-        var tentativeGScore = gScore[current] + cost.applyAsInt(current, neighbor);
-        if (tentativeGScore < gScore[neighbor]) {
+      for (var neighbor : neighbors) {
+        var neighborCost = cost.applyAsInt(current, neighbor);
+        int tentativeGScore;
+        if (neighborCost < gScore[neighbor] && (tentativeGScore = currentGScore + neighborCost) < gScore[neighbor]) {
           gScore[neighbor] = tentativeGScore;
 
-          openSetFScore[neighbor] = tentativeGScore + heuristic.applyAsInt(neighbor);
-          openSetCounter++;
-
-          onNewEdge.accept(current, neighbor);
-
-          if (openSetFScore[neighbor] < minFScore || openSetCounter == 1) {
-            minFScore = openSetFScore[neighbor];
+          var neighborFScore = (openSetFScore[neighbor] = tentativeGScore + heuristic.applyAsInt(neighbor));
+          if (openSetCounter == 0 || neighborFScore < minFScore) {
+            minFScore = neighborFScore;
             minNode = neighbor;
             hasMin = true;
           }
+
+          openSetCounter++;
+          onNewEdge.accept(current, neighbor);
         }
       }
     }

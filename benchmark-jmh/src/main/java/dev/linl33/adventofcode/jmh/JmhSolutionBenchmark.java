@@ -17,7 +17,7 @@ public interface JmhSolutionBenchmark<T1, T2> extends AdventSolutionBenchmark<T1
   default void benchmark(BenchmarkOption... options) {
     options = Objects.requireNonNullElse(options, new JmhBenchmarkOption[] {
         JmhBenchmarkOption.PART_1,
-        JmhBenchmarkOption.PART_2
+        JmhBenchmarkOption.PART_2,
     });
 
     var opt = Arrays
@@ -33,7 +33,7 @@ public interface JmhSolutionBenchmark<T1, T2> extends AdventSolutionBenchmark<T1
             (left, right) -> left
         )
         .param("solutionClass", getClass().getName())
-//        .jvmArgsPrepend("-XX:+UseParallelGC")
+        .jvmArgsPrepend("-XX:+UseParallelGC")
 //        .warmupIterations(2)
 //        .measurementIterations(2)
         .forks(1)
