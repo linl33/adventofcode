@@ -185,14 +185,10 @@ public final class GraphUtil {
         }
 
         minFScore = minVector.reduceLanes(VectorOperators.MIN);
-        minVector = (IntVector) SPECIES.broadcast(minFScore);
-
-        for (int i = 0; i < alignedSize; i += SPECIES.length()) {
-          var next = SPECIES.fromArray(openSetFScore, i);
-          var eqMask = next.compare(VectorOperators.EQ, minVector);
-          var eqIdx = eqMask.firstTrue();
-          if (eqIdx != SPECIES.length()) {
-            minNode = i + eqIdx;
+        var idx = minVector.compare(VectorOperators.EQ, minFScore).firstTrue();
+        for (int i = idx; i < size; i += SPECIES.length()) {
+          if (openSetFScore[i] == minFScore) {
+            minNode = i;
             break;
           }
         }
