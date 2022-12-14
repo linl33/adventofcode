@@ -48,7 +48,7 @@ public class RowArrayGrid implements ArrayGrid {
     var columnArray = new int[width() * height()];
 
     visit((GridConsumer) (x, y, value) -> columnArray[x * height() + y] = value);
-    return new ColumnArrayGrid(columnArray, width(), height());
+    return new ColumnArrayGrid(columnArray, height(), width());
   }
 
   @Override
