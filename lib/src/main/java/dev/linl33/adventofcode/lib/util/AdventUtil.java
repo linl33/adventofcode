@@ -1,9 +1,14 @@
 package dev.linl33.adventofcode.lib.util;
 
+import dev.linl33.adventofcode.lib.ByteBufferAsCharSequence;
+import jdk.incubator.vector.ByteVector;
+import jdk.incubator.vector.VectorOperators;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.io.BufferedReader;
+import java.lang.foreign.MemorySegment;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
@@ -151,7 +156,7 @@ public final class AdventUtil {
 
     for (int i = 0; i < choiceCount; i++) {
       @SuppressWarnings("unchecked")
-      var choiceArr = (T[]) new Object[] {choices.get(i)};
+      var choiceArr = (T[]) new Object[] { choices.get(i) };
 
       allChoices[1 << i] = choiceArr;
       prevIdx[i] = 1 << i;
