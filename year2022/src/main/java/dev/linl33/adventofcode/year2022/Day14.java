@@ -61,7 +61,7 @@ public class Day14 extends AdventSolution2022<Integer, Integer> {
       sand++;
     }
 
-    return sand;
+    throw new IllegalStateException("Unreachable");
   }
 
   @Override
@@ -123,20 +123,20 @@ public class Day14 extends AdventSolution2022<Integer, Integer> {
       sand++;
 
       if (currIdx < grid.width()) {
-        break;
+        var sandMin = SAND_SOURCE_X - (floor + 1);
+        var sandMax = SAND_SOURCE_X + (floor + 1);
+
+        var leftWidth = (minX - 2) - sandMin + 1;
+        var rightWidth = sandMax - (maxX + 2) + 1;
+
+        var leftArea = leftWidth * (leftWidth + 1) / 2;
+        var rightArea = rightWidth * (rightWidth + 1) / 2;
+
+        return sand + leftArea + rightArea;
       }
     }
 
-    var sandMin = SAND_SOURCE_X - (floor + 1);
-    var sandMax = SAND_SOURCE_X + (floor + 1);
-
-    var leftWidth = (minX - 2) - sandMin + 1;
-    var rightWidth = sandMax - (maxX + 2) + 1;
-
-    var leftArea = leftWidth * (leftWidth + 1) / 2;
-    var rightArea = rightWidth * (rightWidth + 1) / 2;
-
-    return sand + leftArea + rightArea;
+    throw new IllegalStateException("Unreachable");
   }
 
   private static int buildGrid(@NotNull BufferedReader reader, Grid grid) {
@@ -145,14 +145,14 @@ public class Day14 extends AdventSolution2022<Integer, Integer> {
     var floor = 0;
     var left = new int[2];
     var right = new int[2];
+    var next = left;
 
     for (var line : input) {
       var endpoints = ARROW_REGEX.split(line);
-      parsePair(endpoints[0], left);
-      var next = right;
+      parsePair(endpoints[0], next = left);
 
       for (int i = 1; i < endpoints.length; i++) {
-        parsePair(endpoints[i], next);
+        parsePair(endpoints[i], next = next == left ? right : left);
 
         if (left[0] == right[0]) {
           var x = left[0];
@@ -175,8 +175,6 @@ public class Day14 extends AdventSolution2022<Integer, Integer> {
         } else {
           throw new IllegalArgumentException();
         }
-
-        next = next == left ? right : left;
       }
     }
 

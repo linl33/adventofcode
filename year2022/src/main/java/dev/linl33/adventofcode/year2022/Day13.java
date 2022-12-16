@@ -3,7 +3,6 @@ package dev.linl33.adventofcode.year2022;
 import dev.linl33.adventofcode.lib.solution.ByteBufferAdventSolution;
 import dev.linl33.adventofcode.lib.solution.NullBufferedReaderSolution;
 import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
-import dev.linl33.adventofcode.lib.util.AdventUtil;
 import dev.linl33.adventofcode.lib.util.VectorIoUtil;
 import org.jetbrains.annotations.NotNull;
 
