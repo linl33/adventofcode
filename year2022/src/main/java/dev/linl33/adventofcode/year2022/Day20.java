@@ -45,10 +45,10 @@ public class Day20 extends AdventSolution2022<Long, Long> {
       }
     }
 
-    var countMinusOne = numberCount - 1;
-    numbers[countMinusOne].setNext(numbers[0]);
-    numbers[0].setPrev(numbers[countMinusOne]);
+    node.setNext(numbers[0]);
+    numbers[0].setPrev(node);
 
+    var countMinusOne = numberCount - 1;
     for (int round = 0; round < rounds; round++) {
       moveNodes(numbers, countMinusOne);
     }
