@@ -14,6 +14,10 @@ public interface Grid {
 
   void set(int x, int y, int value);
 
+  default void set(Point2D pt, int value) {
+    set(pt.x(), pt.y(), value);
+  }
+
   int width();
 
   int height();

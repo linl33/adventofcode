@@ -3,7 +3,6 @@ package dev.linl33.adventofcode.year2022.test;
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.lib.solution.ClasspathResourceIdentifier;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
-import dev.linl33.adventofcode.year2022.Day15;
 import dev.linl33.adventofcode.year2022.Day22;
 import org.junit.jupiter.api.Test;
 
