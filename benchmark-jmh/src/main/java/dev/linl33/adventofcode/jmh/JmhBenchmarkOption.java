@@ -2,10 +2,7 @@ package dev.linl33.adventofcode.jmh;
 
 import dev.linl33.adventofcode.jmh.benchmark.SolutionBenchmark;
 import dev.linl33.adventofcode.lib.benchmark.BenchmarkOption;
-import org.openjdk.jmh.profile.GCProfiler;
-import org.openjdk.jmh.profile.JavaFlightRecorderProfiler;
-import org.openjdk.jmh.profile.LinuxPerfAsmProfiler;
-import org.openjdk.jmh.profile.LinuxPerfNormProfiler;
+import org.openjdk.jmh.profile.*;
 import org.openjdk.jmh.runner.options.ChainedOptionsBuilder;
 
 public enum JmhBenchmarkOption implements BenchmarkOption {
@@ -30,17 +27,24 @@ public enum JmhBenchmarkOption implements BenchmarkOption {
   GC_PROFILE {
     @Override
     public ChainedOptionsBuilder applyOption(ChainedOptionsBuilder builder) {
-      return builder.addProfiler(GCProfiler.class);
+      return builder.addProfiler(GCProfiler.class, "churn=true");
     }
   },
   PERF_PROFILE {
     @Override
     public ChainedOptionsBuilder applyOption(ChainedOptionsBuilder builder) {
       return builder
-          .addProfiler(LinuxPerfAsmProfiler.class, "skipInterpreter=true;saveLog=true;saveLogTo=logs;intelSyntax=true;hotThreshold=0.05")
+          .addProfiler(LinuxPerfAsmProfiler.class, "skipInterpreter=true;saveLog=true;saveLogTo=logs;intelSyntax=true;hotThreshold=0.05;drawIntraJumps=true;drawInterJumps=true")
           .addProfiler(LinuxPerfNormProfiler.class);
     }
-  };
+  },
+  STACK_PROFILE {
+    @Override
+    public ChainedOptionsBuilder applyOption(ChainedOptionsBuilder builder) {
+      return builder.addProfiler(StackProfiler.class, "detailLine=true;lines=24");
+    }
+  },
+  ;
 
   public abstract ChainedOptionsBuilder applyOption(ChainedOptionsBuilder builder);
 }
