@@ -12,6 +12,14 @@ public interface Grid {
     return get(pt.x(), pt.y());
   }
 
+  default int getOrDefault(int x, int y, int defaultValue) {
+    return isWithinBounds(x, y) ? get(x, y) : defaultValue;
+  }
+
+  default int getOrDefault(Point2D pt, int defaultValue) {
+    return getOrDefault(pt.x(), pt.y(), defaultValue);
+  }
+
   void set(int x, int y, int value);
 
   default void set(Point2D pt, int value) {
