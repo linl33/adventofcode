@@ -1,25 +1,108 @@
 package dev.linl33.adventofcode.year2023;
 
+import dev.linl33.adventofcode.jmh.JmhBenchmarkOption;
+import dev.linl33.adventofcode.lib.solution.ClasspathResourceIdentifier;
+import dev.linl33.adventofcode.lib.solution.SolutionPart;
 import dev.linl33.adventofcode.lib.util.AdventUtil;
+import dev.linl33.adventofcode.lib.util.PrintUtil;
+import jdk.incubator.vector.ByteVector;
+import jdk.incubator.vector.VectorMask;
+import jdk.incubator.vector.VectorSpecies;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.function.ToIntFunction;
 import java.util.stream.IntStream;
 
 public class Day7 extends AdventSolution2023<Integer, Integer> {
+  private static final VectorSpecies<Byte> SPECIES = ByteVector.SPECIES_PREFERRED;
+  private static final VectorMask<Byte> HAND_MASK = VectorMask.fromLong(SPECIES, 0b11111);
+  private static final byte[] CARD_STRENGTH = {
+      0, 2, 3, 4, 5, 6, 7, 8, 9, 0,
+      0, 0, 0, 0, 0, 0, 14, 0, 0, 0,
+      0, 0, 0, 0, 0, 11, 13, 0, 0, 0,
+      0, 0, 12, 0, 0, 10,
+  };
+
   public static void main(String[] args) {
-    new Day7().runAndPrintAll();
+    System.out.println(CARD_STRENGTH['A' - '1']);
+    System.out.println(CARD_STRENGTH['K' - '1']);
+    System.out.println(CARD_STRENGTH['Q' - '1']);
+    System.out.println(CARD_STRENGTH['J' - '1']);
+    System.out.println(CARD_STRENGTH['T' - '1']);
+    System.out.println(CARD_STRENGTH['9' - '1']);
+
+//    new Day7().runAndPrintAll();
+//    new Day7().print(SolutionPart.PART_1, new ClasspathResourceIdentifier("day7test1"));
+//    new Day7().print(SolutionPart.PART_1, new ClasspathResourceIdentifier("day7"));
+    new Day7().benchmark(JmhBenchmarkOption.PART_1);
   }
 
   @Override
   public Integer part1(@NotNull BufferedReader reader) {
-    return calculateTotalWinnings(reader, false);
+    var lines = reader.lines().toArray(String[]::new);
+    var hands = new int[lines.length * 7 + 13];
+    var handTypeCount = new int[8];
+
+    for (int i = 0; i < lines.length; i++) {
+      // TODO: remove
+      var codePoints = lines[i].codePoints().toArray();
+      var v = ByteVector.fromArray(
+          SPECIES,
+          CARD_STRENGTH,
+          -'1',
+          codePoints,
+          0,
+          HAND_MASK
+      );
+
+      var val = Long.reverseBytes(v.reinterpretAsLongs().lane(0)) >>> (Long.SIZE - (5 * 8 + 10));
+      var bid = 0;
+      for (int j = 6; j < codePoints.length; j++) {
+        bid = 10 * bid + (codePoints[j] & 0xF);
+      }
+      val |= bid;
+
+      var hand = (int) Long.compress(val, 0b00001111_00001111_00001111_00001111_00001111_1111_1111_11L);
+//      var hand = (int) Long.compress(val, 0b00001111_00001111_00001111_00001111_00001111_00000000_0000L);
+//      hand |= bid;
+      var handType = findType(hand, false) & 0b111;
+
+//      var ref = findType(lines[i].substring(0, 5), false);
+//      if (handType != ref) {
+//        throw new IllegalArgumentException();
+//      }
+
+      hands[handType * lines.length + handTypeCount[handType]++] = hand;
+//      System.out.println(STR."\{lines[i]} type \{handType} hand \{Integer.toBinaryString(hand)}");
+    }
+
+    for (int i = 1; i < 8; i++) {
+      Arrays.sort(hands, i * lines.length, i * lines.length + handTypeCount[i]);
+    }
+
+    var sum = 0;
+    var rank = 1; // TODO: replace with hand type size sum
+    for (int i = 1; i < 8; i++) {
+      var size = handTypeCount[i];
+      for (int j = 0; j < size; j++) {
+        var bid = hands[i * lines.length + j] & 0b1111111111;
+//        System.out.println(STR."\{hands[i * lines.length + j] & 0b1111_1111_1111_1111_1111_0000_0000_0000} type \{i} bid \{bid} rank \{rank}");
+        sum += bid * rank++;
+      }
+    }
+//    PrintUtil.enhancedPrint(handTypeCount);
+
+    return sum;
+//    return calculateTotalWinnings(reader, false);
   }
 
   @Override
   public Integer part2(@NotNull BufferedReader reader) {
+
+
     return calculateTotalWinnings(reader, true);
   }
 
@@ -42,6 +125,8 @@ public class Day7 extends AdventSolution2023<Integer, Integer> {
       var rank = i + 1;
       var bid = Integer.parseInt(hands[i][1]);
       sum += rank * bid;
+
+//      System.out.println(STR."bid \{bid} rank \{rank}");
     }
 
     return sum;
@@ -81,6 +166,47 @@ public class Day7 extends AdventSolution2023<Integer, Integer> {
     }
 
     throw new IllegalArgumentException();
+  }
+
+  private static int findType(int hand, boolean joker) {
+    var tally = new int[16];
+    var tallyMask = 0;
+
+//    System.out.println(Integer.toBinaryString(hand & 0b1111_1111_1111_1111_1111_0000_0000_0000));
+    for (int i = 0; i < 5; i++) {
+      var card = (hand >>> (10 + i * 4)) & 0b1111;
+//      System.out.println(Integer.toBinaryString(card));
+      tally[card]++;
+      tallyMask |= 1 << card;
+    }
+
+    var tallySize = Integer.bitCount(tallyMask);
+//    System.out.println(tallySize);
+//    System.out.println(Arrays.toString(tally));
+    if (tallySize == 1) return 7;
+    if (tallySize == 4) return 2;
+    if (tallySize == 5) return 1;
+
+    var maxCount = 0;
+    for (int i = 0; i < tallySize; i++) {
+      var lowestBit = Integer.numberOfTrailingZeros(tallyMask) & 0xF;
+      maxCount = Math.max(maxCount, tally[lowestBit]);
+      tallyMask &= ~(1 << lowestBit);
+    }
+
+    return maxCount + (4 - tallySize);
+
+//    if (tallySize == 2) {
+//      // 4 or 3
+//      return maxCount == 4 ? 6 : 5;
+//    }
+//
+//    if (tallySize == 3) {
+//      // 3 or 2
+//      return maxCount == 3 ? 4 : 3;
+//    }
+//
+//    throw new IllegalArgumentException();
   }
 
   private static int cardToStrength(char card, boolean joker) {
