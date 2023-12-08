@@ -16,7 +16,8 @@ public class Day7Test implements AdventSolutionTest<Integer, Integer> {
   public Map<Object, Integer> getPart1Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), 248217452,
-        "day7test1", 6440
+        "day7test1", 6440,
+        "day7test2", 6592
     );
   }
 
@@ -24,7 +25,8 @@ public class Day7Test implements AdventSolutionTest<Integer, Integer> {
   public Map<Object, Integer> getPart2Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), 245576185,
-        "day7test1", 5905
+        "day7test1", 5905,
+        "day7test2", 6839
     );
   }
 }
