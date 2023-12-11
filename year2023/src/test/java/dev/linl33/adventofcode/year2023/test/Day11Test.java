@@ -16,7 +16,8 @@ public class Day11Test implements AdventSolutionTest<Long, Long> {
   public Map<Object, Long> getPart1Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), 9947476L,
-        "day11test1", 374L
+        "day11test1", 374L,
+        "day11test2", 2466269413L
     );
   }
 
@@ -24,7 +25,8 @@ public class Day11Test implements AdventSolutionTest<Long, Long> {
   public Map<Object, Long> getPart2Cases() {
     return Map.of(
         newSolutionInstance().getPart1Resource(), 519939907614L,
-        "day11test1", 82000210L
+        "day11test1", 82000210L,
+        "day11test2", 155354715564293L
     );
   }
 }

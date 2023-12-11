@@ -1,78 +1,106 @@
 package dev.linl33.adventofcode.year2023;
 
-import dev.linl33.adventofcode.lib.point.Point2D;
+import dev.linl33.adventofcode.lib.solution.ByteBufferAdventSolution;
+import dev.linl33.adventofcode.lib.solution.NullBufferedReaderSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
+import jdk.incubator.vector.ByteVector;
+import jdk.incubator.vector.VectorSpecies;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.ValueLayout;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
-public class Day11 extends AdventSolution2023<Long, Long> {
+public class Day11 extends AdventSolution2023<Long, Long>
+  implements ByteBufferAdventSolution<Long, Long>, NullBufferedReaderSolution<Long, Long> {
+  private static final VectorSpecies<Byte> BYTE_SPECIES = ByteVector.SPECIES_PREFERRED;
+
   public static void main(String[] args) {
     new Day11().runAndPrintAll();
   }
 
   @Override
-  public Long part1(@NotNull BufferedReader reader) throws Exception {
-    return solve(reader, 2);
+  public Long part1(@NotNull ResourceIdentifier identifier) throws Exception {
+    return ByteBufferAdventSolution.super.part1(identifier);
   }
 
   @Override
-  public Long part2(@NotNull BufferedReader reader) throws Exception {
-    return solve(reader, 1_000_000);
+  public Long part2(@NotNull ResourceIdentifier identifier) throws Exception {
+    return ByteBufferAdventSolution.super.part2(identifier);
   }
 
-  private static long solve(BufferedReader reader, final int emptySpaceScale) {
-    var lines = reader.lines().toArray(String[]::new);
-    var dim = lines.length;
+  @Override
+  public Long part1(@NotNull ByteBuffer byteBuffer) {
+    return solveVector(byteBuffer, 2);
+  }
 
-    var galaxies = new ArrayList<Point2D>();
-    var vAdjust = 0;
-    var emptyCols = new boolean[dim];
-    Arrays.fill(emptyCols, true);
+  @Override
+  public Long part2(@NotNull ByteBuffer byteBuffer) {
+    return solveVector(byteBuffer, 1_000_000);
+  }
 
-    for (int y = 0; y < dim; y++) {
-      var line = lines[y];
+  private static long solveVector(ByteBuffer byteBuffer, final long emptySpaceScale) {
+    var memSegment = MemorySegment.ofBuffer(byteBuffer);
 
-      var rowEmpty = true;
-      for (int x = 0; x < dim; x++) {
-        var pt = line.codePointAt(x);
+    var squareDim = (((int) Math.sqrt(4 * (byteBuffer.limit() + 1))) - 1) / 2;
+    var alignedSquareDim = Math.ceilDiv(squareDim, BYTE_SPECIES.length()) * BYTE_SPECIES.length();
 
-        if (pt == '#') {
-          galaxies.add(new Point2D(x, y + vAdjust));
-          rowEmpty = false;
-          emptyCols[x] = false;
+    var colCounts = Arena.ofAuto().allocate(ValueLayout.JAVA_BYTE, alignedSquareDim);
+    var rowCounts = new int[alignedSquareDim];
+    var galaxiesCount = 0;
+
+    for (int y = 0; y < squareDim; y++) {
+      var rowOffset = (long) y * (squareDim + 1);
+
+      for (int x = 0; x < squareDim; x += BYTE_SPECIES.length()) {
+        var row = ByteVector
+          .fromMemorySegment(BYTE_SPECIES, memSegment, rowOffset + x, ByteOrder.nativeOrder(), BYTE_SPECIES.indexInRange(x, squareDim))
+          .eq((byte) '#');
+
+        ByteVector
+          .fromMemorySegment(BYTE_SPECIES, colCounts, x, ByteOrder.nativeOrder())
+          .add((byte) 1, row)
+          .intoMemorySegment(colCounts, x, ByteOrder.nativeOrder());
+
+        if (row.anyTrue()) {
+          var rowPopcnt = row.trueCount();
+          galaxiesCount += rowPopcnt;
+          rowCounts[y] += rowPopcnt;
         }
       }
-
-      if (rowEmpty) {
-        vAdjust += emptySpaceScale - 1;
-      }
     }
 
-    var hAdjust = new int[dim];
-    var hAdjustCurr = 0;
-    for (int x = 0; x < dim; x++) {
-      hAdjust[x] = hAdjustCurr;
-      if (emptyCols[x]) {
-        hAdjustCurr += emptySpaceScale - 1;
+    var colPrefix = 0;
+    var rowPrefix = 0;
+
+    var emptySpaceAdjust = 0;
+
+    var totalManhattanDistance = 0L;
+
+    for (int i = 0; i < squareDim; i++) {
+      var colVal = colCounts.getAtIndex(ValueLayout.JAVA_BYTE, i);
+      var rowVal = rowCounts[i];
+
+      // calculate number of ways to cross the ith row/col, add them up
+      // (# of galaxies before the ith row/col) * (# of galaxies on or after the ith row/col)
+      totalManhattanDistance += colPrefix * (galaxiesCount - colPrefix) + rowPrefix * (galaxiesCount - rowPrefix);
+
+      // calculate number of ways to cross the empty column
+      if (colVal == 0) {
+        emptySpaceAdjust += colPrefix * (galaxiesCount - colPrefix);
       }
+
+      // calculate number of ways to cross the empty row
+      if (rowVal == 0) {
+        emptySpaceAdjust += rowPrefix * (galaxiesCount - rowPrefix);
+      }
+
+      colPrefix += colVal;
+      rowPrefix += rowVal;
     }
 
-    var sum = 0L;
-    for (int idxA = 0; idxA < galaxies.size(); idxA++) {
-      var left = galaxies.get(idxA);
-
-      for (int idxB = idxA + 1; idxB < galaxies.size(); idxB++) {
-        var right = galaxies.get(idxB);
-
-        var hDist = Math.abs(right.x() - left.x()) + Math.abs(hAdjust[right.x()] - hAdjust[left.x()]);
-        var vDist = right.y() - left.y();
-
-        sum += hDist + vDist;
-      }
-    }
-
-    return sum;
+    return (emptySpaceScale - 1) * emptySpaceAdjust + totalManhattanDistance;
   }
 }
