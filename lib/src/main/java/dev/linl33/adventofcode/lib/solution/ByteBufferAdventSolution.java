@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 
 public interface ByteBufferAdventSolution<T1, T2> extends AdventSolution<T1, T2>, ResourceServiceHolder {
@@ -49,12 +49,25 @@ public interface ByteBufferAdventSolution<T1, T2> extends AdventSolution<T1, T2>
     return null;
   }
 
-  private static <T> ThrowingFunction<FileChannel, T> adaptFileChannel(ThrowingFunction<ByteBuffer, T> byteBufferFunc) {
-    return byteBufferFunc.compose(ByteBufferAdventSolution::mapWholeFileRO);
+  private <T> ThrowingFunction<FileChannel, T> adaptFileChannel(ThrowingFunction<ByteBuffer, T> byteBufferFunc) {
+    return byteBufferFunc.compose(this::mapWholeFileRO);
   }
 
-  private static MappedByteBuffer mapWholeFileRO(FileChannel channel) throws IOException {
-    return channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+  private ByteBuffer mapWholeFileRO(FileChannel channel) throws IOException {
+    // copy the entire file into a memory segment
+    // mmap/munmap is slower than copy
+
+    var buffer = getResourceService()
+      .bufferAllocator()
+      .allocate(128 * 1024)
+      .asByteBuffer()
+      .order(ByteOrder.nativeOrder());
+
+    channel.read(buffer);
+    return buffer
+      .flip()
+      .asReadOnlyBuffer()
+      .order(ByteOrder.nativeOrder());
   }
 
   private <A extends ByteBufferAdventSolution<T1, T2>, T> ThrowingBiFunction<A, ResourceIdentifier, T> convert(ThrowingBiFunction<A, ByteBuffer, T> orig) {

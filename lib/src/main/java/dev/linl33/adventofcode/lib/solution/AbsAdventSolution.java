@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.foreign.Arena;
+import java.lang.foreign.SegmentAllocator;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -20,6 +22,7 @@ public abstract class AbsAdventSolution<T1, T2> implements
   private final Logger logger;
   private final ClasspathResourceIdentifier defaultResourceIdentifier;
   private final Path defaultResourcePath;
+  private final SegmentAllocator bufferAllocator;
   private ResourceService resourceService;
 
   @Override
@@ -42,6 +45,9 @@ public abstract class AbsAdventSolution<T1, T2> implements
     defaultResourceIdentifier = new ClasspathResourceIdentifier(getClass().getSimpleName().toLowerCase(Locale.ROOT));
     defaultResourcePath = ResourceUtil.getResourcePath(getClass(), defaultResourceIdentifier.name());
     resourceService = this;
+
+    var inputBuffer = Arena.ofAuto().allocate(512 * 1024, 8);
+    bufferAllocator = SegmentAllocator.prefixAllocator(inputBuffer);
   }
 
   @Override
@@ -116,5 +122,10 @@ public abstract class AbsAdventSolution<T1, T2> implements
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+  }
+
+  @Override
+  public SegmentAllocator bufferAllocator() {
+    return bufferAllocator;
   }
 }

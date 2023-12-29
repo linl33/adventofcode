@@ -6,6 +6,7 @@ import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import dev.linl33.adventofcode.lib.solution.ResourceService;
 
 import java.io.BufferedReader;
+import java.lang.foreign.SegmentAllocator;
 import java.nio.channels.FileChannel;
 
 public record CompositeResourceService(ClasspathResourceService classpathResourceService,
@@ -26,6 +27,11 @@ public record CompositeResourceService(ClasspathResourceService classpathResourc
       case StringResourceIdentifier string -> asFileChannel(string);
       default -> throw new UnsupportedOperationException();
     };
+  }
+
+  @Override
+  public SegmentAllocator bufferAllocator() {
+    return classpathResourceService.bufferAllocator();
   }
 
   private BufferedReader asBufferedReader(ClasspathResourceIdentifier identifier) {
