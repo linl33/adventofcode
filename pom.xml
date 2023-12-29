@@ -50,7 +50,7 @@
         <org.codehaus.mojo.flatten-plugin.version>1.5.0</org.codehaus.mojo.flatten-plugin.version>
 
         <!-- Other Dependencies -->
-        <org.apache.logging.log4j.version>2.22.0</org.apache.logging.log4j.version>
+        <org.apache.logging.log4j.version>2.22.1</org.apache.logging.log4j.version>
         <org.openjdk.jmh.version>1.37</org.openjdk.jmh.version>
         <org.jetbrains.annotations.version>24.1.0</org.jetbrains.annotations.version>
 
