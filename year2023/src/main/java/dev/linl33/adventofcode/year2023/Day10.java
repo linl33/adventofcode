@@ -3,13 +3,25 @@ package dev.linl33.adventofcode.year2023;
 import dev.linl33.adventofcode.lib.graph.GraphPath;
 import dev.linl33.adventofcode.lib.graph.GraphUtil;
 import dev.linl33.adventofcode.lib.point.Point2D;
+import dev.linl33.adventofcode.lib.solution.ByteBufferAdventSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
+import jdk.incubator.vector.ByteVector;
+import jdk.incubator.vector.VectorSpecies;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+import java.lang.foreign.ValueLayout;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Day10 extends AdventSolution2023<Integer, Integer> {
+public class Day10 extends AdventSolution2023<Integer, Integer>
+  implements ByteBufferAdventSolution<Integer, Integer> {
+  private static final VectorSpecies<Byte> BYTE_SPECIES = ByteVector.SPECIES_MAX;
+
   public static void main(String[] args) {
     new Day10().runAndPrintAll();
   }
@@ -57,8 +69,31 @@ public class Day10 extends AdventSolution2023<Integer, Integer> {
   }
 
   @Override
+  public Integer part1(@NotNull ByteBuffer byteBuffer) throws Exception {
+    var squareDim = ((int) Math.sqrt(4 * byteBuffer.limit() + 1) - 1) / 2;
+    System.out.println(squareDim);
+
+    var grid = new byte[squareDim * squareDim];
+    var memSegment = MemorySegment.ofBuffer(byteBuffer);
+
+    Arena.ofAuto();
+    Arena.ofConfined().allocate(ValueLayout.JAVA_BYTE);
+
+    return -1;
+  }
+
+//  @Override
+//  public Integer part1(@NotNull ResourceIdentifier identifier) throws Exception {
+//    return ByteBufferAdventSolution.super.part1(identifier);
+//  }
+
+  @Override
   public Integer part2(@NotNull BufferedReader reader) throws Exception {
     var lines = reader.lines().toArray(String[]::new);
+
+//    if (true) {
+//      return -1;
+//    }
 
     var map = new HashMap<Point2D, Integer>();
     Point2D start = null;
@@ -75,7 +110,7 @@ public class Day10 extends AdventSolution2023<Integer, Integer> {
       }
     }
 
-    System.out.println(STR."pre \{map.values().stream().filter(i -> i != 'S' && i != '.').count()}");
+//    System.out.println(STR."pre \{map.values().stream().filter(i -> i != 'S' && i != '.').count()}");
     var cleanMap = new HashMap<>(map);
 
     for (var entry : map.entrySet()) {
@@ -93,12 +128,12 @@ public class Day10 extends AdventSolution2023<Integer, Integer> {
       ).map(GraphPath::length).orElse(-1);
 
       if (path == -1) {
-        System.out.println(STR."removed \{pos}");
+//        System.out.println(STR."removed \{pos}");
         cleanMap.put(entry.getKey(), (int) '.');
       }
     }
 
-    System.out.println(STR."post \{cleanMap.values().stream().filter(i -> i != 'S' && i != '.').count()}");
+//    System.out.println(STR."post \{cleanMap.values().stream().filter(i -> i != 'S' && i != '.').count()}");
 
     var translation = new HashMap<Integer, int[][]>();
     translation.put((int) '.', new int[][] {
@@ -199,7 +234,7 @@ public class Day10 extends AdventSolution2023<Integer, Integer> {
       }
     }
 
-    System.out.println(STR."total \{expandedMap.length * expandedMap[0].length} outside \{outsideSet.size()} inside \{insideSet.size()}");
+//    System.out.println(STR."total \{expandedMap.length * expandedMap[0].length} outside \{outsideSet.size()} inside \{insideSet.size()}");
 
     var insideSetValues = insideSet.stream().map(pt -> new Point2D(pt.x() / 3 - 1, pt.y() / 3 - 1)).distinct().toList();
     var count = 0;
@@ -263,7 +298,7 @@ public class Day10 extends AdventSolution2023<Integer, Integer> {
       }
     }
   }
-  
+
   private static List<Point2D> getNeighbors(Map<Point2D, Integer> map, Point2D pt) {
     var ptShape = map.get(pt);
 

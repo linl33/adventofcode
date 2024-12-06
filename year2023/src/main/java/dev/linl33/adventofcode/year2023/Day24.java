@@ -94,7 +94,7 @@ public class Day24 extends AdventSolution2023<Integer, Long> {
       ranges[1][3] = 10_000;
 
       choices[i] = ranges;
-      System.out.println(STR."\{Arrays.toString(ranges[0])} \{Arrays.toString(ranges[1])}");
+//      System.out.println(STR."\{Arrays.toString(ranges[0])} \{Arrays.toString(ranges[1])}");
 //      if (velA[0] > 0) {
 //        ranges[0][0] = posA[0] + 1;
 //        ranges[0][1] = 1L << 52;
@@ -137,7 +137,7 @@ public class Day24 extends AdventSolution2023<Integer, Long> {
       if (currIdx == choices.length) {
         // TODO:
         System.out.println("done");
-        System.out.println(STR."\{Arrays.toString(currRange)} \{Math.abs(currRange[0] - currRange[1])} \{Math.abs(currRange[2] - currRange[3])}");
+//        System.out.println(STR."\{Arrays.toString(currRange)} \{Math.abs(currRange[0] - currRange[1])} \{Math.abs(currRange[2] - currRange[3])}");
         continue;
       }
 

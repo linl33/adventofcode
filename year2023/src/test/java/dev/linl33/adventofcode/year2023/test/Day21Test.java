@@ -2,7 +2,6 @@ package dev.linl33.adventofcode.year2023.test;
 
 import dev.linl33.adventofcode.lib.solution.AdventSolution;
 import dev.linl33.adventofcode.testlib.AdventSolutionTest;
-import dev.linl33.adventofcode.year2023.Day20;
 import dev.linl33.adventofcode.year2023.Day21;
 
 import java.util.Map;

@@ -27,17 +27,17 @@ public class Day7 extends AdventSolution2023<Integer, Integer> {
   };
 
   public static void main(String[] args) {
-    System.out.println(CARD_STRENGTH['A' - '1']);
-    System.out.println(CARD_STRENGTH['K' - '1']);
-    System.out.println(CARD_STRENGTH['Q' - '1']);
-    System.out.println(CARD_STRENGTH['J' - '1']);
-    System.out.println(CARD_STRENGTH['T' - '1']);
-    System.out.println(CARD_STRENGTH['9' - '1']);
+//    System.out.println(CARD_STRENGTH['A' - '1']);
+//    System.out.println(CARD_STRENGTH['K' - '1']);
+//    System.out.println(CARD_STRENGTH['Q' - '1']);
+//    System.out.println(CARD_STRENGTH['J' - '1']);
+//    System.out.println(CARD_STRENGTH['T' - '1']);
+//    System.out.println(CARD_STRENGTH['9' - '1']);
 
 //    new Day7().runAndPrintAll();
 //    new Day7().print(SolutionPart.PART_1, new ClasspathResourceIdentifier("day7test1"));
 //    new Day7().print(SolutionPart.PART_1, new ClasspathResourceIdentifier("day7"));
-    new Day7().benchmark(JmhBenchmarkOption.PART_1);
+    new Day7().benchmark(JmhBenchmarkOption.PART_1, /*JmhBenchmarkOption.PROFILE,*/ JmhBenchmarkOption.PERF_PROFILE, JmhBenchmarkOption.GC_PROFILE);
   }
 
   @Override
@@ -49,6 +49,7 @@ public class Day7 extends AdventSolution2023<Integer, Integer> {
     for (int i = 0; i < lines.length; i++) {
       // TODO: remove
       var codePoints = lines[i].codePoints().toArray();
+      // TODO: broken by JDK-8326664
       var v = ByteVector.fromArray(
           SPECIES,
           CARD_STRENGTH,
@@ -191,7 +192,7 @@ public class Day7 extends AdventSolution2023<Integer, Integer> {
     for (int i = 0; i < tallySize; i++) {
       var lowestBit = Integer.numberOfTrailingZeros(tallyMask) & 0xF;
       maxCount = Math.max(maxCount, tally[lowestBit]);
-      tallyMask &= ~(1 << lowestBit);
+      tallyMask &= tallyMask - 1;
     }
 
     return maxCount + (4 - tallySize);

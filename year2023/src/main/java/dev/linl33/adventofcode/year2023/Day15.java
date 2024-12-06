@@ -19,7 +19,8 @@ public class Day15 extends AdventSolution2023<Integer, Integer> implements ByteB
   private static final Pattern STEP_DELIM_PATTERN = Pattern.compile("[=\\-]");
 
   public static void main(String[] args) {
-    new Day15().runAndPrintAll();
+//    new Day15().runAndPrintAll();
+    new Day15().benchmark();
   }
 
   @Override

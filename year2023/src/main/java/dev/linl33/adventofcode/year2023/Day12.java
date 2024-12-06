@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.year2023;
 
+import dev.linl33.adventofcode.jmh.JmhBenchmarkOption;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -9,7 +10,8 @@ import java.util.stream.Stream;
 
 public class Day12 extends AdventSolution2023<Long, Long> {
   public static void main(String[] args) {
-    new Day12().runAndPrintAll();
+//    new Day12().runAndPrintAll();
+    new Day12().benchmark(JmhBenchmarkOption.PART_2, JmhBenchmarkOption.PERF_PROFILE);
   }
 
   @Override
@@ -37,7 +39,8 @@ public class Day12 extends AdventSolution2023<Long, Long> {
       var finalLine = line;
       var repeat = 5;
       var replace = "?";
-      line = STR."\{Stream.generate(() -> finalLine.substring(0, space)).limit(repeat).collect(Collectors.joining(replace))} \{Stream.generate(() -> finalLine.substring(space + 1)).limit(repeat).collect(Collectors.joining(","))}";
+//      line = STR."\{Stream.generate(() -> finalLine.substring(0, space)).limit(repeat).collect(Collectors.joining(replace))} \{Stream.generate(() -> finalLine.substring(space + 1)).limit(repeat).collect(Collectors.joining(","))}";
+      line = Stream.generate(() -> finalLine.substring(0, space)).limit(repeat).collect(Collectors.joining(replace)) + " " + Stream.generate(() -> finalLine.substring(space + 1)).limit(repeat).collect(Collectors.joining(","));
       sum += countArrangements(line);
     }
 

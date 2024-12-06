@@ -48,31 +48,6 @@ public class Day21 extends AdventSolution2023<Long, Long> {
 
       while (!curr.isEmpty()) {
         var pt = curr.remove();
-//        var remapped = new Point2D(Math.floorMod(pt.x(), width), Math.floorMod(pt.y(), height));
-//        var scaleX = pt.x() / width;
-//        var scaleY = pt.y() / height;
-//
-//        if (pt.x() < 0) {
-//          scaleX--;
-//        }
-//
-//        if (pt.y() < 0) {
-//          scaleY--;
-//        }
-//
-//        var reachable = cache.get(remapped);
-//        if (reachable == null) {
-//          throw new IllegalStateException();
-//        }
-//
-//        for (var r : reachable) {
-//          var candidate = new Point2D(r.x() + scaleX * width, r.y() + scaleY * height);
-//          var added = seen.add(candidate);
-//          if (added) {
-//            next.add(candidate);
-//          }
-//        }
-
         for (int yDelta = -1; yDelta <= 1; yDelta++) {
           if (yDelta == 0) {
             continue;
@@ -83,7 +58,6 @@ public class Day21 extends AdventSolution2023<Long, Long> {
 
           if (grid.get(modded) == '.' && seen.add(candidate)) {
             next.add(candidate);
-//            System.out.println(candidate);
           }
         }
 
@@ -97,23 +71,9 @@ public class Day21 extends AdventSolution2023<Long, Long> {
 
           if (grid.get(modded) == '.' && seen.add(candidate)) {
             next.add(candidate);
-//            System.out.println(candidate);
           }
         }
       }
-
-//      System.out.println();
-//      var debugCount = 0;
-//      for (int y = -height * 2; y < height * 2; y++) {
-//        for (int x = -width * 2; x < width * 2; x++) {
-//          if (seen.contains(new Point2D(x, y))) {
-//            debugCount++;
-//          }
-//          System.out.print(Character.toString(seen.contains(new Point2D(x, y)) ? 'O' : grid.get(Math.floorMod(x, width), Math.floorMod(y, height))));
-//        }
-//        System.out.println();
-//      }
-//      System.out.println(debugCount);
 
       var gridOffsets = new HashSet<Point2D>();
       for (var pt : seen) {
@@ -122,8 +82,6 @@ public class Day21 extends AdventSolution2023<Long, Long> {
 
         gridOffsets.add(new Point2D(offsetX, offsetY));
       }
-
-      var s = new HashMap<Integer, Integer>();
 
       var found = false;
       for (var gridOffset : gridOffsets) {
@@ -144,12 +102,6 @@ public class Day21 extends AdventSolution2023<Long, Long> {
           }
         }
 
-        if (gridOffset.equals(new Point2D(0, 0))) {
-//          tally.put(n, count);
-        } else {
-          s.compute(count, (k, v) -> v == null ? 1 : v + 1);
-        }
-
         cycles.putIfAbsent(gridOffset, new int[4]);
         var cycleCounter = cycles.get(gridOffset);
 
@@ -166,17 +118,17 @@ public class Day21 extends AdventSolution2023<Long, Long> {
           if (prev != null) {
             throw new IllegalStateException();
           }
-          System.out.println(STR."new cycle \{n} \{gridOffset}");
+//          System.out.println(STR."new cycle \{n} \{gridOffset}");
           System.out.println(Arrays.toString(cycleCounter));
           found = true;
           total += cycleCounter[(max - 1) % 2];
-          System.out.println(STR."add \{cycleCounter[(max - 1) % 2]}");
+//          System.out.println(STR."add \{cycleCounter[(max - 1) % 2]}");
         }
       }
 //      System.out.println(STR."\{n} \{n % 131} \{s.size()} \{total} \{s}");
 
       if (found) {
-        System.out.println(STR."total \{hasCycled.size()}");
+//        System.out.println(STR."total \{hasCycled.size()}");
 //        System.out.println(gridOffsets.size() - hasCycled.size());
 //        System.out.println(gridOffsets);
 //        System.out.println(gridOffsets.stream().mapToInt(Point2D::x).summaryStatistics());
@@ -292,39 +244,11 @@ public class Day21 extends AdventSolution2023<Long, Long> {
     var tally = new HashMap<Integer, Integer>();
 
     var max = 26501365;
-    for (int n = 0; n < 132; n++) {
-      if (n % 100 == 0) {
-        System.out.println(n);
-      }
-
+    for (int n = 0; n < 458; n++) {
       var seen = new HashSet<Point2D>();
 
       while (!curr.isEmpty()) {
         var pt = curr.remove();
-//        var remapped = new Point2D(Math.floorMod(pt.x(), width), Math.floorMod(pt.y(), height));
-//        var scaleX = pt.x() / width;
-//        var scaleY = pt.y() / height;
-//
-//        if (pt.x() < 0) {
-//          scaleX--;
-//        }
-//
-//        if (pt.y() < 0) {
-//          scaleY--;
-//        }
-//
-//        var reachable = cache.get(remapped);
-//        if (reachable == null) {
-//          throw new IllegalStateException();
-//        }
-//
-//        for (var r : reachable) {
-//          var candidate = new Point2D(r.x() + scaleX * width, r.y() + scaleY * height);
-//          var added = seen.add(candidate);
-//          if (added) {
-//            next.add(candidate);
-//          }
-//        }
 
         for (int yDelta = -1; yDelta <= 1; yDelta++) {
           if (yDelta == 0) {
@@ -336,7 +260,6 @@ public class Day21 extends AdventSolution2023<Long, Long> {
 
           if (grid.get(modded) == '.' && seen.add(candidate)) {
             next.add(candidate);
-//            System.out.println(candidate);
           }
         }
 
@@ -350,7 +273,6 @@ public class Day21 extends AdventSolution2023<Long, Long> {
 
           if (grid.get(modded) == '.' && seen.add(candidate)) {
             next.add(candidate);
-//            System.out.println(candidate);
           }
         }
       }
@@ -415,21 +337,20 @@ public class Day21 extends AdventSolution2023<Long, Long> {
         }
 
         if (cycleCounter[2] == cycleCounter[0] && cycleCounter[3] == cycleCounter[1]) {
-          var prev = hasCycled.put(gridOffset, true);
-          if (prev != null) {
-            throw new IllegalStateException();
-          }
-          System.out.println(STR."new cycle \{n} \{gridOffset}");
-          System.out.println(Arrays.toString(cycleCounter));
+          hasCycled.put(gridOffset, true);
+//          System.out.println(STR."new cycle \{n} \{gridOffset} \{Arrays.toString(cycleCounter)}");
+//          System.out.println(Arrays.toString(cycleCounter));
           found = true;
           total += cycleCounter[(max - 1) % 2];
-          System.out.println(STR."add \{cycleCounter[(max - 1) % 2]}");
+//          System.out.println(STR."add \{cycleCounter[(max - 1) % 2]}");
         }
       }
-//      System.out.println(STR."\{n} \{n % 131} \{s.size()} \{total} \{s}");
+      if (n % 131 == (max - 1) % 131) {
+//        System.out.println(STR."\{n} \{n % 131} \{s.size()} \{total} \{s}");
+      }
 
       if (found) {
-        System.out.println(STR."total \{hasCycled.size()}");
+//        System.out.println(STR."total \{hasCycled.size()}");
 //        System.out.println(gridOffsets.size() - hasCycled.size());
 //        System.out.println(gridOffsets);
 //        System.out.println(gridOffsets.stream().mapToInt(Point2D::x).summaryStatistics());
@@ -472,16 +393,20 @@ public class Day21 extends AdventSolution2023<Long, Long> {
 
     // TODO: generalize
 
+    var targetSteps = 26501365L;
+    var targetStepsZero = targetSteps - 1;
+    var cyclePeriod = 131;
+
     var stableTotal = 7523L;
-    for (long i = 1; i < (26501365L - 1) / 131; i++) {
+    for (int i = 1; i < targetStepsZero / cyclePeriod; i++) {
       var num = i % 2 == 0 ? 7523 : 7584;
-      stableTotal += (4 * i) * num;
+      stableTotal += (4L * i) * num;
     }
     System.out.println(stableTotal);
 
     return stableTotal
-      + ((26501365L - 1) / 131 - 1) * (6608 + 6595 + 6612 + 6601)
-      + ((26501365L - 1) / 131) * (966 + 967 + 968 + 940)
+      + (targetStepsZero / cyclePeriod - 1) * (6608 + 6595 + 6612 + 6601)
+      + (targetStepsZero / cyclePeriod) * (966 + 967 + 968 + 940)
       + (5680 + 5684 + 5686 + 5690);
   }
 }

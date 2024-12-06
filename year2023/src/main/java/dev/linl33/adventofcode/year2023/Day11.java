@@ -18,7 +18,8 @@ public class Day11 extends AdventSolution2023<Long, Long>
   private static final VectorSpecies<Byte> BYTE_SPECIES = ByteVector.SPECIES_PREFERRED;
 
   public static void main(String[] args) {
-    new Day11().runAndPrintAll();
+//    new Day11().runAndPrintAll();
+    new Day11().benchmark();
   }
 
   @Override
@@ -44,7 +45,7 @@ public class Day11 extends AdventSolution2023<Long, Long>
   private static long solveVector(ByteBuffer byteBuffer, final long emptySpaceScale) {
     var memSegment = MemorySegment.ofBuffer(byteBuffer);
 
-    var squareDim = (((int) Math.sqrt(4 * (byteBuffer.limit() + 1))) - 1) / 2;
+    var squareDim = ((int) Math.sqrt(4 * byteBuffer.limit() + 1) - 1) / 2;
     var alignedSquareDim = Math.ceilDiv(squareDim, BYTE_SPECIES.length()) * BYTE_SPECIES.length();
 
     var colCounts = Arena.ofAuto().allocate(ValueLayout.JAVA_BYTE, alignedSquareDim);

@@ -193,8 +193,8 @@ public class Day23 extends AdventSolution2023<Integer, Integer> {
           continue;
         }
 
-        queue.add(kv.getKey());
-        visitedQueue.add(new ArrayList<>(visited));
+        queue.push(kv.getKey());
+        visitedQueue.push(new ArrayList<>(visited));
       }
     }
 

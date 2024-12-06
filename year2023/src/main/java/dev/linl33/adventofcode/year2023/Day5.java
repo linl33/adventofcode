@@ -1,5 +1,6 @@
 package dev.linl33.adventofcode.year2023;
 
+import dev.linl33.adventofcode.jmh.JmhBenchmarkOption;
 import dev.linl33.adventofcode.lib.util.AdventUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,7 +12,8 @@ import java.util.stream.Stream;
 
 public class Day5 extends AdventSolution2023<Integer, Integer> {
   public static void main(String[] args) {
-    new Day5().runAndPrintAll();
+//    new Day5().runAndPrintAll();
+    new Day5().benchmark(JmhBenchmarkOption.PART_2, JmhBenchmarkOption.PERF_PROFILE, JmhBenchmarkOption.PROFILE);
   }
 
   @Override

@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 public class Day14 extends AdventSolution2023<Integer, Integer> {
   public static void main(String[] args) {
+    // TODO: try bit field impl
+
     new Day14().runAndPrintAll();
   }
 
