@@ -1,34 +1,49 @@
 package dev.linl33.adventofcode.year2024;
 
+import dev.linl33.adventofcode.lib.solution.ByteBufferAdventSolution;
+import dev.linl33.adventofcode.lib.solution.NullBufferedReaderSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import dev.linl33.adventofcode.lib.util.MathUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Day9 extends AdventSolution2024<Long, Long> {
+public class Day9 extends AdventSolution2024<Long, Long> implements ByteBufferAdventSolution<Long, Long>, NullBufferedReaderSolution<Long, Long> {
   public static void main() {
     new Day9().runAndPrintAll();
   }
 
   @Override
-  public Long part1(@NotNull BufferedReader reader) throws IOException {
-    var line = reader.readLine() + '0';
+  public Long part1(@NotNull ResourceIdentifier identifier) throws Exception {
+    return ByteBufferAdventSolution.super.part1(identifier);
+  }
 
-    var disk = new short[line.length() * 9];
+  @Override
+  public Long part1(@NotNull ByteBuffer byteBuffer) {
+    var line = new byte[byteBuffer.limit()];
+    byteBuffer.get(line);
+    line[line.length - 1] = '0';
+
+    for (var i = 0; i < line.length; i++) {
+      line[i] -= '0';
+    }
+
+    var disk = new short[line.length * 9];
     var diskSize = 0;
 
-    for (short i = 0; i < line.length(); i += 2) {
-      var size = line.charAt(i) - '0';
-      var free = line.charAt(i + 1) - '0';
+    for (short i = 0; i < line.length; i += 2) {
+      var size = line[i];
+      var free = line[i + 1];
 
       Arrays.fill(disk, diskSize, diskSize + size, (short) (i / 2));
       diskSize += size + free;
     }
 
-    for (int firstEmpty = (line.charAt(0) - '0'); firstEmpty < diskSize; firstEmpty++) {
+    for (int firstEmpty = line[0]; firstEmpty < diskSize; firstEmpty++) {
       if (disk[firstEmpty] != 0) {
         continue;
       }
@@ -41,7 +56,7 @@ public class Day9 extends AdventSolution2024<Long, Long> {
     }
 
     var sum = 0L;
-    for (var i = 0; i < diskSize; i++) {
+    for (int i = line[0]; i < diskSize; i++) {
       sum += i * disk[i];
     }
 
