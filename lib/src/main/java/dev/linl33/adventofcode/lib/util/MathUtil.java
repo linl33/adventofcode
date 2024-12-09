@@ -205,4 +205,8 @@ public final class MathUtil {
 
     return sum / numbers.length;
   }
+
+  public static long triangularNumber(long n) {
+    return n * (n + 1) / 2;
+  }
 }
