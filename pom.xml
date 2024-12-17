@@ -56,7 +56,7 @@
         <org.jetbrains.annotations.version>26.0.1</org.jetbrains.annotations.version>
 
         <!-- Testing -->
-        <org.junit.jupiter.version>5.11.3</org.junit.jupiter.version>
+        <org.junit.jupiter.version>5.11.4</org.junit.jupiter.version>
     </properties>
 
     <build>
