@@ -41,50 +41,71 @@ public class Day16 extends AdventSolution2024<Integer, Integer> {
       throw new IllegalStateException("Start or end point not found");
     }
 
-    var minCost = Integer.MAX_VALUE;
+    var dist = new int[dim * dim * 4];
+    Arrays.fill(dist, Integer.MAX_VALUE);
+    dist[start.y() * dim + start.x() << 2 | 3] = 0;
 
-    for (int direction = 0; direction < 4; direction++) {
-      var path = GraphUtil.aStar(
-        new Node(start, 3),
-        new Node(end, direction),
-        (Node node) -> {
-          var dirClockwise = (node.direction + 1) % 4;
-          var dirCounterClockwise = (node.direction + 3) % 4;
+    var buckets = new ArrayDeque<ArrayDeque<Integer>>();
+    var nextBucket = new ArrayDeque<Integer>();
 
-          Point2D vector;
-          if (node.direction == 0) {
-            vector = new Point2D(0, -1);
-          } else if (node.direction == 1) {
-            vector = new Point2D(1, 0);
-          } else if (node.direction == 2) {
-            vector = new Point2D(0, 1);
-          } else {
-            vector = new Point2D(-1, 0);
-          }
+    nextBucket.add(start.y() * dim + start.x() << 2 | 3);
 
-          var next = node.point.translate(vector);
+    while (!nextBucket.isEmpty() && !buckets.isEmpty()) {
+      if (nextBucket.isEmpty()) {
+        nextBucket = buckets.removeFirst();
+      }
 
-          var neighbors = new ArrayList<Node>();
-          if (next.x() >= 0 && next.x() < dim && next.y() >= 0 && next.y() < dim && lines[next.y()].charAt(next.x()) != '#') {
-            neighbors.add(new Node(next, node.direction));
-          }
+      var bucketSize = nextBucket.size();
+      for (var i = 0; i < bucketSize; i++) {
+        var next = nextBucket.removeFirst();
 
-          neighbors.add(new Node(node.point, dirClockwise));
-          neighbors.add(new Node(node.point, dirCounterClockwise));
-
-          return neighbors;
-        },
-        (Node _) -> 0,
-        (Node left, Node right) -> left.direction == right.direction ? 1 : 1000
-      ).orElseThrow();
-
-      var cost = path.length();
-      minCost = Math.min(minCost, cost);
+        var pt = next >> 2;
+        var dir = next & 0b11;
+      }
     }
 
-    System.out.println(minCost);
+    var minCost = Integer.MAX_VALUE;
 
-    return 0;
+//    for (int direction = 0; direction < 4; direction++) {
+//      var path = GraphUtil.aStar(
+//        new Node(start, 3),
+//        new Node(end, direction),
+//        (Node node) -> {
+//          var dirClockwise = (node.direction + 1) % 4;
+//          var dirCounterClockwise = (node.direction + 3) % 4;
+//
+//          Point2D vector;
+//          if (node.direction == 0) {
+//            vector = new Point2D(0, -1);
+//          } else if (node.direction == 1) {
+//            vector = new Point2D(1, 0);
+//          } else if (node.direction == 2) {
+//            vector = new Point2D(0, 1);
+//          } else {
+//            vector = new Point2D(-1, 0);
+//          }
+//
+//          var next = node.point.translate(vector);
+//
+//          var neighbors = new ArrayList<Node>();
+//          if (next.x() >= 0 && next.x() < dim && next.y() >= 0 && next.y() < dim && lines[next.y()].charAt(next.x()) != '#') {
+//            neighbors.add(new Node(next, node.direction));
+//          }
+//
+//          neighbors.add(new Node(node.point, dirClockwise));
+//          neighbors.add(new Node(node.point, dirCounterClockwise));
+//
+//          return neighbors;
+//        },
+//        (Node _) -> 0,
+//        (Node left, Node right) -> left.direction == right.direction ? 1 : 1000
+//      ).orElseThrow();
+//
+//      var cost = path.length();
+//      minCost = Math.min(minCost, cost);
+//    }
+
+    return minCost;
   }
 
   @Override
@@ -452,15 +473,7 @@ public class Day16 extends AdventSolution2024<Integer, Integer> {
 //      }
 //    }
 
-
-//
-//    System.out.println(minCost);
-
-//    var minCost = nodes.keySet().stream().min(Integer::compareTo).orElseThrow();
-    System.out.println(minCost);
-    System.out.println(nodes.get(minCost).size());
-
-    return 0;
+    return nodes.get(minCost).size();
   }
 
   private record Node(Point2D point, int direction) {
