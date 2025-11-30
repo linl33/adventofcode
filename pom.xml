@@ -35,28 +35,28 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
         <!-- Plugins -->
-        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <maven-dependency-plugin.version>3.8.1</maven-dependency-plugin.version>
-        <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
-        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
-        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
-        <maven-javadoc-plugin.version>3.11.1</maven-javadoc-plugin.version>
-        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
-        <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
-        <maven-install-plugin.version>3.1.3</maven-install-plugin.version>
-        <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
-        <org.codehaus.mojo.versions-plugin.version>2.18.0</org.codehaus.mojo.versions-plugin.version>
-        <org.codehaus.mojo.exec-plugin.version>3.5.0</org.codehaus.mojo.exec-plugin.version>
-        <org.codehaus.mojo.flatten-plugin.version>1.6.0</org.codehaus.mojo.flatten-plugin.version>
+        <maven-compiler-plugin.version>3.14.1</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.9.0</maven-dependency-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <maven-source-plugin.version>3.4.0</maven-source-plugin.version>
+        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
+        <maven-javadoc-plugin.version>3.12.0</maven-javadoc-plugin.version>
+        <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
+        <maven-clean-plugin.version>3.5.0</maven-clean-plugin.version>
+        <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+        <maven-install-plugin.version>3.1.4</maven-install-plugin.version>
+        <maven-enforcer-plugin.version>3.6.2</maven-enforcer-plugin.version>
+        <org.codehaus.mojo.versions-plugin.version>2.20.1</org.codehaus.mojo.versions-plugin.version>
+        <org.codehaus.mojo.exec-plugin.version>3.6.2</org.codehaus.mojo.exec-plugin.version>
+        <org.codehaus.mojo.flatten-plugin.version>1.7.3</org.codehaus.mojo.flatten-plugin.version>
 
         <!-- Other Dependencies -->
-        <org.apache.logging.log4j.version>2.24.3</org.apache.logging.log4j.version>
+        <org.apache.logging.log4j.version>2.25.2</org.apache.logging.log4j.version>
         <org.openjdk.jmh.version>1.37</org.openjdk.jmh.version>
-        <org.jetbrains.annotations.version>26.0.1</org.jetbrains.annotations.version>
+        <org.jetbrains.annotations.version>26.0.2-1</org.jetbrains.annotations.version>
 
         <!-- Testing -->
-        <org.junit.jupiter.version>5.11.4</org.junit.jupiter.version>
+        <org.junit.jupiter.version>6.0.1</org.junit.jupiter.version>
     </properties>
 
     <build>
@@ -98,7 +98,7 @@
                         <dependency>
                             <groupId>org.ow2.asm</groupId>
                             <artifactId>asm</artifactId>
-                            <version>9.7.1</version>
+                            <version>9.9</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -135,6 +135,18 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
                     <version>${org.codehaus.mojo.versions-plugin.version}</version>
+                    <configuration>
+                        <ruleSet>
+                            <ignoreVersion>
+                                <type>regex</type>
+                                <version>(.+-SNAPSHOT|.+-M\d)</version>
+                            </ignoreVersion>
+                            <ignoreVersion>
+                                <type>regex</type>
+                                <version>.+-(alpha|beta).+</version>
+                            </ignoreVersion>
+                        </ruleSet>
+                    </configuration>
                 </plugin>
 
                 <plugin>
