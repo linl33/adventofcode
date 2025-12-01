@@ -22,6 +22,7 @@
         <module>year2022</module>
         <module>year2023</module>
         <module>year2024</module>
+        <module>year2025</module>
     </modules>
 
     <properties>

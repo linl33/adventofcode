@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns="https://logging.apache.org/xml/ns"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="https://logging.apache.org/xml/ns https://logging.apache.org/xml/ns/log4j-config-2.xsd"
+               strict="true">
+    <Appenders>
+        <Console name="Solution">
+            <PatternLayout pattern="%d [%t] %highlight{========== %-16msg ==========%n}%throwable"/>
+            <MarkerFilter marker="SOLUTION" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+
+        <Console name="SolutionResult">
+            <PatternLayout pattern="%d [%t] %msg%n%throwable"/>
+            <MarkerFilter marker="SOLUTION_RESULT" onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+
+        <Console name="Console">
+            <PatternLayout pattern="%d [%t] %logger{36} %highlight{%-5level: %msg%n}%throwable"/>
+            <NoMarkerFilter onMatch="ACCEPT" onMismatch="DENY"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="dev.linl33.adventofcode" level="ALL" additivity="true">
+            <AppenderRef ref="Solution"/>
+            <AppenderRef ref="SolutionResult"/>
+        </Logger>
+
+        <Root level="ALL">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>
