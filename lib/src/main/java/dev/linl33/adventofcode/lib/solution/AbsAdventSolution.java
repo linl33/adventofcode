@@ -19,15 +19,15 @@ import java.util.Locale;
 
 public abstract class AbsAdventSolution<T1, T2> implements
     BufferedReaderAdventSolution<T1, T2>, ClasspathResourceService, ResourceServiceHolder {
-  private final Logger logger;
-  private final ClasspathResourceIdentifier defaultResourceIdentifier;
-  private final Path defaultResourcePath;
-  private final SegmentAllocator bufferAllocator;
+  private final LazyConstant<Logger> logger = LazyConstant.of(() -> LogManager.getLogger(getClass()));
+  private final LazyConstant<ClasspathResourceIdentifier> defaultResource = LazyConstant.of(this::defaultResourceSupplier);
+  private final LazyConstant<Path> defaultResourcePath = LazyConstant.of(this::defaultResourcePathSupplier);
+  private final LazyConstant<SegmentAllocator> bufferAllocator = LazyConstant.of(this::bufferAllocatorSupplier);
   private ResourceService resourceService;
 
   @Override
   public Logger getLogger() {
-    return logger;
+    return logger.get();
   }
 
   @Override
@@ -41,13 +41,7 @@ public abstract class AbsAdventSolution<T1, T2> implements
   }
 
   protected AbsAdventSolution() {
-    logger = LogManager.getLogger(getClass());
-    defaultResourceIdentifier = new ClasspathResourceIdentifier(getClass().getSimpleName().toLowerCase(Locale.ROOT));
-    defaultResourcePath = ResourceUtil.getResourcePath(getClass(), defaultResourceIdentifier.name());
     resourceService = this;
-
-    var inputBuffer = Arena.ofAuto().allocate(512 * 1024, 8);
-    bufferAllocator = SegmentAllocator.prefixAllocator(inputBuffer);
   }
 
   @Override
@@ -80,22 +74,22 @@ public abstract class AbsAdventSolution<T1, T2> implements
 
   @Override
   @NotNull
-  public ResourceIdentifier getDefaultResource() {
-    return defaultResourceIdentifier;
+  public ClasspathResourceIdentifier getDefaultResource() {
+    return defaultResource.get();
   }
 
   @Override
   public BufferedReader asBufferedReader(ResourceIdentifier identifier) {
-    if (identifier == defaultResourceIdentifier) {
+    if (identifier == getDefaultResource()) {
       try {
-        return Files.newBufferedReader(defaultResourcePath, StandardCharsets.UTF_8);
+        return Files.newBufferedReader(getDefaultResourcePath(), StandardCharsets.UTF_8);
       } catch (IOException e) {
         throw new UncheckedIOException(e);
       }
     }
 
-    if (identifier instanceof ClasspathResourceIdentifier classpathRes) {
-      return ResourceUtil.readResource(getClass(), classpathRes.name());
+    if (identifier instanceof ClasspathResourceIdentifier(String name)) {
+      return ResourceUtil.readResource(getClass(), name);
     }
 
     throw new IllegalArgumentException("Unable to resolve identifier " + identifier);
@@ -105,10 +99,10 @@ public abstract class AbsAdventSolution<T1, T2> implements
   public FileChannel asFileChannel(ResourceIdentifier identifier) {
     Path resPath;
 
-    if (identifier == defaultResourceIdentifier) {
-      resPath = defaultResourcePath;
-    } else if (identifier instanceof ClasspathResourceIdentifier classpathRes) {
-      resPath = ResourceUtil.getResourcePath(getClass(), classpathRes.name());
+    if (identifier == getDefaultResource()) {
+      resPath = getDefaultResourcePath();
+    } else if (identifier instanceof ClasspathResourceIdentifier(String name)) {
+      resPath = ResourceUtil.getResourcePath(getClass(), name);
     } else {
       throw new IllegalArgumentException("Unable to resolve identifier " + identifier);
     }
@@ -126,6 +120,23 @@ public abstract class AbsAdventSolution<T1, T2> implements
 
   @Override
   public SegmentAllocator bufferAllocator() {
-    return bufferAllocator;
+    return bufferAllocator.get();
+  }
+
+  private Path getDefaultResourcePath() {
+    return defaultResourcePath.get();
+  }
+
+  private ClasspathResourceIdentifier defaultResourceSupplier() {
+    return new ClasspathResourceIdentifier(getClass().getSimpleName().toLowerCase(Locale.ROOT));
+  }
+
+  private Path defaultResourcePathSupplier() {
+    return ResourceUtil.getResourcePath(getClass(), getDefaultResource().name());
+  }
+
+  private SegmentAllocator bufferAllocatorSupplier() {
+    var buffer = Arena.ofAuto().allocate(512 * 1024, 4 * 1024);
+    return SegmentAllocator.prefixAllocator(buffer);
   }
 }
