@@ -45,6 +45,8 @@ public class Day2 extends AdventSolution2025<Long, Long> implements ByteBufferAd
     1000000000000000000L,
   };
 
+  private static final int[] PRIMES = new int[] { 2, 3, 5, 7, 11, 13, 17 };
+
   static void main() {
     new Day2().runAndPrintAll();
   }
@@ -105,17 +107,25 @@ public class Day2 extends AdventSolution2025<Long, Long> implements ByteBufferAd
   private static long sumInvalidIdsInRange(final long lo, final long hi, final int sequenceCountMax, final IntToLongBinaryOperator templateGenerator) {
     var invalidIdSum = 0L;
     final var searchLimit = Math.min(sequenceCountMax, countDigits(hi));
+    var idx = 0;
+    for (var i = 0; i < PRIMES.length; i++) {
+      if (PRIMES[i] > searchLimit) {
+        idx = i;
+        break;
+      }
+    }
+    final var searchLimitIdx = idx;
 
     var digits = countDigits(lo);
     var nextDigit = POWERS_OF_TEN[digits];
-    var curr = nextInvalidId(lo, digits, searchLimit, templateGenerator, nextDigit);
+    var curr = nextInvalidId(lo, digits, searchLimitIdx, templateGenerator, nextDigit);
     while (curr <= hi) {
       invalidIdSum += curr;
 
       while (curr >= nextDigit) {
         nextDigit = POWERS_OF_TEN[++digits];
       }
-      curr = nextInvalidId(curr, digits, searchLimit, templateGenerator, nextDigit);
+      curr = nextInvalidId(curr, digits, searchLimitIdx, templateGenerator, nextDigit);
     }
 
     return invalidIdSum;
@@ -124,7 +134,9 @@ public class Day2 extends AdventSolution2025<Long, Long> implements ByteBufferAd
   private static long nextInvalidId(final long curr, final int digits, final int searchLimit, final IntToLongBinaryOperator templateGenerator, final long initialMinInvalidId) {
     var minInvalidId = initialMinInvalidId;
 
-    for (int sequenceCount = 2; sequenceCount <= searchLimit; sequenceCount++) {
+    for (var i = 0; i < searchLimit; i++) {
+      // non-prime sequences are covered by prime-numbered sequences
+      var sequenceCount = PRIMES[i];
       if (digits % sequenceCount != 0) {
         continue;
       }
