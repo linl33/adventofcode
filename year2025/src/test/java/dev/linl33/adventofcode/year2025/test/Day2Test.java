@@ -15,20 +15,24 @@ public class Day2Test implements AdventSolutionTest<Long, Long> {
   @Override
   public Map<Object, Long> getPart1Cases() {
     return Map.of(
-        newSolutionInstance().getPart1Resource(), 32976912643L,
-        "day2test1", 1227775554L,
-        // source: https://www.reddit.com/r/adventofcode/comments/1pc2h1l/2025_day_2_challenge_input/
-        "day2test2", 121412594604227157L
+      newSolutionInstance().getPart1Resource(), 32976912643L,
+      "day2test1", 1227775554L,
+      // source: https://www.reddit.com/r/adventofcode/comments/1pc2h1l/2025_day_2_challenge_input/
+      "day2test2", 121412594604227157L,
+      // source: https://www.reddit.com/r/adventofcode/comments/1pc9mrg/2025_day_2_part_3_one_single_range/
+      "string:1-" + (1L << 32) + '\n', 87729849870725L
     );
   }
 
   @Override
   public Map<Object, Long> getPart2Cases() {
     return Map.of(
-        newSolutionInstance().getPart2Resource(), 54446379122L,
-        "day2test1", 4174379265L,
-        // source: https://www.reddit.com/r/adventofcode/comments/1pc2h1l/2025_day_2_challenge_input/
-        "day2test2", 122614329477263799L
+      newSolutionInstance().getPart2Resource(), 54446379122L,
+      "day2test1", 4174379265L,
+      // source: https://www.reddit.com/r/adventofcode/comments/1pc2h1l/2025_day_2_challenge_input/
+      "day2test2", 122614329477263799L,
+      // source: https://www.reddit.com/r/adventofcode/comments/1pc9mrg/2025_day_2_part_3_one_single_range/
+      "string:1-" + (1L << 32) + '\n', 88304989965662L
     );
   }
 }
