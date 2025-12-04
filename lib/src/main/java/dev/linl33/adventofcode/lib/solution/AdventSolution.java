@@ -6,7 +6,6 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
-import java.util.Locale;
 
 public interface AdventSolution<T1, T2> {
   T1 part1(ResourceIdentifier identifier) throws Exception;
@@ -74,19 +73,10 @@ public interface AdventSolution<T1, T2> {
   }
 
   @NotNull
-  default ResourceIdentifier getDefaultResource() {
-    return new ClasspathResourceIdentifier(getClass().getSimpleName().toLowerCase(Locale.ROOT));
-  }
+  ResourceIdentifier getPart1Resource();
 
   @NotNull
-  default ResourceIdentifier getPart1Resource() {
-    return getDefaultResource();
-  }
-
-  @NotNull
-  default ResourceIdentifier getPart2Resource() {
-    return getDefaultResource();
-  }
+  ResourceIdentifier getPart2Resource();
 
   default SolutionPart[] getSolutionParts() {
     return getDay() != 25 ? SolutionPart.values() : new SolutionPart[] {SolutionPart.PART_1};

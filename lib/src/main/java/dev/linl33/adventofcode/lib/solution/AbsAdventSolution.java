@@ -74,8 +74,14 @@ public abstract class AbsAdventSolution<T1, T2> implements
 
   @Override
   @NotNull
-  public ClasspathResourceIdentifier getDefaultResource() {
-    return defaultResource.get();
+  public ResourceIdentifier getPart1Resource() {
+    return getDefaultResource();
+  }
+
+  @Override
+  @NotNull
+  public ResourceIdentifier getPart2Resource() {
+    return getDefaultResource();
   }
 
   @Override
@@ -125,6 +131,10 @@ public abstract class AbsAdventSolution<T1, T2> implements
 
   private Path getDefaultResourcePath() {
     return defaultResourcePath.get();
+  }
+
+  private ClasspathResourceIdentifier getDefaultResource() {
+    return defaultResource.get();
   }
 
   private ClasspathResourceIdentifier defaultResourceSupplier() {
