@@ -1,15 +1,16 @@
 package dev.linl33.adventofcode.year2025;
 
-import dev.linl33.adventofcode.lib.util.AdventUtil;
+import dev.linl33.adventofcode.lib.solution.ByteBufferAdventSolution;
+import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import jdk.incubator.vector.LongVector;
 import jdk.incubator.vector.VectorOperators;
 import jdk.incubator.vector.VectorSpecies;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
-import java.util.ArrayList;
+import java.nio.ByteBuffer;
 
-public class Day5 extends AdventSolution2025<Long, Long> {
+public class Day5 extends AdventSolution2025<Long, Long> implements ByteBufferAdventSolution<Long, Long> {
   private static final VectorSpecies<Long> LONG_SPECIES = LongVector.SPECIES_MAX;
 
   static void main() {
@@ -17,103 +18,136 @@ public class Day5 extends AdventSolution2025<Long, Long> {
   }
 
   @Override
+  public Long part1(@NotNull ResourceIdentifier identifier) throws Exception {
+    return ByteBufferAdventSolution.super.part1(identifier);
+  }
+
+  @Override
+  public Long part2(@NotNull ResourceIdentifier identifier) throws Exception {
+    return ByteBufferAdventSolution.super.part2(identifier);
+  }
+
+  @Override
   public Long part1(@NotNull BufferedReader reader) {
-    var groups = AdventUtil.readInputGrouped(reader).map(x -> x.toArray(String[]::new)).toArray(String[][]::new);
+    throw new UnsupportedOperationException();
+  }
 
-    var rangeCount = groups[0].length;
-    var rangeCountAligned = Math.ceilDiv(rangeCount, LONG_SPECIES.length()) * LONG_SPECIES.length();
+  @Override
+  public Long part2(@NotNull BufferedReader reader) {
+    throw new UnsupportedOperationException();
+  }
 
-    var freshRanges = new long[rangeCountAligned * 2];
-    for (var i = 0; i < groups[0].length; i++) {
-      var line = groups[0][i];
-      var sepIdx = line.indexOf('-');
-      var left = Long.parseLong(line, 0, sepIdx, 10);
-      var right = Long.parseLong(line, sepIdx + 1, line.length(), 10);
-      freshRanges[i] = left;
-      freshRanges[i + freshRanges.length / 2] = right;
-    }
+  @Override
+  public Long part1(@NotNull ByteBuffer byteBuffer) {
+    final var freshRanges = new long[1024];
+    final var freshRangesCount = parseFreshIdRanges(byteBuffer, freshRanges);
 
-    var availableIdCount = groups[1].length;
-    var alignedAvailableIdCount = Math.ceilDiv(availableIdCount, LONG_SPECIES.length()) * LONG_SPECIES.length();
-    var availableIds = new long[alignedAvailableIdCount];
-    for (var i = 0; i < groups[1].length; i++) {
-      availableIds[i] = Long.parseLong(groups[1][i]);
+    final var availableIds = new long[1024];
+    var availableIdsCount = 0;
+    var idNext = 0L;
+    while (byteBuffer.hasRemaining()) {
+      final var c = byteBuffer.get();
+      if (c < '0') {
+        availableIds[availableIdsCount++] = idNext;
+        idNext = 0L;
+      } else {
+        idNext = idNext * 10 + (c - '0');
+      }
     }
 
     var count = 0L;
-    for (var i = 0; i < availableIds.length; i += LONG_SPECIES.length()) {
-      var vec = LongVector.fromArray(LONG_SPECIES, availableIds, i);
-      var mask = LONG_SPECIES.maskAll(false);
+    final var loopBound = Math.ceilDiv(availableIdsCount, LONG_SPECIES.length()) * LONG_SPECIES.length();
+    for (var i = 0; i < loopBound; i += LONG_SPECIES.length()) {
+      // assume that 0 is not in availableIds
+      final var idVec = LongVector.fromArray(LONG_SPECIES, availableIds, i);
+      var withinRangeMask = LONG_SPECIES.maskAll(false);
 
-      for (var j = 0; j < rangeCount; j++) {
-        var lo = LONG_SPECIES.broadcast(freshRanges[j] - 1);
-        var hi = LONG_SPECIES.broadcast(freshRanges[j + freshRanges.length / 2] + 1);
+      for (var j = 0; j < freshRangesCount; j += 2) {
+        final var lo = LONG_SPECIES.broadcast(freshRanges[j] - 1);
+        final var hi = LONG_SPECIES.broadcast(freshRanges[j + 1] + 1);
 
-        mask = mask.or(vec.compare(VectorOperators.GT, lo).and(vec.compare(VectorOperators.LT, hi)));
+        withinRangeMask = withinRangeMask.or(
+          idVec
+            .compare(VectorOperators.GT, lo)
+            .and(idVec.compare(VectorOperators.LT, hi))
+        );
       }
 
-      count += mask.trueCount();
+      count += withinRangeMask.trueCount();
     }
 
     return count;
   }
 
   @Override
-  public Long part2(@NotNull BufferedReader reader) {
-    var groups = AdventUtil.readInputGrouped(reader).map(x -> x.toArray(String[]::new)).toArray(String[][]::new);
+  public Long part2(@NotNull ByteBuffer byteBuffer) {
+    final var freshRanges = new long[1024];
+    final var freshRangesCount = parseFreshIdRanges(byteBuffer, freshRanges);
 
-    var freshRanges = new long[groups[0].length * 2];
-    for (var i = 0; i < groups[0].length; i++) {
-      var line = groups[0][i];
-      var sepIdx = line.indexOf('-');
-      var left = Long.parseLong(line, 0, sepIdx, 10);
-      var right = Long.parseLong(line, sepIdx + 1, line.length(), 10);
-      freshRanges[i * 2] = left;
-      freshRanges[i * 2 + 1] = right;
-    }
-
-    var copy = new ArrayList<long[]>(freshRanges.length);
-    for (var i = 0; i < freshRanges.length; i += 2) {
-      copy.add(new long[] { freshRanges[i], freshRanges[i + 1] });
-    }
-
-    var rounds = copy.size() - 1;
-
-    var count = 0L;
-    for (int r = 0; r < rounds; r++) {
-      var allRanges = new ArrayList<long[]>();
-      for (var i = 0; i < copy.size(); i++) {
-        var newRange = copy.get(i);
-
-        var it = allRanges.listIterator();
-        while (it.hasNext()) {
-          var range = it.next();
-          var loMax = Math.max(newRange[0], range[0]);
-          var hiMin = Math.min(newRange[1], range[1]);
-          if (loMax <= hiMin) {
-            it.remove();
-            newRange = new long[] { loMax ^ newRange[0] ^ range[0], hiMin ^ newRange[1] ^ range[1] };
-            break;
-          }
-        }
-
-        allRanges.add(newRange);
-      }
-
-      if (allRanges.size() == copy.size()) {
-        break;
-      }
-
-      copy.clear();
-      copy.addAll(allRanges);
-
-      count = 0L;
-      for (var i = 0; i < allRanges.size(); i++) {
-        var range = allRanges.get(i);
-        count += range[1] - range[0] + 1;
-      }
+    long count = freshRangesCount / 2;
+    for (var i = 0; i < freshRangesCount; i += 2) {
+      final var lo = freshRanges[i];
+      final var hi = freshRanges[i + 1];
+      count += hi - lo;
     }
 
     return count;
+  }
+
+  private static int parseFreshIdRanges(final ByteBuffer byteBuffer, final long[] freshRanges) {
+    var rangeCount = 0;
+    var rangeNext = 0L;
+    while (byteBuffer.hasRemaining()) {
+      final var c = byteBuffer.get();
+      if (c < '0') {
+        if (rangeNext == 0L) {
+          // double \n detected, end of first section
+          break;
+        }
+
+        freshRanges[rangeCount++] = rangeNext;
+        rangeNext = 0L;
+      } else {
+        rangeNext = rangeNext * 10 + (c - '0');
+      }
+    }
+
+    var queueSize = rangeCount;
+    for (int round = 0; round < rangeCount / 2 - 1; round++) {
+      var mergedRangesCount = 0;
+
+      loop:
+      for (var i = 0; i < queueSize; i += 2) {
+        final var lo = freshRanges[i];
+        final var hi = freshRanges[i + 1];
+
+        for (var j = i + 2; j < queueSize; j += 2) {
+          final var lo2 = freshRanges[j];
+          final var hi2 = freshRanges[j + 1];
+          final var loMax = Math.max(lo, lo2);
+          final var hiMin = Math.min(hi, hi2);
+          if (loMax <= hiMin) {
+            // ranges before j cannot be merged with i
+            // store merged ij to position j
+            freshRanges[j] = loMax ^ lo ^ lo2;
+            freshRanges[j + 1] = hiMin ^ hi ^ hi2;
+            continue loop;
+          }
+        }
+
+        // this range couldn't be merged
+        // note that mergedRangesCount cannot grow faster than i
+        freshRanges[mergedRangesCount++] = lo;
+        freshRanges[mergedRangesCount++] = hi;
+      }
+
+      if (mergedRangesCount == queueSize) {
+        break;
+      }
+
+      queueSize = mergedRangesCount;
+    }
+
+    return queueSize;
   }
 }
