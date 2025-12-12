@@ -78,7 +78,11 @@ public interface AdventSolution<T1, T2> {
   @NotNull
   ResourceIdentifier getPart2Resource();
 
+  default boolean isLastDay() {
+    return getDay() == (getYear() < 2025 ? 25 : 12);
+  }
+
   default SolutionPart[] getSolutionParts() {
-    return getDay() != 25 ? SolutionPart.values() : new SolutionPart[] {SolutionPart.PART_1};
+    return !isLastDay() ? SolutionPart.values() : new SolutionPart[] { SolutionPart.PART_1 };
   }
 }

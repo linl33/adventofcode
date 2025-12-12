@@ -45,7 +45,7 @@ public interface AdventSolutionTest<T1, T2> {
   }
 
   default TestPart[] getTestParts(AdventSolution<T1, T2> instance) {
-    return instance.getDay() != 25 ? TestPart.values() : new TestPart[] { TestPart.PART_1 };
+    return Arrays.stream(instance.getSolutionParts()).sequential().map(TestPart::fromSolutionPart).toArray(TestPart[]::new);
   }
 
   @TestFactory
