@@ -2,13 +2,13 @@ package dev.linl33.adventofcode.year2025;
 
 import dev.linl33.adventofcode.lib.ByteBufferAsCharSequence;
 import dev.linl33.adventofcode.lib.solution.ByteBufferAdventSolution;
+import dev.linl33.adventofcode.lib.solution.NullBufferedReaderSolution;
 import dev.linl33.adventofcode.lib.solution.ResourceIdentifier;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.BufferedReader;
 import java.nio.ByteBuffer;
 
-public class Day2 extends AdventSolution2025<Long, Long> implements ByteBufferAdventSolution<Long, Long> {
+public class Day2 extends AdventSolution2025<Long, Long> implements ByteBufferAdventSolution<Long, Long>, NullBufferedReaderSolution<Long, Long> {
   private static final long[] TEMPLATES = new long[] {
                      0L,
     111111111111111111L,
@@ -59,16 +59,6 @@ public class Day2 extends AdventSolution2025<Long, Long> implements ByteBufferAd
   @Override
   public Long part2(@NotNull ResourceIdentifier identifier) throws Exception {
     return ByteBufferAdventSolution.super.part2(identifier);
-  }
-
-  @Override
-  public Long part1(@NotNull BufferedReader reader) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public Long part2(@NotNull BufferedReader reader) {
-    throw new UnsupportedOperationException();
   }
 
   @Override
